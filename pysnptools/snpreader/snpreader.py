@@ -497,7 +497,7 @@ class SnpReader(object):
 
         if (not allowlowrank) and self.sid_count < self.iid_count: raise Exception("need to adjust code to handle low rank")
 
-        import pysnptools.pysnptools.standardizer as stdizer
+        import pysnptools.standardizer as stdizer
         for start in xrange(0, self.sid_count, blocksize):
             ct += blocksize
             snpdata = self[:,start:start+blocksize].read().standardize(standardizer)
@@ -593,7 +593,7 @@ class SnpReader(object):
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
-    from pysnptools.pysnptools.snpreader.bed import Bed
+    from pysnptools.snpreader.bed import Bed
 
     #snp_on_disk = Bed('../../../tests/datasets/all_chr.maf0.001.N300') # Construct a Bed SnpReader. No data is read.
     #snpdata1 = snp_on_disk.read() # read all data from disk into a SnpData with a new ndarray

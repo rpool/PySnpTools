@@ -3,12 +3,12 @@ import scipy as sp
 import logging
 import doctest
 
-from pysnptools.pysnptools.snpreader.bed import *
-from pysnptools.pysnptools.snpreader.hdf5 import Hdf5
-from pysnptools.pysnptools.snpreader.dat import Dat
-from pysnptools.pysnptools.snpreader.ped import Ped
-from pysnptools.pysnptools.standardizer.unit import Unit
-from pysnptools.pysnptools.standardizer.beta import Beta
+from pysnptools.snpreader.bed import *
+from pysnptools.snpreader.hdf5 import Hdf5
+from pysnptools.snpreader.dat import Dat
+from pysnptools.snpreader.ped import Ped
+from pysnptools.standardizer.unit import Unit
+from pysnptools.standardizer.beta import Beta
 
 
 import unittest
@@ -333,23 +333,22 @@ class NaNCNCTestCases(unittest.TestCase):
 # We need tests to be picklable so that they can be run on a cluster.
 class TestDocStrings(unittest.TestCase):
     def test_snpreader(self):
-        import pysnptools.pysnptools.snpreader.snpreader
+        import pysnptools.snpreader.snpreader
         os.chdir(snpreader_path)
-        doctest.testmod(pysnptools.pysnptools.snpreader.snpreader)
+        doctest.testmod(pysnptools.snpreader.snpreader)
 
     def test_bed(self):
-        import pysnptools.pysnptools.snpreader.bed
+        import pysnptools.snpreader.bed
         os.chdir(snpreader_path)
-        doctest.testmod(pysnptools.pysnptools.snpreader.bed)
+        doctest.testmod(pysnptools.snpreader.bed)
 
     def test_snpdata(self):
-        import pysnptools.pysnptools.snpreader.snpdata
+        import pysnptools.snpreader.snpdata
         os.chdir(snpreader_path)
-        doctest.testmod(pysnptools.pysnptools.snpreader.snpdata)
-
+        doctest.testmod(pysnptools.snpreader.snpdata)
 
     def test_util(self):
-        import pysnptools.pysnptools.util.util
+        import pysnptools.util.util
         os.chdir(snpreader_path)
         doctest.testmod(pysnptools.pysnptools.util.util)
 

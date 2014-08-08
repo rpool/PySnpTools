@@ -1,13 +1,15 @@
 import numpy as np
 import scipy as sp
 import logging
+import pysnptools.standardizer as stdizer
 
 # attempt to import wrapped plink parser
 WRAPPED_PLINK_PARSER_PRESENT = True
 try:
-    import pysnptools.pysnptools.snpreader.wrap_plink_parser as wrap_plink_parser
+    import pysnptools.snpreader.wrap_plink_parser as wrap_plink_parser
 except Exception:
     WRAPPED_PLINK_PARSER_PRESENT = False
+
 
 
 class Unit(object):  #IStandardizer
@@ -17,10 +19,9 @@ class Unit(object):  #IStandardizer
 
     def standardize(self, snps, blocksize=None, force_python_only=False):
         l = self.lambdaFactory(snps, blocksize=blocksize, force_python_only=force_python_only)
-        import pysnptools.pysnptools.standardizer as stdizer
         return stdizer.standardize_with_lambda(snps, l, blocksize)
 
-    def __repr__(self): 
+    def __repr__(self):
         return "{0}()".format(self.__class__.__name__)
 
     def lambdaFactory(self, snps, blocksize=None, force_python_only=False):
@@ -43,8 +44,4 @@ class Unit(object):  #IStandardizer
             else:
                 logging.info("Array type is not float64 or float32, so will standardize with python only instead of C++")
 
-        import pysnptools.pysnptools.standardizer as stdizer
         return lambda s: stdizer.standardize_unit_python(s)
-
-
-

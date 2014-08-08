@@ -6,7 +6,7 @@ import platform
 import os
 import sys
 import shutil
-
+import setuptools
 from distutils.core import setup
 from distutils.extension import Extension
 from distutils.command.clean import clean as Clean
@@ -27,20 +27,20 @@ def readme():
     with open('INSTALL_README.txt') as f:
        return f.read()
 
-class CleanCommand(Clean):
-    description = "Remove build directories, and compiled files (including .pyc)"
+# class CleanCommand(Clean):
+#     description = "Remove build directories, and compiled files (including .pyc)"
 
-    def run(self):
-        Clean.run(self)
-        if os.path.exists('build'):
-            shutil.rmtree('build')
-        for dirpath, dirnames, filenames in os.walk('fastlmm'):
-            for filename in filenames:
-                if (filename.endswith('.so') or filename.endswith('.pyd')
-                             #or filename.endswith('.dll')
-                             #or filename.endswith('.pyc')
-                             ):
-                    os.unlink(os.path.join(dirpath, filename))
+#     def run(self):
+#         Clean.run(self)
+#         if os.path.exists('build'):
+#             shutil.rmtree('build')
+#         for dirpath, dirnames, filenames in os.walk('fastlmm'):
+#             for filename in filenames:
+#                 if (filename.endswith('.so') or filename.endswith('.pyd')
+#                              #or filename.endswith('.dll')
+#                              #or filename.endswith('.pyc')
+#                              ):
+#                     os.unlink(os.path.join(dirpath, filename))
 
 # set up macro
 if "win" in platform.system().lower():
@@ -71,7 +71,7 @@ setup(
     #install_requires=['cython', 'numpy', 'scipy', 'pandas', 'sklearn', 'matplotlib'],
     #zip_safe=False,
     # extensions
-    cmdclass = {'build_ext': build_ext, 'clean': CleanCommand},
+    cmdclass = {'build_ext': build_ext},
     ext_modules = ext,
 	include_dirs = [numpy.get_include()],
   )

@@ -4,8 +4,8 @@ from itertools import *
 import pandas as pd
 import logging
 from snpreader import SnpReader
-from pysnptools.pysnptools.standardizer.unit import Unit
-from pysnptools.pysnptools.standardizer.identity import Identity
+from pysnptools.standardizer.unit import Unit
+from pysnptools.standardizer.identity import Identity
 
 class SnpData(SnpReader):
     """  This is a class hold SNP values in-memory along with related iid and sid information.

@@ -19,7 +19,7 @@ def _decide_once_on_plink_reader():
     if WRAPPED_PLINK_PARSER_PRESENT == None:
         # attempt to import wrapped plink parser
         try:
-            import pysnptools.pysnptools.snpreader.wrap_plink_parser
+            import pysnptools.snpreader.wrap_plink_parser
             WRAPPED_PLINK_PARSER_PRESENT = True #!!ck does the standardizer work without c++
             logging.info("using c-based plink parser")
         except Exception, detail:
@@ -139,7 +139,7 @@ class Bed(SnpReader):
             sid_index_out = range(sid_count_in)
 
         if WRAPPED_PLINK_PARSER_PRESENT and not force_python_only:
-            import pysnptools.pysnptools.snpreader.wrap_plink_parser as wrap_plink_parser
+            import pysnptools.snpreader.wrap_plink_parser as wrap_plink_parser
             val = SP.zeros((iid_count_out, sid_count_out), order=order, dtype=dtype)
             bed_fn = self.basefilename + ".bed"
 

@@ -1,7 +1,7 @@
 import numpy as SP
 import subprocess, sys, os.path
 from itertools import *
-from pysnptools.pysnptools.altset_list import *
+from pysnptools.altset_list import *
 import pandas as pd
 import logging
 from snpreader import SnpReader
