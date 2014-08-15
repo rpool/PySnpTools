@@ -19,7 +19,8 @@ cdef extern from "./CPlinkBedFile.h":
 		size_t nSNPs,
 		const bool betaNotUnitVariance,
 		const float betaA,
-		const float betaB
+		const float betaB,
+		bool hideSNCWarning
 		)
 	void _ImputeAndZeroMeanSNPsdoubleFAAA "ImputeAndZeroMeanSNPsdoubleFAAA"( 
 		double *SNPs,
@@ -27,7 +28,8 @@ cdef extern from "./CPlinkBedFile.h":
 		size_t nSNPs,
 		const bool betaNotUnitVariance,
 		const double betaA,
-		const double betaB
+		const float betaB,
+		bool hideSNCWarning
 		)
 	void _ImputeAndZeroMeanSNPsfloatCAAA "ImputeAndZeroMeanSNPsfloatCAAA"( 
 		float *SNPs,
@@ -35,7 +37,8 @@ cdef extern from "./CPlinkBedFile.h":
 		size_t nSNPs,
 		bool betaNotUnitVariance,
 		float betaA,
-		float betaB
+		const float betaB,
+		bool hideSNCWarning
 		)
 
 	void _ImputeAndZeroMeanSNPsdoubleCAAA "ImputeAndZeroMeanSNPsdoubleCAAA"( 
@@ -44,51 +47,52 @@ cdef extern from "./CPlinkBedFile.h":
 		size_t nSNPs,
 		const bool betaNotUnitVariance,
 		const double betaA,
-		const double betaB
+		const float betaB,
+		bool hideSNCWarning
 		)
 
 
-def standardizefloatFAAA(np.ndarray[np.float32_t, ndim=2] out, bool betaNotUnitVariance, float betaA, float betaB):
+def standardizefloatFAAA(np.ndarray[np.float32_t, ndim=2] out, bool betaNotUnitVariance, float betaA, float betaB, bool hideSNCWarning):
 	
 	num_ind = out.shape[0]
 	num_snps = out.shape[1]
 
 	#http://wiki.cython.org/tutorials/NumpyPointerToC
-	_ImputeAndZeroMeanSNPsfloatFAAA(<float*> out.data, num_ind, num_snps, betaNotUnitVariance, betaA, betaB)
+	_ImputeAndZeroMeanSNPsfloatFAAA(<float*> out.data, num_ind, num_snps, betaNotUnitVariance, betaA, betaB, hideSNCWarning)
 
 	return out
 
 
 
-def standardizedoubleFAAA(np.ndarray[np.float64_t, ndim=2] out, bool betaNotUnitVariance, double betaA, double betaB):
+def standardizedoubleFAAA(np.ndarray[np.float64_t, ndim=2] out, bool betaNotUnitVariance, double betaA, double betaB, bool hideSNCWarning):
 	
 	num_ind = out.shape[0]
 	num_snps = out.shape[1]
 
 	#http://wiki.cython.org/tutorials/NumpyPointerToC
-	_ImputeAndZeroMeanSNPsdoubleFAAA(<double*> out.data, num_ind, num_snps, betaNotUnitVariance, betaA, betaB)
+	_ImputeAndZeroMeanSNPsdoubleFAAA(<double*> out.data, num_ind, num_snps, betaNotUnitVariance, betaA, betaB, hideSNCWarning)
 
 	return out
 
 
 
-def standardizefloatCAAA(np.ndarray[np.float32_t, ndim=2] out, bool betaNotUnitVariance, float betaA, float betaB):
+def standardizefloatCAAA(np.ndarray[np.float32_t, ndim=2] out, bool betaNotUnitVariance, float betaA, float betaB, bool hideSNCWarning):
 	
 	num_ind = out.shape[0]
 	num_snps = out.shape[1]
 
 	#http://wiki.cython.org/tutorials/NumpyPointerToC
-	_ImputeAndZeroMeanSNPsfloatCAAA(<float*> out.data, num_ind, num_snps, betaNotUnitVariance, betaA, betaB)
+	_ImputeAndZeroMeanSNPsfloatCAAA(<float*> out.data, num_ind, num_snps, betaNotUnitVariance, betaA, betaB, hideSNCWarning)
 
 	return out
 
-def standardizedoubleCAAA(np.ndarray[np.float64_t, ndim=2] out, bool betaNotUnitVariance, double betaA, double betaB):
+def standardizedoubleCAAA(np.ndarray[np.float64_t, ndim=2] out, bool betaNotUnitVariance, double betaA, double betaB, bool hideSNCWarning):
 	
 	num_ind = out.shape[0]
 	num_snps = out.shape[1]
 
 	#http://wiki.cython.org/tutorials/NumpyPointerToC
-	_ImputeAndZeroMeanSNPsdoubleCAAA(<double*> out.data, num_ind, num_snps, betaNotUnitVariance, betaA, betaB)
+	_ImputeAndZeroMeanSNPsdoubleCAAA(<double*> out.data, num_ind, num_snps, betaNotUnitVariance, betaA, betaB, hideSNCWarning)
 
 	return out
 

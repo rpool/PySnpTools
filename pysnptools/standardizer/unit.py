@@ -26,19 +26,21 @@ class Unit(object):  #IStandardizer
 
     def lambdaFactory(self, snps, blocksize=None, force_python_only=False):
         if not force_python_only:
+            hideSNCWarning = logging.getLogger().getEffectiveLevel() > logging.WARNING # Only show the C code's SNC warning if the logging level is set to WARNING or below
+
             if snps.dtype == np.float64:
                 if snps.flags['F_CONTIGUOUS'] and (snps.flags["OWNDATA"] or snps.base.nbytes == snps.nbytes):
-                    #!!!cmk05192014 LATER: set snps to np.load(D:\Source\carlk_snpreader\tests\temp.npz.npz) and then run this. It fails without error. Could it be that standardizing twice, sometimes causes this?
-                    return lambda s : wrap_plink_parser.standardizedoubleFAAA(s,False,float("NaN"),float("NaN"))
+                    #!!! LATER: set snps to np.load(D:\Source\carlk_snpreader\tests\temp.npz.npz) and then run this. It fails without error. Could it be that standardizing twice, sometimes causes this?
+                    return lambda s, hideSNCWarning=hideSNCWarning : wrap_plink_parser.standardizedoubleFAAA(s,False,float("NaN"),float("NaN"),hideSNCWarning)
                 elif snps.flags['C_CONTIGUOUS'] and (snps.flags["OWNDATA"] or snps.base.nbytes == snps.nbytes) and blocksize is None:
-                    return lambda s : wrap_plink_parser.standardizedoubleCAAA(s,False,float("NaN"),float("NaN"))
+                    return lambda s, hideSNCWarning=hideSNCWarning : wrap_plink_parser.standardizedoubleCAAA(s,False,float("NaN"),float("NaN"),hideSNCWarning)
                 else:
                     logging.info("Array is not contiguous, so will standardize with python only instead of C++")
             elif snps.dtype == np.float32:
                 if snps.flags['F_CONTIGUOUS'] and (snps.flags["OWNDATA"] or snps.base.nbytes == snps.nbytes):
-                    return lambda s: wrap_plink_parser.standardizefloatFAAA(s,False,float("NaN"),float("NaN"))
+                    return lambda s, hideSNCWarning=hideSNCWarning: wrap_plink_parser.standardizefloatFAAA(s,False,float("NaN"),float("NaN"),hideSNCWarning)
                 elif snps.flags['C_CONTIGUOUS'] and (snps.flags["OWNDATA"] or snps.base.nbytes == snps.nbytes) and blocksize is None:
-                    return lambda s: wrap_plink_parser.standardizefloatCAAA(s,False,float("NaN"),float("NaN"))
+                    return lambda s, hideSNCWarning=hideSNCWarning: wrap_plink_parser.standardizefloatCAAA(s,False,float("NaN"),float("NaN"),hideSNCWarning)
                 else:
                     logging.info("Array is not contiguous, so will standardize with python only instead of C++")
             else:

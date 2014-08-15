@@ -18,7 +18,6 @@ class Dat(SnpReader):
         '''
         self.dat_filename = dat_filename
 
-    #!! similar code in fastlmm
     def __repr__(self): 
         return "{0}('{1}')".format(self.__class__.__name__,self.dat_filename)
 

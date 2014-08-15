@@ -18,20 +18,20 @@ class Beta(object): #IStandardizer
         return "{0}()".format(self.__class__.__name__)
 
     def lambdaFactory(self, snps, blocksize=None, force_python_only=False):
-
         if not force_python_only:
+            hideSNCWarning = logging.getLogger().getEffectiveLevel() > logging.WARNING # Only show the C code's SNC warning if the logging level is set to WARNING or below
             if snps.dtype == np.float64:
                 if snps.flags['F_CONTIGUOUS'] and (snps.flags["OWNDATA"] or snps.base.nbytes == snps.nbytes): #!!create a method called is_single_segment
-                    return lambda s, a=self.a, b=self.b : wrap_plink_parser.standardizedoubleFAAA(s,True,a,b)
+                    return lambda s, a=self.a, b=self.b, hideSNCWarning=hideSNCWarning : wrap_plink_parser.standardizedoubleFAAA(s,True,a,b,hideSNCWarning)
                 elif snps.flags['C_CONTIGUOUS']  and (snps.flags["OWNDATA"] or snps.base.nbytes == snps.nbytes) and blocksize is None:
-                    return lambda s, a=self.a, b=self.b  : wrap_plink_parser.standardizedoubleCAAA(s,True,a,b)
+                    return lambda s, a=self.a, b=self.b, hideSNCWarning=hideSNCWarning  : wrap_plink_parser.standardizedoubleCAAA(s,True,a,b,hideSNCWarning)
                 else:
                     logging.info("Array is not contiguous, so will standardize with python only instead of C++")
             elif snps.dtype == np.float32:
                 if snps.flags['F_CONTIGUOUS'] and (snps.flags["OWNDATA"] or snps.base.nbytes == snps.nbytes):
-                    return lambda s, a=self.a, b=self.b : wrap_plink_parser.standardizefloatFAAA(s,True,a,b)
+                    return lambda s, a=self.a, b=self.b, hideSNCWarning=hideSNCWarning : wrap_plink_parser.standardizefloatFAAA(s,True,a,b,hideSNCWarning)
                 elif snps.flags['C_CONTIGUOUS'] and (snps.flags["OWNDATA"] or snps.base.nbytes == snps.nbytes) and blocksize is None:
-                    return lambda s, a=self.a, b=self.b : wrap_plink_parser.standardizefloatCAAA(s,True,a,b)
+                    return lambda s, a=self.a, b=self.b, hideSNCWarning=hideSNCWarning : wrap_plink_parser.standardizefloatCAAA(s,True,a,b,hideSNCWarning)
                 else:
                     logging.info("Array is not contiguous, so will standardize with python only instead of C++")
             else:

@@ -188,10 +188,10 @@ class TestLoader(unittest.TestCase):
 
     def test_load_and_standardize_ped(self):
 
-        #!!!cmk04072014 Ped columns can be ambigous
+        #!!! Ped columns can be ambiguous
         ###Creating Ped data ...
         #currentFolder = os.path.dirname(os.path.realpath(__file__))
-        #snpData = Bed(currentFolder + "/examples/toydata").read() #!!!cmk comment this out
+        #snpData = Bed(currentFolder + "/examples/toydata").read() #!!! comment this out
         ##Ped.write(snpData, currentFolder + "/examples/toydata.ped")
         #fromPed = Ped(currentFolder + "/examples/toydata").read()
         #self.assertTrue(np.allclose(snpData.val, fromPed.val, rtol=1e-05, atol=1e-05))
@@ -350,17 +350,13 @@ class TestDocStrings(unittest.TestCase):
     def test_util(self):
         import pysnptools.util.util
         os.chdir(snpreader_path)
-        doctest.testmod(pysnptools.pysnptools.util.util)
-
-#!!!cmk04072014 Need to add more of these?
-
-
+        doctest.testmod(pysnptools.util.util)
 
 def getTestSuite():
     """
     set up composite test suite
     """
-    
+
     test_suite = unittest.TestSuite([])
     test_suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestLoader))
     test_suite.addTests(NaNCNCTestCases.factory_iterator())
@@ -373,7 +369,9 @@ snpreader_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),"snpre
 
 if __name__ == '__main__':
 
+    logging.basicConfig(level=logging.ERROR)
+
     # TestFeatureSelection().test_aaa_hdf5_speed()
-    r = unittest.TextTestRunner(failfast=False)
+    r = unittest.TextTestRunner(failfast=True)
     r.run(getTestSuite())
 

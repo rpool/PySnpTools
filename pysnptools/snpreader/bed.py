@@ -27,8 +27,6 @@ def _decide_once_on_plink_reader():
             WRAPPED_PLINK_PARSER_PRESENT = False
 
 
-#!!!cmk0519214O LATER fix bug in Hadoop whereas it won't use data two levels down
-
 class Bed(SnpReader):
     '''
     This is a class that does random-access reads of a Bed/Bim/Fam files from disk.
@@ -120,7 +118,7 @@ class Bed(SnpReader):
         _decide_once_on_plink_reader()
         global WRAPPED_PLINK_PARSER_PRESENT
 
-        #!!!cmk04092014 this could be refactored to not use so many names
+        #!!! this could be refactored to not use so many names
         iid_count_in = self.iid_count
         sid_count_in = self.sid_count
 
@@ -191,8 +189,8 @@ class Bed(SnpReader):
             val = val[iid_index_out,:] #reorder or trim any extra allocation
 
 
-            #cmk05192014 LATER this can fail because the trim statement above messes up the order
-            #assert(SnpReader._array_properties_are_ok(val, order, dtype)) #!!!cmk04222014
+            #LATER this assert can fail because the trim statement above messes up the order
+            #assert(SnpReader._array_properties_are_ok(val, order, dtype)) #!!!cmk
 
         return val
 

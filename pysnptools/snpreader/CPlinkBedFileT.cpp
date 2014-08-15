@@ -21,7 +21,7 @@
 *     Revision Date:   14 Aug 2013
 *
 *    Module Purpose:   This file implements the CPlinkBedFile 
-*                      class for FastLmmC
+*                      class for pysnptools
 *
 *                      A .BED file contains compressed binary genotype 
 *                         values for for individuals by SNPs.  
@@ -40,7 +40,7 @@
 #include <math.h> 
 #include <stdlib.h>
 
-// 0 and 2 are flipped (wrt C++ fastlmm) in order to agree to python code
+// 0 and 2 are flipped (wrt C++ pysnptools) in order to agree to python code
 REAL SUFFIX(unknownOrMissing) = std::numeric_limits<REAL>::quiet_NaN();  // now used by SnpInfo
 REAL SUFFIX(homozygousPrimaryAllele) = 2;                // Major Allele
 REAL SUFFIX(heterozygousAllele) = 1;                     
@@ -308,10 +308,13 @@ void SUFFIX(ImputeAndZeroMeanSNPs)(
 	const size_t nSNPs, 
 	const bool betaNotUnitVariance,
 	const REAL betaA,
-	const REAL betaB
+	const REAL betaB,
+	bool hideSNCWarning //Keep track of this so that no ore than one warning message is reported
 	)
 {
-	bool seenSNC = false; //Keep track of this so that only one warning message is reported
+
+	//fprintf(stderr, "hideSNCWarning=%i\n", hideSNCWarning);
+
 #ifdef ORDERF
 
 	for ( size_t iSnp = 0; iSnp < nSNPs; ++iSnp )
@@ -353,11 +356,11 @@ void SUFFIX(ImputeAndZeroMeanSNPs)(
 
 		freq = (sum_s) / (n_observed * (REAL)2.0);   //compute snp-freq as in the Visscher Height paper (Nat Gen, Yang et al 2010).
 
-		if ( (freq != freq) || (freq >= (REAL)1.0) || (freq <= (REAL)0.0) )
+		if ((freq != freq) || (freq >= (REAL)1.0) || (freq <= (REAL)0.0))
 		{
-			if (!seenSNC)
+			if (!hideSNCWarning)
 			{
-				seenSNC = true;
+				hideSNCWarning = true;
 				fprintf(stderr, "Illegal SNP frequency: %.2f for SNPs[:][%i]\n", freq, iSnp);
 			}
 		}
@@ -374,9 +377,9 @@ void SUFFIX(ImputeAndZeroMeanSNPs)(
 			//   This test now prevents a divide by zero error below
 			std = 1.0;
 			isSNC = true;
-			if (!seenSNC)
+			if (!hideSNCWarning)
 			{
-				seenSNC = true;
+				hideSNCWarning = true;
 				fprintf(stderr, "std=.%2f has illegal value for SNPs[:][%i]\n", std, iSnp );
 			}
 
@@ -465,9 +468,9 @@ void SUFFIX(ImputeAndZeroMeanSNPs)(
 
 		if ( (freq[iSnp] != freq[iSnp]) || (freq[iSnp] >= (REAL)1.0) || (freq[iSnp] <= (REAL)0.0) )
 		{
-			if (!seenSNC)
+			if (!hideSNCWarning)
 			{
-				seenSNC = true;
+				hideSNCWarning = true;
 				fprintf(stderr, "Illegal SNP frequency: %.2f for SNPs[:][%i]\n", freq[iSnp], iSnp);
 			}
 		}
@@ -483,9 +486,9 @@ void SUFFIX(ImputeAndZeroMeanSNPs)(
 			//   This test now prevents a divide by zero error below
 			std[iSnp] = 1.0;
 			isSNC[iSnp] = true;
-			if (!seenSNC)
+			if (!hideSNCWarning)
 			{
-				seenSNC = true;
+				hideSNCWarning = true;
 				fprintf(stderr, "std=.%2f has illegal value for SNPs[:][%i]\n", std[iSnp], iSnp );
 			}
 		}

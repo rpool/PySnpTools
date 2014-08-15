@@ -33,20 +33,23 @@ def intersect_apply(data_list, sort_by_dataset=True):
 
     :Example:
 
-    >>> from pysnptools.pysnptools.snpreader.bed import Bed
-    >>> import fastlmm.pyplink.plink as plink
-    >>>
+    >>> from pysnptools.snpreader.bed import Bed
     >>> #Create five datasets in different formats
     >>> ignore_in = None
-    >>> snpreader_in = Bed('../../../tests/datasets/all_chr.maf0.001.N300') # Specify SNP data on disk
-    >>> pheno_dict = plink.loadOnePhen('../../../tests/datasets/phenSynthFrom22.23.N300.randcidorder.txt')
-    >>> cov = plink.loadPhen('../../../tests/datasets/all_chr.maf0.001.covariates.N300.txt')
-    >>> cov_as_tuple_in = (cov['vals'],cov['iid']) #We could do cov directly, but as an example we make it a tuple.
-    >>>
+    >>> snpreader_in = Bed('../examples/all_chr.maf0.001.N300') # Specify SNP data on disk
+    >>> 
+    >>> # Generate a random phenotype dictionary with the iids in reverse order and with an extra iid
+    >>> sp.random.seed(0) # set seed so that random number will be deterministic
+    >>> pheno_dict = {'iid':sp.concatenate((snpreader_in.iid[::-1],[['ignore', 'ignore']]),axis=0),'vals':sp.random.rand(snpreader_in.iid_count+1),'more':'more'}
+    >>> 
+    >>> # Generate a random covariate in the form of a tuple of random values and iids in random order
+    >>> cov_as_tuple_in = (sp.random.rand(snpreader_in.iid_count,5),sp.random.permutation(snpreader_in.iid)) # make a tuple of values and iids
+    >>> 
     >>> # Create five new datasets with consistent iids
-    >>> ignore_out, snpreader_out, pheno_dict, cov_as_tuple_out = intersect_apply([ignore_in, snpreader_in, pheno_dict, cov_as_tuple_in])
-    >>> # Print the first five iids from each dataset
-    >>> print ignore_out, snpreader_out.iid[:5], pheno_dict['iid'][:5], cov_as_tuple_out[1][:5]
+    >>> ignore_out, snpreader_out, pheno_dict, cov_as_tuple_in = intersect_apply([ignore_in, snpreader_in, pheno_dict, cov_as_tuple_in])
+    >>> 
+    >>> # Print the first five iids from each dataset -- they all match
+    >>> print ignore_out, snpreader_out.iid[:5], pheno_dict['iid'][:5], cov_as_tuple_in[1][:5]
     None [['POP1' '0']
      ['POP1' '12']
      ['POP1' '44']
@@ -158,10 +161,7 @@ def intersect_ids(idslist):
                     id2ind[id]=entry
             else:
                 for i in xrange(id_list.shape[0]):
-                    try:
-                        id=(id_list[i,0], id_list[i,1])
-                    except:
-                        print "#!!!cmk07292014"
+                    id=(id_list[i,0], id_list[i,1])
                     if id2ind.has_key(id):
                         id2ind[id][l]=i
 
@@ -174,7 +174,6 @@ def intersect_ids(idslist):
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-
 
     # There is also a unit test case in 'pysnptools\test.py' that calls this doc test
     import doctest

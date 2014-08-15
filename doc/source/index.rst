@@ -1,7 +1,7 @@
 ################################
 :mod:`pysnptools` Documentation
 ################################
-.. automodule:: pysnptools.pysnptools
+.. automodule:: pysnptools
     :members:
     :undoc-members:
 	:show-inheritance:
@@ -11,7 +11,7 @@
 :mod:`snpreader` Module
 ***********************
 
-.. automodule:: pysnptools.pysnptools.snpreader
+.. automodule:: pysnptools.snpreader
     :members:
     :undoc-members:
 	:show-inheritance:
@@ -20,7 +20,7 @@
 
 :mod:`snpreader.snpreader`
 ++++++++++++++++++++++++++
-.. automodule:: pysnptools.pysnptools.snpreader.snpreader
+.. automodule:: pysnptools.snpreader.snpreader
     :members:
     :undoc-members:
 	:show-inheritance:
@@ -30,7 +30,7 @@
 
 :mod:`snpreader.bed`
 ++++++++++++++++++++
-.. automodule:: pysnptools.pysnptools.snpreader.bed
+.. automodule:: pysnptools.snpreader.bed
     :members:
     :inherited-members:
     :undoc-members:
@@ -41,7 +41,7 @@
 
 :mod:`snpreader.snpdata`
 ++++++++++++++++++++++++++
-.. automodule:: pysnptools.pysnptools.snpreader.snpdata
+.. automodule:: pysnptools.snpreader.snpdata
     :members:
     :inherited-members:
     :undoc-members:
@@ -52,7 +52,7 @@
 
 :mod:`snpreader.ped`
 ++++++++++++++++++++
-.. automodule:: pysnptools.pysnptools.snpreader.ped
+.. automodule:: pysnptools.snpreader.ped
     :members:
     :inherited-members:
     :undoc-members:
@@ -62,7 +62,7 @@
 
 :mod:`snpreader.dat`
 ++++++++++++++++++++
-.. automodule:: pysnptools.pysnptools.snpreader.dat
+.. automodule:: pysnptools.snpreader.dat
     :members:
     :inherited-members:
     :undoc-members:
@@ -72,7 +72,7 @@
 
 :mod:`snpreader.hdf5`
 +++++++++++++++++++++
-.. automodule:: pysnptools.pysnptools.snpreader.hdf5
+.. automodule:: pysnptools.snpreader.hdf5
     :members:
     :inherited-members:
     :undoc-members:
@@ -85,7 +85,7 @@
 :mod:`util` Module
 ***********************
 
-.. automodule:: pysnptools.pysnptools.util
+.. automodule:: pysnptools.util
     :members:
     :undoc-members:
 	:show-inheritance:
@@ -93,7 +93,7 @@
 
 :mod:`util.util`
 ++++++++++++++++++++++++++++++++++++++++++++++++++++
-.. automodule:: pysnptools.pysnptools.util.util
+.. automodule:: pysnptools.util.util
     :members:
     :undoc-members:
 	:show-inheritance:
@@ -102,7 +102,7 @@
 :mod:`standardizer` Module
 ****************************
 
-.. automodule:: pysnptools.pysnptools.standardizer
+.. automodule:: pysnptools.standardizer
     :members:
     :undoc-members:
 	:show-inheritance:
@@ -111,7 +111,7 @@
 
 :mod:`standardizer.unit`
 ++++++++++++++++++++++++++
-.. automodule:: pysnptools.pysnptools.standardizer.unit
+.. automodule:: pysnptools.standardizer.unit
     :members:
     :undoc-members:
 	:show-inheritance:
@@ -120,7 +120,7 @@
 
 :mod:`standardizer.identity`
 ++++++++++++++++++++++++++++++++++++++++++++++++++++
-.. automodule:: pysnptools.pysnptools.standardizer.identity
+.. automodule:: pysnptools.standardizer.identity
     :members:
     :undoc-members:
 	:show-inheritance:
@@ -130,7 +130,7 @@
 
 :mod:`standardizer.beta`
 ++++++++++++++++++++++++++++++++++++++++++++++++++++
-.. automodule:: pysnptools.pysnptools.standardizer.beta
+.. automodule:: pysnptools.standardizer.beta
     :members:
     :undoc-members:
 	:show-inheritance:
@@ -139,7 +139,7 @@
 
 :mod:`standardizer.bysidcount`
 ++++++++++++++++++++++++++++++++++++++++++++++++++++
-.. automodule:: pysnptools.pysnptools.standardizer.bysidcount
+.. automodule:: pysnptools.standardizer.bysidcount
     :members:
     :undoc-members:
 	:show-inheritance:
@@ -148,7 +148,7 @@
 
 :mod:`standardizer.bysqrtsidcount`
 ++++++++++++++++++++++++++++++++++++++++++++++++++++
-.. automodule:: pysnptools.pysnptools.standardizer.bysqrtsidcount
+.. automodule:: pysnptools.standardizer.bysqrtsidcount
     :members:
     :undoc-members:
 	:show-inheritance:
@@ -161,7 +161,7 @@
 :mod:`altset_list` Module
 **********************************************
 
-.. automodule:: pysnptools.pysnptools.altset_list
+.. automodule:: pysnptools.altset_list
     :members:
     :undoc-members:
 	:show-inheritance:
@@ -170,7 +170,7 @@
 
 :mod:`altset_list.consecutive`
 ++++++++++++++++++++++++++++++++++++++++++++++++++++
-.. automodule:: pysnptools.pysnptools.altset_list.consecutive
+.. automodule:: pysnptools.altset_list.consecutive
     :members:
     :undoc-members:
 	:show-inheritance:
@@ -179,7 +179,7 @@
 
 :mod:`altset_list.snpandsetnamecollection`
 ++++++++++++++++++++++++++++++++++++++++++++++++++++
-.. automodule:: pysnptools.pysnptools.altset_list.snpandsetnamecollection
+.. automodule:: pysnptools.altset_list.snpandsetnamecollection
     :members:
     :undoc-members:
 	:show-inheritance:
@@ -188,7 +188,7 @@
 
 :mod:`altset_list.subset`
 ++++++++++++++++++++++++++
-.. automodule:: pysnptools.pysnptools.altset_list.subset
+.. automodule:: pysnptools.altset_list.subset
     :members:
     :undoc-members:
 	:show-inheritance:
@@ -198,7 +198,7 @@
 
 :mod:`altset_list.minmaxsetsize`
 ++++++++++++++++++++++++++++++++++++++++++++++++++++
-.. automodule:: pysnptools.pysnptools.altset_list.minmaxsetsize
+.. automodule:: pysnptools.altset_list.minmaxsetsize
     :members:
     :undoc-members:
 	:show-inheritance:

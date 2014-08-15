@@ -56,7 +56,7 @@ class SnpData(SnpReader):
         """
         return self._parent.pos
 
-    #!!!cmk04072014 Seems like we can't short cut the view_OK this because the .val wouldn't necessarly have the right order and dtype
+    #!!! Seems like we can't short cut the view_OK this because the .val wouldn't necessarily have the right order and dtype
     #def read(self, order='F', dtype=SP.float64, force_python_only=False, view_ok=False):
     #    """creates an in-memory :class:`.SnpData` with a copy of the genotype data
     #    """
@@ -90,15 +90,15 @@ class SnpData(SnpReader):
 
         :rtype: :class:`.SnpData` (standardizes in place, but for convenience, returns 'self')
 
-        >>> from pysnptools.pysnptools.snpreader.bed import Bed
-        >>> snp_on_disk = Bed('../../../tests/datasets/all_chr.maf0.001.N300') # Specify some data on disk in Bed format
+        >>> from pysnptools.snpreader.bed import Bed
+        >>> snp_on_disk = Bed('../examples/all_chr.maf0.001.N300') # Specify some data on disk in Bed format
         >>> snpdata1 = snp_on_disk.read() # read all SNP values into memory
         >>> print snpdata1 # Prints the specification for this SnpData
-        SnpData(Bed('../../../tests/datasets/all_chr.maf0.001.N300'))
+        SnpData(Bed('../examples/all_chr.maf0.001.N300'))
         >>> print snpdata1.val[0,0]
         2.0
         >>> snpdata1.standardize() # standardize changes the values in snpdata1.val and changes the specification.
-        SnpData(Bed('../../../tests/datasets/all_chr.maf0.001.N300'),Unit())
+        SnpData(Bed('../examples/all_chr.maf0.001.N300'),Unit())
         >>> print snpdata1.val[0,0]
         0.229415733871
         >>> snpdata2 = snp_on_disk.read().standardize() # Read and standardize in one expression with only one ndarray allocated.
