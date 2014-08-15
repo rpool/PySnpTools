@@ -45,7 +45,7 @@ class Bed(SnpReader):
     def __init__(self, basefilename):
         self.basefilename = basefilename
 
-    def __repr__(self): 
+    def __repr__(self):
         return "{0}('{1}')".format(self.__class__.__name__,self.basefilename)
 
     @property
@@ -159,11 +159,11 @@ class Bed(SnpReader):
                     raise Exception("order '{0}' not known, only 'F' and 'C'".format(order));
             else:
                 raise Exception("dtype '{0}' not known, only float64 and float32".format(dtype))
-            
+
         else:
             # An earlier version of this code had a way to read consecutive SNPs of code in one read. May want
-            # to add that ability back to the code. 
-            # Also, note that reading with python will often result in non-contigious memory, so the python standardizers will automatically be used, too.       
+            # to add that ability back to the code.
+            # Also, note that reading with python will often result in non-contigious memory, so the python standardizers will automatically be used, too.
             logging.warn("using pure python plink parser (might be much slower!!)")
             val = SP.zeros(((int(SP.ceil(0.25*iid_count_in))*4),sid_count_out),order=order, dtype=dtype) #allocate it a little big
             for SNPsIndex, bimIndex in enumerate(sid_index_out):
@@ -280,7 +280,7 @@ if __name__ == "__main__":
     #assert(boolex.read().val.shape == (snpreader.iid_count, 4))
     #boolex = snpreader[:,~near_front]
     #assert(boolex.read().val.shape == (snpreader.iid_count, 6))
-    
+
     #print snpreader.read()
     #print snpreader.read().standardize()
     #print snpreader.read()
