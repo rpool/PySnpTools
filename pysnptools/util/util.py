@@ -1,4 +1,4 @@
-import scipy as sp
+import scipy as sp #all of this could be done using numpy instead of scipy
 import logging
 
 def _testtest(data, iididx):

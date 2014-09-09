@@ -1,8 +1,6 @@
-fastlmm overview
+pysnpreader overview
 
-This package includes FaST-LMM-SELECT and FaST-LMM-SET.
-
-If you want to test single SNPs, please use the C++ version for now.
+python library for the handling of SNPs data for Genome Wide Association Studies (GWAS)
 
 ###############################
 Package Install Instructions:
@@ -16,21 +14,14 @@ Packages:
 
 numpy
 scipy
-matplotlib
-pandas
-scikit.learn (sklearn)
 cython
-[statsmodels -- install only required for logistic-based tests, not the standard linear LRT]
 
-Please see MANUAL.txt for usage instructions.
 
 ---------------------------------------
 (1) Installation of dependent packages
 ---------------------------------------
 
-**SPECIAL NOTE FOR FAST-LMM-EWASHER: If you are using FaST-LMM-EWASher, please skip the installation steps in this file and instead read ./doc/FaST-LMM-EWASHer/README.txt**
-
-We highly recommend using a python distribution such as 
+We recommend using a python distribution such as 
 Anaconda (https://store.continuum.io/cshop/anaconda/) 
 or Enthought (https://www.enthought.com/products/epd/free/).
 Both these distributions can be used on linux and Windows, are free 
