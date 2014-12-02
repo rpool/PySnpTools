@@ -5,9 +5,9 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{60f1cb4a-9da3-47c2-9b89-60ac1ce93347}</ProjectGuid>
     <ProjectHome />
-    <StartupFile>util\util.py</StartupFile>
-    <SearchPath>..\..\;..\doc\source\</SearchPath>
-    <WorkingDirectory>.</WorkingDirectory>
+    <StartupFile>..\setup.py</StartupFile>
+    <SearchPath>.</SearchPath>
+    <WorkingDirectory>..</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <ProjectTypeGuids>{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
@@ -20,6 +20,7 @@
     <SccLocalPath>SAK</SccLocalPath>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
     <IsWindowsApplication>False</IsWindowsApplication>
+    <CommandLineArguments>clean</CommandLineArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
   <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
@@ -30,6 +31,9 @@
   <ItemGroup>
     <Compile Include="..\doc\source\conf.py">
       <Link>docsource\conf.py</Link>
+    </Compile>
+    <Compile Include="..\setup.py">
+      <Link>setup\setup.py</Link>
     </Compile>
     <Compile Include="altset_list\consecutive.py" />
     <Compile Include="altset_list\minmaxsetsize.py" />
@@ -68,16 +72,29 @@
     <Folder Include="altset_list\" />
     <Folder Include="examples\" />
     <Folder Include="docsource\" />
+    <Folder Include="setup\" />
     <Folder Include="util\" />
     <Folder Include="snpreader" />
     <Folder Include="standardizer\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="..\AUTHORS.txt">
+      <Link>setup\AUTHORS.txt</Link>
+    </Content>
     <Content Include="..\doc\make.bat">
       <Link>docsource\make.bat</Link>
     </Content>
     <Content Include="..\doc\source\index.rst">
       <Link>docsource\index.rst</Link>
+    </Content>
+    <Content Include="..\LICENSE.md">
+      <Link>setup\LICENSE.md</Link>
+    </Content>
+    <Content Include="..\MANIFEST.in">
+      <Link>setup\MANIFEST.in</Link>
+    </Content>
+    <Content Include="..\README.md">
+      <Link>setup\README.md</Link>
     </Content>
     <Content Include="examples\toydata.5chrom.bed" />
     <Content Include="examples\toydata.5chrom.bim" />

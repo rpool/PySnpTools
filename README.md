@@ -1,13 +1,13 @@
-## FaST-LMM
+## PySnpTools
 -------------------------------------
 
-FaST-LMM, which stands for Factored Spectrally Transformed Linear Mixed Models, is a program for performing both single-SNP and SNP-set genome-wide association studies (GWAS) on extremely large data sets.  This release contains the improvements described in Widmer _et al._, _Scientific Reports_ 2014, and tests for epistasis.
+PySnpTools is a library for reading and manipulating genetic data.
 
-See the FaST-LMM website for related software:  
+We originally created it for FaST-LMM, a program for performing genome-wide association studies (GWAS) on large data sets.
 http://research.microsoft.com/en-us/um/redmond/projects/MicrosoftGenomics/Fastlmm/
 
-Our documentation (including live examples) is also available as ipython notebook:
-http://nbviewer.ipython.org/github/MicrosoftGenomics/FaST-LMM/blob/master/doc/ipynb/FaST-LMM.ipynb
+Find the PySnpTools documentation and related tools at
+http://research.microsoft.com/en-us/um/redmond/projects/MSCompBio/
 
 
 ### Quick install:
@@ -16,14 +16,14 @@ http://nbviewer.ipython.org/github/MicrosoftGenomics/FaST-LMM/blob/master/doc/ip
 If you have pip installed, installation is as easy as:
 
 ```
-pip install fastlmm
+pip install pysnptools
 ```
 
 
 ### Detailed Package Install Instructions:
 
 
-fastlmm has the following dependencies:
+pysnptools has the following dependencies:
 
 python 2.7
 
@@ -31,12 +31,8 @@ Packages:
 
 * numpy
 * scipy
-* matplotlib
 * pandas
-* scikit.learn (sklearn)
 * cython
-* pysnptools
-* optional: [statsmodels -- install only required for logistic-based tests, not the standard linear LRT]
 
 
 #### (1) Installation of dependent packages
@@ -87,8 +83,8 @@ likely fix the problem, e.g.
 python setup.py build_ext --inplace --compiler=msvc
 ```
 
-Don't forget to set your PYTHONPATH to point to the directory above the one named fastlmm in
-the fastlmm source code. For e.g. if fastlmm is in the [somedir] directory, then
+Don't forget to set your PYTHONPATH to point to the directory above the one named pysnptools in
+the pysnptools source code. For e.g. if pysnptools is in the [somedir] directory, then
 in the unix shell use:
 ```
 export PYTHONPATH=$PYTHONPATH:[somedir]
