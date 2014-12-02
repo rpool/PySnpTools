@@ -21,3 +21,4 @@
 #undef ORDERC
 #define SUFFIX(NAME) NAME ## floatFAAA
 #include "CPlinkBedFileT.h"
+

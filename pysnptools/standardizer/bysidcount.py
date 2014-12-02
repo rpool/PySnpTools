@@ -2,7 +2,7 @@ import numpy as np
 import scipy as sp
 import logging
 
-class BySidCount(object):  #IStandardizer  # LATER need to make abstract class and to document
+class BySidCount(object):  #IStandardizer  #!!LATER need to make abstract class and to document
     """The specificiation for BySidCount standardization"""
     def __init__(self, sid_count=None):
         self._sid_count = sid_count

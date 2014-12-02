@@ -1,4 +1,4 @@
-import numpy as SP
+import numpy as np
 import subprocess, sys, os.path
 from itertools import *
 import pandas as pd
@@ -56,20 +56,20 @@ class Dat(SnpReader):
 
         famfile, mapfile = self.names_of_other_files()
 
-        #!!!similar code in BED reader
+        #!!similar code in BED reader
         logging.info("Loading fam file {0}".format(famfile))
-        self._original_iid = SP.loadtxt(famfile,delimiter = ' ',dtype = 'str',usecols=(0,1),comments=None)
+        self._original_iid = np.loadtxt(famfile,delimiter = ' ',dtype = 'str',usecols=(0,1),comments=None)
 
-        #!!!similar code in BED reader
+        #!!similar code in BED reader
         logging.info("Loading map file {0}".format(mapfile))
         bimfields = pd.read_csv(mapfile,delimiter = '\t',usecols = (0,1,2,3),header=None,index_col=False)
-        self._sid = SP.array(bimfields[1].tolist(),dtype='str')
+        self._sid = np.array(bimfields[1].tolist(),dtype='str')
         self._pos = bimfields.as_matrix([0,2,3])
 
         return self
 
     #def __del__(self):
-    #    if self._filepointer != None:  # we need to test this because Python doesn't guarentee that __init__ was fully run
+    #    if self._filepointer != None:  # we need to test this because Python doesn't guarantee that __init__ was fully run
     #        self._filepointer.close()
 
     def copyinputs(self, copier):
@@ -82,9 +82,9 @@ class Dat(SnpReader):
     @property
     def datfields(self):
         if not hasattr(self,"_datfields"):
-            #!!!could change to just create/find an index to the file position of each row. Instead, reading all into memory
+            #!!could change to just create/find an index to the file position of each row. Instead, reading all into memory
             datfields = pd.read_csv(self.dat_filename,delimiter = '\t',header=None,index_col=False)
-            if not SP.array_equal(SP.array(datfields[0]), self.sid) : raise Exception("Expect snp list is fam file to exactly match snp list in dat file")
+            if not np.array_equal(np.array(datfields[0],dtype="string"), self.sid) : raise Exception("Expect snp list in map file to exactly match snp list in dat file")
             self.start_column = 3
             if len(self._original_iid) != datfields.shape[1]-self.start_column : raise Exception("Expect # iids in fam file to match dat file")
             self._datfields = datfields.T
@@ -102,11 +102,11 @@ class Dat(SnpReader):
         if order is None:
             order = "F"
         if dtype is None:
-            dtype = SP.float64
+            dtype = np.float64
         if force_python_only is None:
             force_python_only = False
 
-        #This could be refactored to not use so many names
+        #This could be re-factored to not use so many names
         iid_count_in = self.iid_count
         sid_count_in = self.sid_count
 
@@ -125,10 +125,10 @@ class Dat(SnpReader):
             sid_index_out = range(sid_count_in)
 
 
-        val = SP.zeros((iid_count_out,sid_count_out),order=order, dtype=dtype)
+        val = np.zeros((iid_count_out,sid_count_out),order=order, dtype=dtype)
         datfields = self.datfields
         for SNPsIndex, sid_index in enumerate(sid_index_out):
-            row = SP.array(datfields[sid_index])[self.start_column:,]
+            row = np.array(datfields[sid_index])[self.start_column:,]
             val[:,SNPsIndex] = row[iid_index_out]
         return val
 
@@ -136,32 +136,35 @@ class Dat(SnpReader):
     @staticmethod
     def write(snpdata, basefilename):
 
-        iid = snpdata.iid
-        sid = snpdata.sid
-        pos = snpdata.pos
+        iid_list = snpdata.iid
+        sid_list = snpdata.sid
+        pos_list = snpdata.pos
         snpsarray = snpdata.val
 
         famfile, mapfile = Dat.names_of_other_files_static(basefilename)
 
         with open(famfile,"w") as fam_filepointer:
-            for iid_row in iid:
+            for iid_row in iid_list:
                 fam_filepointer.write("{0} {1} 0 0 0 0\n".format(iid_row[0],iid_row[1]))
 
         with open(mapfile,"w") as map_filepointer:
-            for sid_index, sid in enumerate(sid):
-                posrow = pos[sid_index]
+            for sid_index, sid in enumerate(sid_list):
+                posrow = pos_list[sid_index]
                 map_filepointer.write("{0}\t{1}\t{2}\t{3}\n".format(posrow[0], sid, posrow[1], posrow[2]))
 
-        with open(datfile,"w") as dat:
-            for sid_index, sid in enumerate(sid):
-                dat.write("{0}\tj\tn\t".format(sid)) #use "j" and "n" as the major and minor allele
+        with open(basefilename,"w") as dat_filepointer:
+            for sid_index, sid in enumerate(sid_list):
+                if sid_index % 1000 == 0:
+                    logging.info("Writing snp # {0} to file '{1}'".format(sid_index, basefilename))
+                dat_filepointer.write("{0}\tj\tn\t".format(sid)) #use "j" and "n" as the major and minor allele
                 row = snpsarray[:,sid_index]
-                dat.write("\t".join([str(i) for i in row]) + "\n")
+                dat_filepointer.write("\t".join((str(i) for i in row)) + "\n")
+        logging.info("Done writing " + basefilename)
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
-    snpreader = Dat(r'../../tests/datasets/all_chr.maf0.001.N300.dat')
+    snpreader = Dat(r'../tests/datasets/all_chr.maf0.001.N300.dat')
     snp_matrix = snpreader.read()
     print len(snp_matrix['sid'])
     snp_matrix = snpreader[:,:].read()

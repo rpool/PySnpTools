@@ -21,10 +21,9 @@
 *     Revision Date:   14 Aug 2013
 *
 *    Module Purpose:   This file implements the CPlinkBedFile 
-*                      class for pysnptools
-*
+*  
 *                      A .BED file contains compressed binary genotype 
-*                         values for for individuals by SNPs.  
+*                         values for individuals by SNPs.  
 *
 *    Change History:   Version 2.00: Reworked to be wrapped in python version by Chris Widmer  (chris@shogun-toolbox.org)
 *
@@ -40,7 +39,7 @@
 #include <math.h> 
 #include <stdlib.h>
 
-// 0 and 2 are flipped (wrt C++ pysnptools) in order to agree to python code
+// 0 and 2 are flipped (wrt C++ fastlmm) in order to agree to python code
 REAL SUFFIX(unknownOrMissing) = std::numeric_limits<REAL>::quiet_NaN();  // now used by SnpInfo
 REAL SUFFIX(homozygousPrimaryAllele) = 2;                // Major Allele
 REAL SUFFIX(heterozygousAllele) = 1;                     
@@ -157,25 +156,29 @@ size_t SUFFIX(CBedFile)::Read( BYTE *pb, size_t cbToRead )
 	return( cbRead );
 }
 
-size_t SUFFIX(CBedFile)::ReadLine( BYTE *pb, size_t idx )
+size_t SUFFIX(CBedFile)::ReadLine(BYTE *pb, size_t idx)
 {
 	long long fpos = cbHeader + (idx*cbStride);
 #ifdef _WIN32
-	long long fposCur = _ftelli64( pFile );
+	long long fposCur = _ftelli64(pFile);
+#elif __APPLE__
+	long long fposCur = ftello(pFile);
 #else
-	long long fposCur = ftello64( pFile );
+	long long fposCur = ftello64(pFile);
 #endif
-	if ( fpos != fposCur )
+	if (fpos != fposCur)
 	{
 #ifdef _WIN32
-		_fseeki64( pFile, fpos, SEEK_SET );
+		_fseeki64(pFile, fpos, SEEK_SET);
+#elif __APPLE__
+		fseeko(pFile, fpos, SEEK_SET);
 #else
-		fseeko64( pFile, fpos, SEEK_SET );
+		fseeko64(pFile, fpos, SEEK_SET);
 #endif
 	}
 
-	size_t cbRead = Read( pb, cbStride );
-	return( cbRead );
+	size_t cbRead = Read(pb, cbStride);
+	return(cbRead);
 }
 
 /*
@@ -308,13 +311,10 @@ void SUFFIX(ImputeAndZeroMeanSNPs)(
 	const size_t nSNPs, 
 	const bool betaNotUnitVariance,
 	const REAL betaA,
-	const REAL betaB,
-	bool hideSNCWarning //Keep track of this so that no ore than one warning message is reported
+	const REAL betaB
 	)
 {
-
-	//fprintf(stderr, "hideSNCWarning=%i\n", hideSNCWarning);
-
+	bool seenSNC = false; //Keep track of this so that only one warning message is reported
 #ifdef ORDERF
 
 	for ( size_t iSnp = 0; iSnp < nSNPs; ++iSnp )
@@ -345,29 +345,30 @@ void SUFFIX(ImputeAndZeroMeanSNPs)(
 		REAL mean_s  = sum_s  / n_observed;    //compute the mean over observed individuals for the current SNP
 		REAL mean2_s = sum2_s / n_observed;    //compute the mean of the squared SNP
 
-		REAL std;                              //the standard deviation
-		REAL freq;                             //The SNP frequency
-		if ( sum_s <= (REAL)0.0 )
+		//When beta standardization is being done, check that data is 0,1,2
+		if (betaNotUnitVariance && sum_s <= (REAL)0.0)
 		{
 			REAL freqT = sum_s/n_observed;
 			fprintf(stderr, "Observed SNP freq is %.2f. for a SNPs[:][%i]\n", freqT, iSnp );
 			exit(1);
 		}
 
-		freq = (sum_s) / (n_observed * (REAL)2.0);   //compute snp-freq as in the Visscher Height paper (Nat Gen, Yang et al 2010).
 
-		if ((freq != freq) || (freq >= (REAL)1.0) || (freq <= (REAL)0.0))
+		//The SNP frequency
+		REAL freq = (sum_s) / (n_observed * (REAL)2.0);   //compute snp-freq as in the Visscher Height paper (Nat Gen, Yang et al 2010).
+
+		if ((freq != freq) || betaNotUnitVariance && ((freq >= (REAL)1.0) || (freq <= (REAL)0.0)))
 		{
-			if (!hideSNCWarning)
+			if (!seenSNC)
 			{
-				hideSNCWarning = true;
+				seenSNC = true;
 				fprintf(stderr, "Illegal SNP frequency: %.2f for SNPs[:][%i]\n", freq, iSnp);
 			}
 		}
 
 
 		REAL variance = mean2_s-mean_s * mean_s;        //By the Cauchy Shwartz inequality this should always be positive
-		std = sqrt( variance );
+		REAL std = sqrt( variance );                    //The SNP frequency
 
 		bool isSNC = false;
 		if ( (std != std) || (std <= (REAL)0.0) )
@@ -377,9 +378,9 @@ void SUFFIX(ImputeAndZeroMeanSNPs)(
 			//   This test now prevents a divide by zero error below
 			std = 1.0;
 			isSNC = true;
-			if (!hideSNCWarning)
+			if (!seenSNC)
 			{
-				hideSNCWarning = true;
+				seenSNC = true;
 				fprintf(stderr, "std=.%2f has illegal value for SNPs[:][%i]\n", std, iSnp );
 			}
 
@@ -420,7 +421,7 @@ void SUFFIX(ImputeAndZeroMeanSNPs)(
 #else //Order C
 
 
-	// Make one pass through the data (by individual, because that is how it is layed out), collecting statistics
+	// Make one pass through the data (by individual, because that is how it is laid out), collecting statistics
 	std::vector<REAL> n_observed(nSNPs); //                                                C++ inits to 0's
 	std::vector<REAL> sum_s(nSNPs);      //the sum of a SNP over all observed individuals. C++ inits to 0's
 	std::vector<REAL> sum2_s(nSNPs);     //the sum of the squares of the SNP over all observed individuals.     C++ inits to 0's
@@ -457,7 +458,8 @@ void SUFFIX(ImputeAndZeroMeanSNPs)(
 		mean_s[iSnp]  = sum_s[iSnp]  / n_observed[iSnp];    //compute the mean over observed individuals for the current SNP
 		mean2_s[iSnp] = sum2_s[iSnp] / n_observed[iSnp];    //compute the mean of the squared SNP
 
-		if ( sum_s[iSnp] <= (REAL)0.0 )
+		//When beta standardization is being done, check that data is 0,1,2
+		if (betaNotUnitVariance && sum_s[iSnp] <= (REAL)0.0)
 		{
 			REAL freqT = sum_s[iSnp]/n_observed[iSnp];
 			fprintf(stderr, "Observed SNP freq is %.2f. for a SNPs[:][%i]\n", freqT, iSnp );
@@ -466,11 +468,11 @@ void SUFFIX(ImputeAndZeroMeanSNPs)(
 
 		freq[iSnp] = (sum_s[iSnp]) / (n_observed[iSnp] * (REAL)2.0);   //compute snp-freq[iSnp] as in the Visscher Height paper (Nat Gen, Yang et al 2010).
 
-		if ( (freq[iSnp] != freq[iSnp]) || (freq[iSnp] >= (REAL)1.0) || (freq[iSnp] <= (REAL)0.0) )
+		if ((freq[iSnp] != freq[iSnp]) || betaNotUnitVariance && ((freq[iSnp] >= (REAL)1.0) || (freq[iSnp] <= (REAL)0.0)))
 		{
-			if (!hideSNCWarning)
+			if (!seenSNC)
 			{
-				hideSNCWarning = true;
+				seenSNC = true;
 				fprintf(stderr, "Illegal SNP frequency: %.2f for SNPs[:][%i]\n", freq[iSnp], iSnp);
 			}
 		}
@@ -486,9 +488,9 @@ void SUFFIX(ImputeAndZeroMeanSNPs)(
 			//   This test now prevents a divide by zero error below
 			std[iSnp] = 1.0;
 			isSNC[iSnp] = true;
-			if (!hideSNCWarning)
+			if (!seenSNC)
 			{
-				hideSNCWarning = true;
+				seenSNC = true;
 				fprintf(stderr, "std=.%2f has illegal value for SNPs[:][%i]\n", std[iSnp], iSnp );
 			}
 		}

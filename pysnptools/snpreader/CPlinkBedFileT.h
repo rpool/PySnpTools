@@ -24,10 +24,9 @@
  *     Revision Date:   14 Aug 2013
  *
  *    Module Purpose:   This file defines the CPlinkBedFile class 
- *                         for pysnptools
  *
  *                      A .BED file contains compressed binary genotype values for 
- *                         for individuals by SNPs.  For pysnptools, we prefer and may
+ *                         for individuals by SNPs.  In other contexts, we prefer and may
  *                         require the file LayoutMode be LayoutGroupGenotypesBySnp
  *
  *                      The .bed header is three bytes followed immediately by data.
@@ -130,8 +129,7 @@ void SUFFIX(ImputeAndZeroMeanSNPs)(
    const size_t nSNPs, 
 	const bool betaNotUnitVariance,
 	const REAL betaA,
-	const REAL betaB,
-	bool hideSNCWarning
+	const REAL betaB
    );
 
 // to be used by cython wrapper

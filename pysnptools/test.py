@@ -16,17 +16,15 @@ import os.path
 import time
 
 
-
    
 class TestLoader(unittest.TestCase):     
 
-    def xtest_aaa_hdf5_speed(self): #!!ck
+    def xtest_aaa_hdf5_speed(self): #!!to0 slow to use all the time
 
         #currentFolder + "/examples/toydata"
         #currentFolder + "/examples/delme.hdf5"
-        bedFileName = r"d:\data\carlk\cachebio\genetics\synthetic\wtccclikeH\snps" #!!ck local paths
-        hdf5Pattern = r"d:\data\carlk\cachebio\genetics\synthetic\wtccclikeH\del.{0}.hdf5"#!!ck
-
+        bedFileName = r"d:\data\carlk\cachebio\genetics\synthetic\wtccclikeH\snps" #!! local paths
+        hdf5Pattern = r"d:\data\carlk\cachebio\genetics\synthetic\wtccclikeH\del.{0}.hdf5"#!!
         tt0 = time.time()
         snpreader_bed = Bed(bedFileName)
 
@@ -35,10 +33,10 @@ class TestLoader(unittest.TestCase):
 
         hdf5FileName = hdf5Pattern.format(len(snp_index_list0))
 
-        #!ck        snpDataBed = snpreader_bed.read(SnpIndexList(snp_index_list0))
+        #!!        snpDataBed = snpreader_bed.read(SnpIndexList(snp_index_list0))
         tt1 = time.time()
         logging.info("Read bed %.2f seconds" % (tt1 - tt0))
-        #!ck        Hdf5.write(snpDataBed, hdf5FileName)
+        #!!        Hdf5.write(snpDataBed, hdf5FileName)
         tt2 = time.time()
         logging.info("write Hdf5 bed %.2f seconds" % (tt2 - tt1))
 
@@ -48,7 +46,7 @@ class TestLoader(unittest.TestCase):
         N_original = snpreader_hdf5.iid_count
         iid_index_list = sorted(range(N_original - 1,0,-2))
 
-        snp_index_list = sorted(range(S - 1,0,-2))#!ck
+        snp_index_list = sorted(range(S - 1,0,-2))#!!
         #snp_index_list = range(S/2)
 
         snpreader_hdf5 = snpreader_hdf5[iid_index_list,:]
@@ -162,13 +160,13 @@ class TestLoader(unittest.TestCase):
         result = snpreader2.read(view_ok=True)
         self.assertFalse(snpreader2 is result)
         result2 = result[:,:].read()
-        self.assertFalse(SP.may_share_memory(result2.val,result.val))
+        self.assertFalse(sp.may_share_memory(result2.val,result.val))
         result3 = result[:,:].read(view_ok=True)
-        self.assertTrue(SP.may_share_memory(result3.val,result.val))
+        self.assertTrue(sp.may_share_memory(result3.val,result.val))
         result4 = result3.read()
-        self.assertFalse(SP.may_share_memory(result4.val,result3.val))
+        self.assertFalse(sp.may_share_memory(result4.val,result3.val))
         result5 = result4.read(view_ok=True)
-        self.assertTrue(SP.may_share_memory(result4.val,result5.val))
+        self.assertTrue(sp.may_share_memory(result4.val,result5.val))
 
 
     def test_load_and_standardize_hdf5(self):
@@ -188,10 +186,10 @@ class TestLoader(unittest.TestCase):
 
     def test_load_and_standardize_ped(self):
 
-        #!!! Ped columns can be ambiguous
+        #!!Ped columns can be ambiguous
         ###Creating Ped data ...
         #currentFolder = os.path.dirname(os.path.realpath(__file__))
-        #snpData = Bed(currentFolder + "/examples/toydata").read() #!!! comment this out
+        #snpData = Bed(currentFolder + "/examples/toydata").read()
         ##Ped.write(snpData, currentFolder + "/examples/toydata.ped")
         #fromPed = Ped(currentFolder + "/examples/toydata").read()
         #self.assertTrue(np.allclose(snpData.val, fromPed.val, rtol=1e-05, atol=1e-05))
@@ -277,7 +275,9 @@ class NaNCNCTestCases(unittest.TestCase):
             for snp_index_list in [range(snps_to_read_count), range(snps_to_read_count/2), range(snps_to_read_count - 1,0,-2)]:
                 for standardizer in [Unit(),Beta(1,25)]:
                     reference_snps, reference_dtype = NaNCNCTestCases(iid_index_list, snp_index_list, standardizer, snp_reader_factory_bed(), sp.float64, "C", "False", None, None).read_and_standardize()
-                    for snpreader_factory in [snp_reader_factory_bed, snp_reader_factory_snpmajor_hdf5, snp_reader_factory_iidmajor_hdf5, snp_reader_factory_dat]:
+                    for snpreader_factory in [snp_reader_factory_bed, 
+                                             snp_reader_factory_snpmajor_hdf5, snp_reader_factory_iidmajor_hdf5,
+                                              snp_reader_factory_dat]:
                         for dtype in [sp.float64,sp.float32]:
                             for order in ["C", "F"]:
                                 for force_python_only in [False, True]:
@@ -330,48 +330,75 @@ class NaNCNCTestCases(unittest.TestCase):
             self.assertTrue(np.allclose(self.reference_snps, snps, rtol=1e-04 if dtype == sp.float32 or self.reference_dtype == sp.float32 else 1e-12))
 
 # We do it this way instead of using doctest.DocTestSuite because doctest.DocTestSuite requires modules to be pickled, which python doesn't allow.
-# We need tests to be picklable so that they can be run on a cluster.
+# We need tests to be pickleable so that they can be run on a cluster.
 class TestDocStrings(unittest.TestCase):
     def test_snpreader(self):
         import pysnptools.snpreader.snpreader
-        os.chdir(snpreader_path)
-        doctest.testmod(pysnptools.snpreader.snpreader)
+        old_dir = os.getcwd()
+        os.chdir(os.path.dirname(os.path.realpath(__file__)))
+        result = doctest.testmod(pysnptools.snpreader.snpreader)
+        os.chdir(old_dir)
+        assert result.failed == 0, "failed doc test: " + __file__
 
     def test_bed(self):
         import pysnptools.snpreader.bed
-        os.chdir(snpreader_path)
-        doctest.testmod(pysnptools.snpreader.bed)
+        old_dir = os.getcwd()
+        os.chdir(os.path.dirname(os.path.realpath(__file__)))
+        result = doctest.testmod(pysnptools.snpreader.bed)
+        os.chdir(old_dir)
+        assert result.failed == 0, "failed doc test: " + __file__
 
     def test_snpdata(self):
         import pysnptools.snpreader.snpdata
-        os.chdir(snpreader_path)
-        doctest.testmod(pysnptools.snpreader.snpdata)
+        old_dir = os.getcwd()
+        os.chdir(os.path.dirname(os.path.realpath(__file__)))
+        result = doctest.testmod(pysnptools.snpreader.snpdata)
+        os.chdir(old_dir)
+        assert result.failed == 0, "failed doc test: " + __file__
+
 
     def test_util(self):
         import pysnptools.util.util
-        os.chdir(snpreader_path)
-        doctest.testmod(pysnptools.util.util)
+        old_dir = os.getcwd()
+        os.chdir(os.path.dirname(os.path.realpath(__file__))+"/util")
+        result = doctest.testmod(pysnptools.util.util)
+        os.chdir(old_dir)
+        assert result.failed == 0, "failed doc test: " + __file__
+
 
 def getTestSuite():
     """
     set up composite test suite
     """
-
+    
     test_suite = unittest.TestSuite([])
+    test_suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestDocStrings))
     test_suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestLoader))
     test_suite.addTests(NaNCNCTestCases.factory_iterator())
-    test_suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestDocStrings))
+    from pysnptools.util.intrangeset import TestLoader as IntRangeSetTestLoader
+    test_suite.addTests(unittest.TestLoader().loadTestsFromTestCase(IntRangeSetTestLoader))
 
     return test_suite
 
-snpreader_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),"snpreader")
-
-
 if __name__ == '__main__':
 
-    logging.basicConfig(level=logging.ERROR)
+    suites = getTestSuite()
+    if True:
+        # TestFeatureSelection().test_aaa_hdf5_speed()
+        r = unittest.TextTestRunner(failfast=False)
+        r.run(suites)
+    else: #Cluster test run
+        task_count = 500
+        runner = HPC(task_count, 'RR1-N13-09-H44',r'\\msr-arrays\Scratch\msr-pool\Scratch_Storage6\Redmond',
+                     remote_python_parent=r"\\msr-arrays\Scratch\msr-pool\Scratch_Storage6\REDMOND\carlk\Source\carlk\july_7_14\pythonpath",
+                     update_remote_python_parent=True,
+                     min=150,
+                     priority="AboveNormal",mkl_num_threads=1)
+        #runner = Local()
+        runner = LocalMultiProc(taskcount=4,mkl_num_threads=5)
+        #runner = LocalInParts(1,2,mkl_num_threads=1) # For debugging the cluster runs
+        #runner = Hadoop2(100, mapmemory=8*1024, reducememory=8*1024, mkl_num_threads=1, queue="default")
+        distributable_test = DistributableTest(suites,"temp_test")
+        print runner.run(distributable_test)
 
-    # TestFeatureSelection().test_aaa_hdf5_speed()
-    r = unittest.TextTestRunner(failfast=True)
-    r.run(getTestSuite())
 

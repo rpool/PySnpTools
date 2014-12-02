@@ -1,5 +1,6 @@
-import scipy as sp #all of this could be done using numpy instead of scipy
+import scipy as sp
 import logging
+
 
 def _testtest(data, iididx):
     return (data[0][iididx],data[1][iididx])
@@ -34,22 +35,19 @@ def intersect_apply(data_list, sort_by_dataset=True):
     :Example:
 
     >>> from pysnptools.snpreader.bed import Bed
+    >>> from pysnptools.util.pheno import loadOnePhen,loadPhen
+    >>>
     >>> #Create five datasets in different formats
     >>> ignore_in = None
-    >>> snpreader_in = Bed('../examples/all_chr.maf0.001.N300') # Specify SNP data on disk
-    >>> 
-    >>> # Generate a random phenotype dictionary with the iids in reverse order and with an extra iid
-    >>> sp.random.seed(0) # set seed so that random number will be deterministic
-    >>> pheno_dict = {'iid':sp.concatenate((snpreader_in.iid[::-1],[['ignore', 'ignore']]),axis=0),'vals':sp.random.rand(snpreader_in.iid_count+1),'more':'more'}
-    >>> 
-    >>> # Generate a random covariate in the form of a tuple of random values and iids in random order
-    >>> cov_as_tuple_in = (sp.random.rand(snpreader_in.iid_count,5),sp.random.permutation(snpreader_in.iid)) # make a tuple of values and iids
-    >>> 
+    >>> snpreader_in = Bed('../../tests/datasets/all_chr.maf0.001.N300') # Specify SNP data on disk
+    >>> pheno_dict = loadOnePhen('../../tests/datasets/phenSynthFrom22.23.N300.randcidorder.txt')
+    >>> cov = loadPhen('../../tests/datasets/all_chr.maf0.001.covariates.N300.txt')
+    >>> cov_as_tuple_in = (cov['vals'],cov['iid']) #We could do cov directly, but as an example we make it a tuple.
+    >>>
     >>> # Create five new datasets with consistent iids
-    >>> ignore_out, snpreader_out, pheno_dict, cov_as_tuple_in = intersect_apply([ignore_in, snpreader_in, pheno_dict, cov_as_tuple_in])
-    >>> 
-    >>> # Print the first five iids from each dataset -- they all match
-    >>> print ignore_out, snpreader_out.iid[:5], pheno_dict['iid'][:5], cov_as_tuple_in[1][:5]
+    >>> ignore_out, snpreader_out, pheno_dict, cov_as_tuple_out = intersect_apply([ignore_in, snpreader_in, pheno_dict, cov_as_tuple_in])
+    >>> # Print the first five iids from each dataset
+    >>> print ignore_out, snpreader_out.iid[:5], pheno_dict['iid'][:5], cov_as_tuple_out[1][:5]
     None [['POP1' '0']
      ['POP1' '12']
      ['POP1' '44']
@@ -64,7 +62,6 @@ def intersect_apply(data_list, sort_by_dataset=True):
      ['POP1' '58']
      ['POP1' '65']]
     """
-    #!!!cmk04072104 would be better if docstring example didn't use 'import fastlmm.pyplink.plink as plink' because that is outside the library.
 
     iid_list = []
     reindex_list = []
@@ -81,7 +78,7 @@ def intersect_apply(data_list, sort_by_dataset=True):
                 try: #snpreader
                     iid = data.iid
                     reindex = lambda data, iididx : data[iididx,:]
-                except: #tuple of (val,iid)
+                except AttributeError: #tuple of (val,iid)
                     iid = data[1]
                     reindex = lambda data, iididx : _testtest(data,iididx)
 
@@ -170,10 +167,103 @@ def intersect_ids(idslist):
     inan = sp.isnan(indarr).any(1)                  #find any rows that contain at least one Nan
     indarr=indarr[~inan]                            #keep only rows that are not NaN
     indarr=sp.array(indarr,dtype='int')             #convert to int so can slice 
-    return indarr
+    return indarr   
+
+
+#!!need documentation
+def sub_matrix(val, iid_index, sid_index, order='F', dtype=sp.float64):
+    from pysnptools.snpreader import wrap_matrix_subset
+
+    if order == 'A':
+        if val.flags['C_CONTIGUOUS']:
+            effective_order = 'C'
+        else:
+            effective_order = 'F'
+    else:
+        effective_order = order
+
+    sub_val = sp.empty((len(iid_index), len(sid_index)),dtype=dtype,order=effective_order)
+
+    logging.debug("About to call cython matrixSubset")
+
+    iid_count, sid_count = val.shape
+
+    if val.flags['F_CONTIGUOUS']:
+        if val.dtype ==  sp.float64:
+            if dtype == sp.float64:
+                if effective_order=="F":
+                    wrap_matrix_subset.matrixSubsetDoubleFToDoubleFAAA(val, iid_count, sid_count, iid_index, sid_index, sub_val)
+                elif effective_order=="C":
+                    wrap_matrix_subset.matrixSubsetDoubleFToDoubleCAAA(val, iid_count, sid_count, iid_index, sid_index, sub_val)
+                else:
+                    raise Exception("order '{0}' not known, only 'F' and 'C'".format(effective_order));
+            elif dtype == sp.float32:
+                if effective_order=="F":
+                    wrap_matrix_subset.matrixSubsetDoubleFToSingleFAAA(val, iid_count, sid_count, iid_index, sid_index, sub_val)
+                elif effective_order=="C":
+                    wrap_matrix_subset.matrixSubsetDoubleFToSingleCAAA(val, iid_count, sid_count, iid_index, sid_index, sub_val)
+                else:
+                    raise Exception("dtype '{0}' not known, only float64 and float32".format(dtype))
+        elif val.dtype ==  sp.float32:
+            if dtype == sp.float64:
+                if effective_order=="F":
+                    wrap_matrix_subset.matrixSubsetSingleFToDoubleFAAA(val, iid_count, sid_count, iid_index, sid_index, sub_val)
+                elif effective_order=="C":
+                    wrap_matrix_subset.matrixSubsetSingleFToDoubleCAAA(val, iid_count, sid_count, iid_index, sid_index, sub_val)
+                else:
+                    raise Exception("order '{0}' not known, only 'F' and 'C'".format(effective_order));
+            elif dtype == sp.float32:
+                if effective_order=="F":
+                    wrap_matrix_subset.matrixSubsetSingleFToSingleFAAA(val, iid_count, sid_count, iid_index, sid_index, sub_val)
+                elif effective_order=="C":
+                    wrap_matrix_subset.matrixSubsetSingleFToSingleCAAA(val, iid_count, sid_count, iid_index, sid_index, sub_val)
+                else:
+                    raise Exception("dtype '{0}' not known, only float64 and float32".format(dtype))
+        else:
+            raise Exception("input dtype '{0}' not known, only float64 and float32".format(val.dtype))
+    elif val.flags['C_CONTIGUOUS']:
+        if val.dtype ==  sp.float64:
+            if dtype == sp.float64:
+                if effective_order=="F":
+                    wrap_matrix_subset.matrixSubsetDoubleCToDoubleFAAA(val, iid_count, sid_count, iid_index, sid_index, sub_val)
+                elif effective_order=="C":
+                    wrap_matrix_subset.matrixSubsetDoubleCToDoubleCAAA(val, iid_count, sid_count, iid_index, sid_index, sub_val)
+                else:
+                    raise Exception("order '{0}' not known, only 'F' and 'C'".format(effective_order));
+            elif dtype == sp.float32:
+                if effective_order=="F":
+                    wrap_matrix_subset.matrixSubsetDoubleCToSingleFAAA(val, iid_count, sid_count, iid_index, sid_index, sub_val)
+                elif effective_order=="C":
+                    wrap_matrix_subset.matrixSubsetDoubleCToSingleCAAA(val, iid_count, sid_count, iid_index, sid_index, sub_val)
+                else:
+                    raise Exception("dtype '{0}' not known, only float64 and float32".format(dtype))
+        elif val.dtype ==  sp.float32:
+            if dtype == sp.float64:
+                if effective_order=="F":
+                    wrap_matrix_subset.matrixSubsetSingleCToDoubleFAAA(val, iid_count, sid_count, iid_index, sid_index, sub_val)
+                elif effective_order=="C":
+                    wrap_matrix_subset.matrixSubsetSingleCToDoubleCAAA(val, iid_count, sid_count, iid_index, sid_index, sub_val)
+                else:
+                    raise Exception("order '{0}' not known, only 'F' and 'C'".format(effective_order));
+            elif dtype == sp.float32:
+                if effective_order=="F":
+                    wrap_matrix_subset.matrixSubsetSingleCToSingleFAAA(val, iid_count, sid_count, iid_index, sid_index, sub_val)
+                elif effective_order=="C":
+                    wrap_matrix_subset.matrixSubsetSingleCToSingleCAAA(val, iid_count, sid_count, iid_index, sid_index, sub_val)
+                else:
+                    raise Exception("dtype '{0}' not known, only float64 and float32".format(dtype))
+        else:
+            raise Exception("input dtype '{0}' not known, only float64 and float32".format(val.dtype))
+    else:
+        raise Exception("input order must be 'F' or 'C'");
+
+
+    logging.debug("Back from cython matrixSubset")
+    return sub_val
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
+
 
     # There is also a unit test case in 'pysnptools\test.py' that calls this doc test
     import doctest

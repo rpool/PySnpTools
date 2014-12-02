@@ -21,5 +21,5 @@ from .snpandsetnamecollection import *
 from .subset import *
 from .minmaxsetsize import *
 from .consecutive import *
-# !!! ISnpSetList  Later replace all interfaces with abstract classes
-# !!! remove all these __init__.py imports?
+#!! ISnpSetList Later replace all interfaces with abstract classes
+#!!remove all these __init__.py imports?

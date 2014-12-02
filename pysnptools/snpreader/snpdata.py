@@ -1,4 +1,4 @@
-import numpy as SP
+import numpy as np
 import subprocess, sys, os.path
 from itertools import *
 import pandas as pd
@@ -13,11 +13,16 @@ class SnpData(SnpReader):
 
     See :class:`.SnpReader` for details and examples.
     """
-    def __init__(self, parent, val):
-        self._parent = parent
-        assert type(val) == SP.ndarray, "expect SnpData's val to be a ndarray"
+    def __init__(self, iid, sid, pos, val, parent_string="",copyinputs_function=None):
+        self._iid = iid
+        self._sid = sid
+        self._pos = pos
+        assert type(val) == np.ndarray, "expect SnpData's val to be a ndarray"
         self.val = val
-        self._std_string = ""
+        self._parent_string = parent_string
+        self._std_string_list = []
+        if copyinputs_function is not None:
+            self.copyinputs = copyinputs_function
 
     val = None
     """The in-memory SNP data. A numpy.ndarray with dimensions :attr:`.iid_count` x :attr:`.sid_count`.
@@ -26,11 +31,20 @@ class SnpData(SnpReader):
     """
 
     def __repr__(self):
-        s = "SnpData({0}{1})".format(self._parent,self._std_string)
+        if self._parent_string == "":
+            if len(self._std_string_list) > 0:
+                s = "SnpData({0})".format(",".join(self._std_string_list))
+            else:
+                s = "SnpData()"
+        else:
+            if len(self._std_string_list) > 0:
+                s = "SnpData({0},{1})".format(self._parent_string,",".join(self._std_string_list))
+            else:
+                s = "SnpData({0})".format(self._parent_string)
         return s
 
     def copyinputs(self, copier):
-        self._parent.copyinputs(copier)
+        pass
 
     @property
     def iid(self):
@@ -38,7 +52,7 @@ class SnpData(SnpReader):
 
         See :attr:`.SnpReader.iid` for details and examples.
         """
-        return self._parent.iid
+        return self._iid
 
     @property
     def sid(self):
@@ -46,7 +60,7 @@ class SnpData(SnpReader):
 
         See :attr:`.SnpReader.sid` for details and examples.
         """
-        return self._parent.sid
+        return self._sid
 
     @property
     def pos(self):
@@ -54,10 +68,10 @@ class SnpData(SnpReader):
 
         See :attr:`.SnpReader.pos` for details and examples.
         """
-        return self._parent.pos
+        return self._pos
 
-    #!!! Seems like we can't short cut the view_OK this because the .val wouldn't necessarily have the right order and dtype
-    #def read(self, order='F', dtype=SP.float64, force_python_only=False, view_ok=False):
+    #!!Seems like we can't short cut the view_OK this because the .val wouldn't necessarily have the right order and dtype
+    #def read(self, order='F', dtype=np.float64, force_python_only=False, view_ok=False):
     #    """creates an in-memory :class:`.SnpData` with a copy of the genotype data
     #    """
     #    if view_ok:
@@ -91,14 +105,14 @@ class SnpData(SnpReader):
         :rtype: :class:`.SnpData` (standardizes in place, but for convenience, returns 'self')
 
         >>> from pysnptools.snpreader.bed import Bed
-        >>> snp_on_disk = Bed('../examples/all_chr.maf0.001.N300') # Specify some data on disk in Bed format
+        >>> snp_on_disk = Bed('../tests/datasets/all_chr.maf0.001.N300') # Specify some data on disk in Bed format
         >>> snpdata1 = snp_on_disk.read() # read all SNP values into memory
         >>> print snpdata1 # Prints the specification for this SnpData
-        SnpData(Bed('../examples/all_chr.maf0.001.N300'))
+        SnpData(Bed('../tests/datasets/all_chr.maf0.001.N300'))
         >>> print snpdata1.val[0,0]
         2.0
         >>> snpdata1.standardize() # standardize changes the values in snpdata1.val and changes the specification.
-        SnpData(Bed('../examples/all_chr.maf0.001.N300'),Unit())
+        SnpData(Bed('../tests/datasets/all_chr.maf0.001.N300'),Unit())
         >>> print snpdata1.val[0,0]
         0.229415733871
         >>> snpdata2 = snp_on_disk.read().standardize() # Read and standardize in one expression with only one ndarray allocated.
@@ -106,14 +120,14 @@ class SnpData(SnpReader):
         0.229415733871
         """
         self.val = standardizer.standardize(self.val, blocksize=blocksize, force_python_only=force_python_only)
-        self._std_string += ",{0}".format(standardizer)
+        self._std_string_list.append(str(standardizer))
         return self
 
     def kernel(self, standardizer, blocksize=10000, allowlowrank=False):
         """
             See :meth:`.SnpReader.kernel` for details and examples.
         """
-        if (blocksize is None or self.sid_count <= blocksize) and type(standardizer) is Identity:
+        if type(standardizer) is Identity:
             K = self.val.dot(self.val.T)
             return K
         else:

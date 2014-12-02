@@ -98,6 +98,17 @@
     :undoc-members:
 	:show-inheritance:
 
+:mod:`util.intrangeset`
+++++++++++++++++++++++++++
+.. autoclass:: pysnptools.util.intrangeset.IntRangeSet
+    :members:
+    :inherited-members:
+    :undoc-members:
+	:show-inheritance:
+	:special-members: __getitem__,__iter__,__len__,__eq__,__ne__,__contains__,__ge__,__le__,__gt__,__str__,__repr__,__concat__,_or__,__add__,__mul__,__and__,__sub__,__xor__,__iand__,__isub__,__ixor__,__delitem__,__reversed__
+
+
+ 
 ****************************
 :mod:`standardizer` Module
 ****************************

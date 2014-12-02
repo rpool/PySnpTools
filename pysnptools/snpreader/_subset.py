@@ -1,4 +1,4 @@
-import numpy as SP
+import numpy as np
 import subprocess, sys, os.path
 from itertools import *
 from pysnptools.altset_list import *
@@ -23,7 +23,7 @@ class _Subset(SnpReader):
 
     _ran_once = False
 
-    def __repr__(self): #!!! Should this be __str__ (and elsewhere) because it uses "nice_string" which uses "..." so may be ambiguous?
+    def __repr__(self): #!!Should this be __str__ (and elsewhere) because it uses "nice_string" which uses "..." so may be ambiguous?
         s = "{0}[{1},{2}]".format(self._internal,self._nice_string(self._iid_indexer),self._nice_string(self._sid_indexer))
         return s
 
@@ -64,9 +64,9 @@ class _Subset(SnpReader):
         self.run_once()
         return self._pos
 
-    #!!! commented out because doesn't guarantee that the shortcut will return with the dtype and order requested.
+    #!!commented out because doesn't guarantee that the shortcut will return with the dtype and order requested.
     #                  Also, didn't handle stacked do-nothing subsets
-    #def read(self, order='F', dtype=SP.float64, force_python_only=False, view_ok=False):
+    #def read(self, order='F', dtype=np.float64, force_python_only=False, view_ok=False):
     #    if view_ok and hasattr(self._internal,"val") and _Subset._is_all_slice(self._iid_indexer) and _Subset._is_all_slice(self._sid_indexer):
     #        return self._internal
     #    else:

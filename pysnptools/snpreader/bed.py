@@ -1,4 +1,4 @@
-import numpy as SP
+import numpy as np
 import subprocess, sys, os.path
 from itertools import *
 import pandas as pd
@@ -20,12 +20,14 @@ def _decide_once_on_plink_reader():
         # attempt to import wrapped plink parser
         try:
             import pysnptools.snpreader.wrap_plink_parser
-            WRAPPED_PLINK_PARSER_PRESENT = True #!!ck does the standardizer work without c++
+            WRAPPED_PLINK_PARSER_PRESENT = True #!! does the standardizer work without c++
             logging.info("using c-based plink parser")
         except Exception, detail:
             logging.warn(detail)
             WRAPPED_PLINK_PARSER_PRESENT = False
 
+
+#!!LATER fix bug in Hadoop whereas it won't use data two levels down
 
 class Bed(SnpReader):
     '''
@@ -43,7 +45,7 @@ class Bed(SnpReader):
     def __init__(self, basefilename):
         self.basefilename = basefilename
 
-    def __repr__(self):
+    def __repr__(self): 
         return "{0}('{1}')".format(self.__class__.__name__,self.basefilename)
 
     @property
@@ -76,11 +78,11 @@ class Bed(SnpReader):
         bimfile = self.basefilename+'.bim'
 
         logging.info("Loading fam file {0}".format(famfile))
-        self._original_iid = SP.loadtxt(famfile,delimiter = ' ',dtype = 'str',usecols=(0,1),comments=None)
+        self._original_iid = np.loadtxt(famfile,delimiter = ' ',dtype = 'str',usecols=(0,1),comments=None)
         logging.info("Loading bim file {0}".format(bimfile))
 
         bimfields = pd.read_csv(bimfile,delimiter = '\t',usecols = (0,1,2,3),header=None,index_col=False)
-        self._sid = SP.array(bimfields[1].tolist(),dtype='str')
+        self._sid = np.array(bimfields[1].tolist(),dtype='str')
         self._pos = bimfields.as_matrix([0,2,3])
 
         bedfile = self.basefilename+ '.bed'
@@ -110,7 +112,7 @@ class Bed(SnpReader):
         if order is None:
             order = "F"
         if dtype is None:
-            dtype = SP.float64
+            dtype = np.float64
         if force_python_only is None:
             force_python_only = False
 
@@ -118,7 +120,7 @@ class Bed(SnpReader):
         _decide_once_on_plink_reader()
         global WRAPPED_PLINK_PARSER_PRESENT
 
-        #!!! this could be refactored to not use so many names
+        #!! this could be re-factored to not use so many names
         iid_count_in = self.iid_count
         sid_count_in = self.sid_count
 
@@ -138,17 +140,17 @@ class Bed(SnpReader):
 
         if WRAPPED_PLINK_PARSER_PRESENT and not force_python_only:
             import pysnptools.snpreader.wrap_plink_parser as wrap_plink_parser
-            val = SP.zeros((iid_count_out, sid_count_out), order=order, dtype=dtype)
+            val = np.zeros((iid_count_out, sid_count_out), order=order, dtype=dtype)
             bed_fn = self.basefilename + ".bed"
 
-            if dtype == SP.float64:
+            if dtype == np.float64:
                 if order=="F":
                     wrap_plink_parser.readPlinkBedFiledoubleFAAA(bed_fn, iid_count_in, sid_count_in, iid_index_out, sid_index_out, val)
                 elif order=="C":
                     wrap_plink_parser.readPlinkBedFiledoubleCAAA(bed_fn, iid_count_in, sid_count_in, iid_index_out, sid_index_out, val)
                 else:
                     raise Exception("order '{0}' not known, only 'F' and 'C'".format(order));
-            elif dtype == SP.float32:
+            elif dtype == np.float32:
                 if order=="F":
                     wrap_plink_parser.readPlinkBedFilefloatFAAA(bed_fn, iid_count_in, sid_count_in, iid_index_out, sid_index_out, val)
                 elif order=="C":
@@ -157,40 +159,40 @@ class Bed(SnpReader):
                     raise Exception("order '{0}' not known, only 'F' and 'C'".format(order));
             else:
                 raise Exception("dtype '{0}' not known, only float64 and float32".format(dtype))
-
+            
         else:
             # An earlier version of this code had a way to read consecutive SNPs of code in one read. May want
-            # to add that ability back to the code.
-            # Also, note that reading with python will often result in non-contigious memory, so the python standardizers will automatically be used, too.
+            # to add that ability back to the code. 
+            # Also, note that reading with python will often result in non-contigious memory, so the python standardizers will automatically be used, too.       
             logging.warn("using pure python plink parser (might be much slower!!)")
-            val = SP.zeros(((int(SP.ceil(0.25*iid_count_in))*4),sid_count_out),order=order, dtype=dtype) #allocate it a little big
+            val = np.zeros(((int(np.ceil(0.25*iid_count_in))*4),sid_count_out),order=order, dtype=dtype) #allocate it a little big
             for SNPsIndex, bimIndex in enumerate(sid_index_out):
 
-                startbit = int(SP.ceil(0.25*iid_count_in)*bimIndex+3)
+                startbit = int(np.ceil(0.25*iid_count_in)*bimIndex+3)
                 self._filepointer.seek(startbit)
-                nbyte = int(SP.ceil(0.25*iid_count_in))
-                bytes = SP.array(bytearray(self._filepointer.read(nbyte))).reshape((int(SP.ceil(0.25*iid_count_in)),1),order='F')
+                nbyte = int(np.ceil(0.25*iid_count_in))
+                bytes = np.array(bytearray(self._filepointer.read(nbyte))).reshape((int(np.ceil(0.25*iid_count_in)),1),order='F')
 
-                val[3::4,SNPsIndex:SNPsIndex+1][bytes>=64]=SP.nan
+                val[3::4,SNPsIndex:SNPsIndex+1][bytes>=64]=np.nan
                 val[3::4,SNPsIndex:SNPsIndex+1][bytes>=128]=1
                 val[3::4,SNPsIndex:SNPsIndex+1][bytes>=192]=2
-                bytes=SP.mod(bytes,64)
-                val[2::4,SNPsIndex:SNPsIndex+1][bytes>=16]=SP.nan
+                bytes=np.mod(bytes,64)
+                val[2::4,SNPsIndex:SNPsIndex+1][bytes>=16]=np.nan
                 val[2::4,SNPsIndex:SNPsIndex+1][bytes>=32]=1
                 val[2::4,SNPsIndex:SNPsIndex+1][bytes>=48]=2
-                bytes=SP.mod(bytes,16)
-                val[1::4,SNPsIndex:SNPsIndex+1][bytes>=4]=SP.nan
+                bytes=np.mod(bytes,16)
+                val[1::4,SNPsIndex:SNPsIndex+1][bytes>=4]=np.nan
                 val[1::4,SNPsIndex:SNPsIndex+1][bytes>=8]=1
                 val[1::4,SNPsIndex:SNPsIndex+1][bytes>=12]=2
-                bytes=SP.mod(bytes,4)
-                val[0::4,SNPsIndex:SNPsIndex+1][bytes>=1]=SP.nan
+                bytes=np.mod(bytes,4)
+                val[0::4,SNPsIndex:SNPsIndex+1][bytes>=1]=np.nan
                 val[0::4,SNPsIndex:SNPsIndex+1][bytes>=2]=1
                 val[0::4,SNPsIndex:SNPsIndex+1][bytes>=3]=2
             val = val[iid_index_out,:] #reorder or trim any extra allocation
 
 
-            #LATER this assert can fail because the trim statement above messes up the order
-            #assert(SnpReader._array_properties_are_ok(val, order, dtype)) #!!!cmk
+            #!!LATER this can fail because the trim statement above messes up the order
+            #assert(SnpReader._array_properties_are_ok(val, order, dtype)) #!!
 
         return val
 
@@ -200,7 +202,7 @@ if __name__ == "__main__":
 
     ##What if you want to some level cached?  e.g.
     #from standardizer.BySqrtSidCount import BySqrtSidCount
-    #l0 = Bed('../../tests/datasets/all_chr.maf0.001.N300').read(order='F')
+    #l0 = Bed('../tests/datasets/all_chr.maf0.001.N300').read(order='F')
     #l0.standardize()
     #for test_start_index in range(10):
     #    test = l0[test_start_index::10,:].read(order='C') #1/10th of the cids by starting at 0 to 9 and then incrementing by 10
@@ -212,14 +214,14 @@ if __name__ == "__main__":
     #print "done"
 
 
-    #snpreader0 = Bed('../../tests/datasets/all_chr.maf0.001.N300')
+    #snpreader0 = Bed('../tests/datasets/all_chr.maf0.001.N300')
 
 
     ##from hdf5 import Hdf5
-    ##Hdf5.write(snpreader, r'../../tests/datasets/all_chr.maf0.001.N300.hdf5')
+    ##Hdf5.write(snpreader, r'../tests/datasets/all_chr.maf0.001.N300.hdf5')
 
     ##from dat import Dat
-    ##Dat.write(snpreader, r'../../tests/datasets/all_chr.maf0.001.N300.dat')
+    ##Dat.write(snpreader, r'../tests/datasets/all_chr.maf0.001.N300.dat')
 
     #G0 = snpreader0.read()
     #assert(G0 is not snpreader0.read())
@@ -278,7 +280,7 @@ if __name__ == "__main__":
     #assert(boolex.read().val.shape == (snpreader.iid_count, 4))
     #boolex = snpreader[:,~near_front]
     #assert(boolex.read().val.shape == (snpreader.iid_count, 6))
-
+    
     #print snpreader.read()
     #print snpreader.read().standardize()
     #print snpreader.read()

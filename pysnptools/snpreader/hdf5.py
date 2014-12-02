@@ -7,7 +7,7 @@ import logging
 import scipy as sp
 from snpreader import SnpReader
 
-#!!ck document the format
+#!! document the format
 
 class Hdf5(SnpReader):
 
@@ -20,7 +20,7 @@ class Hdf5(SnpReader):
         self.blocksize = blocksize
 
     def __repr__(self): 
-        return "{0}('{1}')".format(self.__class__.__name__,self.filename) #!!! LATER print non-default values, too
+        return "{0}('{1}')".format(self.__class__.__name__,self.filename) #!!LATER print non-default values, too
 
     def copyinputs(self, copier):
         copier.input(self.filename)
@@ -87,7 +87,7 @@ class Hdf5(SnpReader):
     
 
     def __del__(self):
-        if self.h5 != None:  # we need to test this because Python doesn't guarentee that __init__ was fully run
+        if self.h5 != None:  # we need to test this because Python doesn't guarantee that __init__ was fully run
             self.h5.close()
 
     def read_direct(self, snps, selection=sp.s_[:,:]):
@@ -118,7 +118,7 @@ class Hdf5(SnpReader):
         if order is None:
             order = "F"
         if dtype is None:
-            dtype = SP.float64
+            dtype = sp.float64
         if force_python_only is None:
             force_python_only = False
 
@@ -190,7 +190,7 @@ class Hdf5(SnpReader):
         #iid = sp.array(self._original_iid[iid_index_list],dtype="S") #Need to make another copy of to stop it from being converted to a list of 1-d string arrays
 
 
-        #!!! LATER does this test work when the size is 1 x 1 and order if F? iid_index_or_none=[0], sid_index_or_none=[1000] (based on test_blocking_hdf5)
+        #!!LATER does this test work when the size is 1 x 1 and order if F? iid_index_or_none=[0], sid_index_or_none=[1000] (based on test_blocking_hdf5)
         has_right_order = (order=="C" and val.flags["C_CONTIGUOUS"]) or (order=="F" and val.flags["F_CONTIGUOUS"])
         assert val.shape == (N, S) and val.dtype == dtype and has_right_order
 
@@ -215,4 +215,55 @@ class Hdf5(SnpReader):
             h5.create_dataset('pos', data=snpdata.pos)
             h5.create_dataset('val', data=val,dtype=dtype,shuffle=True)#compression="gzip", doesn't seem to work with Anaconda
             h5['val'].attrs["SNP-major"] = snp_major
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+
+    #snpreader = Hdf5(r'../tests/datasets/all_chr.maf0.001.N300.hdf5')
+    #snp_matrix = snpreader.read()
+    #print len(snp_matrix['sid'])
+    #snp_matrix = snpreader[:,:].read()
+    #print len(snp_matrix['sid'])
+    #sid_index_list = snpreader.sid_to_index(['23_9','23_2'])
+    #snp_matrix = snpreader[:,sid_index_list].read()
+    #print ",".join(snp_matrix['sid'])
+    #snp_matrix = snpreader[:,0:10].read()
+    #print ",".join(snp_matrix['sid'])
+
+    #print snpreader.iid_count
+    #print snpreader.sid_count
+    #print len(snpreader.pos)
+
+    #snpreader2 = snpreader[::-1,4]
+    #print snpreader.iid_count
+    #print snpreader2.sid_count
+    #print len(snpreader2.pos)
+
+    #snp_matrix = snpreader2.read()
+    #print len(snp_matrix['iid'])
+    #print len(snp_matrix['sid'])
+
+    #snp_matrix = snpreader2[5,:].read()
+    #print len(snp_matrix['iid'])
+    #print len(snp_matrix['sid'])
+
+    #iid_index_list = snpreader2.iid_to_index(snpreader2.iid[::2])
+    #snp_matrix = snpreader2[iid_index_list,::3].read()
+    #print len(snp_matrix['iid'])
+    #print len(snp_matrix['sid'])
+
+    #snp_matrix = snpreader[[4,5],:].read()
+    #print len(snp_matrix['iid'])
+    #print len(snp_matrix['sid'])
+
+    #print snpreader2
+    #print snpreader[::-1,4]
+    #print snpreader2[iid_index_list,::3]
+    #print snpreader[:,sid_index_list]
+    #print snpreader2[5,:]
+    #print snpreader[[4,5],:]
+
+
+    import doctest
+    doctest.testmod()
 

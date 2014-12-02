@@ -2,7 +2,7 @@ import numpy as np
 import scipy as sp
 import logging
 
-class BySqrtSidCount(object):  #IStandardizer  # LATER need to make abstract class and to document
+class BySqrtSidCount(object):  #IStandardizer  #!!LATER need to make abstract class and to document
     """The specificiation for BySqrtSidCount standardization"""
     def __init__(self, sid_count=None):
         self._sid_count = sid_count

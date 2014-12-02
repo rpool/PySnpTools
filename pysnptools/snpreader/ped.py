@@ -1,4 +1,4 @@
-import numpy as SP
+import numpy as np
 import subprocess, sys, os.path
 from itertools import *
 from pysnptools.altset_list import *
@@ -7,10 +7,10 @@ import logging
 from snpreader import SnpReader
 import numpy as np
 
-#!!!LATER: Make Ped and/or Dat reader not be all in memory
+#!!Make Ped and/or Dat reader not be all in memory
 class Ped(SnpReader):
     '''
-    This is a class that does a Ped file. For examples of its use see its 'read' method. #!!! LATER update comments
+    This is a class that does a Ped file. For examples of its use see its 'read' method. #!!LATER update comments
     '''
 
     _ran_once = False
@@ -51,19 +51,19 @@ class Ped(SnpReader):
 
         pedfile = self.basefilename+".ped"
         mapfile = self.basefilename+".map"
-        map = SP.loadtxt(mapfile,dtype = 'str',comments=None)
+        map = np.loadtxt(mapfile,dtype = 'str',comments=None)
 
         self._sid = map[:,1]
-        self._pos = SP.array(map[:,(0,2,3)],dtype = 'float')
+        self._pos = np.array(map[:,(0,2,3)],dtype = 'float')
         map = None
 
-        ped = SP.loadtxt(pedfile,dtype = 'str',comments=None)
+        ped = np.loadtxt(pedfile,dtype = 'str',comments=None)
         self._iid = ped[:,0:2]
         snpsstr = ped[:,6::]
         inan=snpsstr==self.missing
-        self._snps = SP.zeros((snpsstr.shape[0],snpsstr.shape[1]/2))
+        self._snps = np.zeros((snpsstr.shape[0],snpsstr.shape[1]/2))
         for i in xrange(snpsstr.shape[1]/2):
-            self._snps[inan[:,2*i],i]=SP.nan
+            self._snps[inan[:,2*i],i]=np.nan
             vals=snpsstr[~inan[:,2*i],2*i:2*(i+1)]
             self._snps[~inan[:,2*i],i]+=(vals==vals[0,0]).sum(1)
     def copyinputs(self, copier):
@@ -73,14 +73,15 @@ class Ped(SnpReader):
 
 
     def _read(self, iid_index_or_none, sid_index_or_none, order, dtype, force_python_only, view_ok):
-
+        '''
+        '''
         self.run_once()
         assert not hasattr(self, 'ind_used'), "A SnpReader should not have a 'ind_used' attribute"
 
         if order is None:
             order = "F"
         if dtype is None:
-            dtype = SP.float64
+            dtype = np.float64
         if force_python_only is None:
             force_python_only = False
 
@@ -95,7 +96,7 @@ class Ped(SnpReader):
         pedfile = basefilename + ".ped"
         mapfile = basefilename + ".map"
 
-        #!!!LATER this could be made faster
+        #!!LATER this could be made faster
 
         with open(mapfile,"w") as map_filepointer:
             for sid_index, sid in enumerate(snpdata.sid):
@@ -121,10 +122,68 @@ class Ped(SnpReader):
                         s = "A G"
                     elif val == 2:
                         s = "G G"
-                    elif val == SP.nan:
+                    elif val == np.nan:
                         s = "0 0"
                     else:
                         raise Exception("Expect values for ped file to be 0,1,2, or NAN. Instead, saw '{0}'".format(val))
                     ped_filepointer.write("\t"+s)
                 ped_filepointer.write("\n")
 
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+
+    #snpreader = Ped(r'../tests/datasets/all_chr.maf0.001.N300')
+    #snp_matrix = snpreader.read()
+
+    ##from snpreader.hdf5 import Hdf5
+    ##Hdf5.write(snp_matrix, r'../tests/datasets/all_chr.maf0.001.N300.hdf5')
+
+    ##from snpreader.dat import Dat
+    ##Dat.write(snp_matrix, r'../tests/datasets/all_chr.maf0.001.N300.dat')
+
+
+    #print len(snp_matrix['sid'])
+    #snp_matrix = snpreader[:,:].read()
+    #print len(snp_matrix['sid'])
+    #sid_index_list = snpreader.sid_to_index(['23_9','23_2'])
+    #snp_matrix = snpreader[:,sid_index_list].read()
+    #print ",".join(snp_matrix['sid'])
+    #snp_matrix = snpreader[:,0:10].read()
+    #print ",".join(snp_matrix['sid'])
+
+    #print snpreader.iid_count
+    #print snpreader.sid_count
+    #print len(snpreader.pos)
+
+    #snpreader2 = snpreader[::-1,4]
+    #print snpreader.iid_count
+    #print snpreader2.sid_count
+    #print len(snpreader2.pos)
+
+    #snp_matrix = snpreader2.read()
+    #print len(snp_matrix['iid'])
+    #print len(snp_matrix['sid'])
+
+    #snp_matrix = snpreader2[5,:].read()
+    #print len(snp_matrix['iid'])
+    #print len(snp_matrix['sid'])
+
+    #iid_index_list = snpreader2.iid_to_index(snpreader2.iid[::2])
+    #snp_matrix = snpreader2[iid_index_list,::3].read()
+    #print len(snp_matrix['iid'])
+    #print len(snp_matrix['sid'])
+
+    #snp_matrix = snpreader[[4,5],:].read()
+    #print len(snp_matrix['iid'])
+    #print len(snp_matrix['sid'])
+
+    #print snpreader2
+    #print snpreader[::-1,4]
+    #print snpreader2[iid_index_list,::3]
+    #print snpreader[:,sid_index_list]
+    #print snpreader2[5,:]
+    #print snpreader[[4,5],:]
+
+
+    import doctest
+    doctest.testmod()

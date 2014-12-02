@@ -2,7 +2,7 @@ import numpy as np
 import scipy as sp
 import logging
 
-class Identity(object):  #IStandardizer #!!! LATER make an abstract object
+class Identity(object):  #IStandardizer #!!LATER make an abstract object
     """The specificiation for unit standardization"""
     def __init__(self):
         pass
