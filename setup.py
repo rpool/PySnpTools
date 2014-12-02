@@ -53,6 +53,9 @@ if platform.system() == "Darwin":
     macros = [("__APPLE__", "1")]
 elif "win" in platform.system().lower():
     macros = [("_WIN32", "1")]
+else:
+    macros = [("_UNIX", "1")]
+
 
 ext = []
 ext.append(Extension("pysnptools.snpreader.wrap_plink_parser", ["pysnptools/snpreader/wrap_plink_parser.pyx", "pysnptools/snpreader/CPlinkBedFile.cpp"], language="c++", define_macros=macros))
