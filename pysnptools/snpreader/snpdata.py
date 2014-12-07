@@ -95,9 +95,9 @@ class SnpData(SnpReader):
         it also returns itself.
 
         :param standardizer: optional -- Specify standardization to be applied before the matrix multiply. 
-             Any :class:`.Standardizer` may be used. Some choices include :class:`.Unit` (default, makes values for each SNP have mean zero and
-             standard deviation 1.0), :class:`.Beta`, :class:`.BySidCount`, :class:`.BySqrtSidCount`.
-        :type order: :class:`.Standardizer`
+             Any class from :mod:`pysnptools.standardizer` may be used. Some choices include :class:`.Unit` (default, makes values for each SNP have mean zero and
+             standard deviation 1.0)and :class:`.Beta`.
+        :type order: class from :mod:`pysnptools.standardizer`
 
         :param blocksize: optional -- Default of None. None means to load all. Suggested number of sids to read into memory at a time.
         :type blocksize: int or None

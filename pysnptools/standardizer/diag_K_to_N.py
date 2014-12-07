@@ -1,11 +1,11 @@
 import numpy as np
 
 class DiagKtoN(object):
-    """The specificiation for diag(K)=N standardization"""
+    """diag(K)=N standardization of the data"""
     def __init__(self, N):
         self._N = N
 
-    def standardize(self, snps):
+    def standardize(self, snps, blocksize=None, force_python_only=False):
         flag = snps.flags.writeable
         vec = snps.reshape(-1, order="A")
         

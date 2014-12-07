@@ -1,6 +1,20 @@
 ################################
 :mod:`pysnptools` Documentation
 ################################
+
+PySnpTools: A library for reading and manipulating genetic data.
+
+:synopsis:
+
+* :mod:`.snpreader`: Efficiently read genetic PLINK formats including \*.bed/bim/fam files. Also, efficiently read *parts* of files and standardize data.
+
+* :mod:`.util`: In one line, intersect and re-order IIDs from :mod:`.snpreader` and other sources. Also, efficiently extract a submatrix from an ndarray.
+
+* :class:`.util.IntRangeSet`: Efficiently manipulate ranges of integers -- for example, genetic position -- with set operators including
+  union, intersection, and set difference. 
+
+* :mod:`.util.pheno`: Read the PLINK pheno type file format.
+
 .. automodule:: pysnptools
     :members:
     :undoc-members:
@@ -18,9 +32,9 @@
 	:special-members:
 
 
-:mod:`snpreader.snpreader`
-++++++++++++++++++++++++++
-.. automodule:: pysnptools.snpreader.snpreader
+:class:`snpreader.SnpReader`
++++++++++++++++++++++++++++++
+.. autoclass:: pysnptools.snpreader.SnpReader
     :members:
     :undoc-members:
 	:show-inheritance:
@@ -28,9 +42,9 @@
     :exclude-members: copyinputs
 
 
-:mod:`snpreader.bed`
-++++++++++++++++++++
-.. automodule:: pysnptools.snpreader.bed
+:class:`snpreader.Bed`
+++++++++++++++++++++++++
+.. autoclass:: pysnptools.snpreader.Bed
     :members:
     :inherited-members:
     :undoc-members:
@@ -39,9 +53,9 @@
     :exclude-members: copyinputs
 
 
-:mod:`snpreader.snpdata`
+:class:`snpreader.snpdata`
 ++++++++++++++++++++++++++
-.. automodule:: pysnptools.snpreader.snpdata
+.. autoclass:: pysnptools.snpreader.SnpData
     :members:
     :inherited-members:
     :undoc-members:
@@ -50,9 +64,9 @@
     :exclude-members: copyinputs
 
 
-:mod:`snpreader.ped`
-++++++++++++++++++++
-.. automodule:: pysnptools.snpreader.ped
+:class:`snpreader.ped`
++++++++++++++++++++++++++
+.. autoclass:: pysnptools.snpreader.Ped
     :members:
     :inherited-members:
     :undoc-members:
@@ -60,9 +74,9 @@
 	:special-members:
     :exclude-members: copyinputs
 
-:mod:`snpreader.dat`
-++++++++++++++++++++
-.. automodule:: pysnptools.snpreader.dat
+:class:`snpreader.dat`
++++++++++++++++++++++++++
+.. autoclass:: pysnptools.snpreader.Dat
     :members:
     :inherited-members:
     :undoc-members:
@@ -70,9 +84,9 @@
 	:special-members:
     :exclude-members: copyinputs
 
-:mod:`snpreader.hdf5`
-+++++++++++++++++++++
-.. automodule:: pysnptools.snpreader.hdf5
+:class:`snpreader.hdf5`
++++++++++++++++++++++++++
+.. autoclass:: pysnptools.snpreader.Hdf5
     :members:
     :inherited-members:
     :undoc-members:
@@ -89,25 +103,24 @@
     :members:
     :undoc-members:
 	:show-inheritance:
-	:special-members:
 
-:mod:`util.util`
-++++++++++++++++++++++++++++++++++++++++++++++++++++
-.. automodule:: pysnptools.util.util
-    :members:
-    :undoc-members:
-	:show-inheritance:
-
-:mod:`util.intrangeset`
+:class:`util.IntRangeSet`
 ++++++++++++++++++++++++++
-.. autoclass:: pysnptools.util.intrangeset.IntRangeSet
+.. autoclass:: pysnptools.util.IntRangeSet
+  :members:
+  :undoc-members:
+  :show-inheritance:
+  :special-members:
+  :exclude-members: __and__, __weakref__,__module__,__dict__, __add__
+
+
+:mod:`util.pheno`
+++++++++++++++++++++++++++
+.. automodule:: pysnptools.util.pheno
     :members:
-    :inherited-members:
     :undoc-members:
 	:show-inheritance:
-	:special-members: __getitem__,__iter__,__len__,__eq__,__ne__,__contains__,__ge__,__le__,__gt__,__str__,__repr__,__concat__,_or__,__add__,__mul__,__and__,__sub__,__xor__,__iand__,__isub__,__ixor__,__delitem__,__reversed__
-
-
+	:special-members:
  
 ****************************
 :mod:`standardizer` Module
@@ -120,18 +133,18 @@
 	:special-members:
 
 
-:mod:`standardizer.unit`
+:class:`standardizer.Unit`
 ++++++++++++++++++++++++++
-.. automodule:: pysnptools.standardizer.unit
+.. autoclass:: pysnptools.standardizer.Unit
     :members:
     :undoc-members:
 	:show-inheritance:
 	:special-members: __getitem__
     :exclude-members: copyinputs
 
-:mod:`standardizer.identity`
+:class:`standardizer.Identity`
 ++++++++++++++++++++++++++++++++++++++++++++++++++++
-.. automodule:: pysnptools.standardizer.identity
+.. autoclass:: pysnptools.standardizer.Identity
     :members:
     :undoc-members:
 	:show-inheritance:
@@ -139,89 +152,47 @@
     :exclude-members: copyinputs
 
 
-:mod:`standardizer.beta`
+:class:`standardizer.Beta`
 ++++++++++++++++++++++++++++++++++++++++++++++++++++
-.. automodule:: pysnptools.standardizer.beta
+.. autoclass:: pysnptools.standardizer.Beta
     :members:
     :undoc-members:
 	:show-inheritance:
 	:special-members: __getitem__
     :exclude-members: copyinputs
 
-:mod:`standardizer.bysidcount`
+:class:`standardizer.BySidCount`
 ++++++++++++++++++++++++++++++++++++++++++++++++++++
-.. automodule:: pysnptools.standardizer.bysidcount
+.. autoclass:: pysnptools.standardizer.BySidCount
     :members:
     :undoc-members:
 	:show-inheritance:
 	:special-members: __getitem__
     :exclude-members: copyinputs
 
-:mod:`standardizer.bysqrtsidcount`
+:class:`standardizer.BySqrtSidCount`
 ++++++++++++++++++++++++++++++++++++++++++++++++++++
-.. automodule:: pysnptools.standardizer.bysqrtsidcount
+.. autoclass:: pysnptools.standardizer.BySqrtSidCount
     :members:
     :undoc-members:
 	:show-inheritance:
 	:special-members: __getitem__
     :exclude-members: copyinputs
 
-
-
-**********************************************
-:mod:`altset_list` Module
-**********************************************
-
-.. automodule:: pysnptools.altset_list
-    :members:
-    :undoc-members:
-	:show-inheritance:
-	:special-members:
-
-
-:mod:`altset_list.consecutive`
+:class:`standardizer.DiagKtoN.py`
 ++++++++++++++++++++++++++++++++++++++++++++++++++++
-.. automodule:: pysnptools.altset_list.consecutive
+.. autoclass:: pysnptools.standardizer.DiagKtoN
     :members:
     :undoc-members:
 	:show-inheritance:
 	:special-members: __getitem__
     :exclude-members: copyinputs
 
-:mod:`altset_list.snpandsetnamecollection`
-++++++++++++++++++++++++++++++++++++++++++++++++++++
-.. automodule:: pysnptools.altset_list.snpandsetnamecollection
-    :members:
-    :undoc-members:
-	:show-inheritance:
-	:special-members: __getitem__
-    :exclude-members: copyinputs
-
-:mod:`altset_list.subset`
-++++++++++++++++++++++++++
-.. automodule:: pysnptools.altset_list.subset
-    :members:
-    :undoc-members:
-	:show-inheritance:
-	:special-members: __getitem__
-    :exclude-members: copyinputs
-
-
-:mod:`altset_list.minmaxsetsize`
-++++++++++++++++++++++++++++++++++++++++++++++++++++
-.. automodule:: pysnptools.altset_list.minmaxsetsize
-    :members:
-    :undoc-members:
-	:show-inheritance:
-	:special-members: __getitem__
-    :exclude-members: copyinputs
-
-
- 
 .. only:: html 
 
+***********************
 Indices and Tables
-++++++++++++++++++++
+***********************
 
    * :ref:`genindex`
    * :ref:`modindex`

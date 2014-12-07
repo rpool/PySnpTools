@@ -1,30 +1,19 @@
+'''
+Define classes such as :class:`Unit` and :class:`Beta` to be used by the :meth:`.SnpData.standardize` method.
+'''
+
+
 import numpy as np
 import logging
 
+from pysnptools.standardizer.beta import Beta
+from pysnptools.standardizer.unit import Unit
+from pysnptools.standardizer.identity import Identity
+from pysnptools.standardizer.bysidcount import BySidCount
+from pysnptools.standardizer.bysqrtsidcount import BySqrtSidCount
+from pysnptools.standardizer.diag_K_to_N import DiagKtoN
 
-#04072014 is this factory a good idea?
-def factory(s):
-    s = s.capitalize()
-    if s == "Unit" or s=="Unit()":
-        return Unit()
-
-    if s == "Identity" or s=="Identity()":
-        return Identity()
-
-    if s == "BySqrtSidCount" or s=="BySqrtSidCount()":
-        return BySqrtSidCount()
-
-    if s == "BySidCount" or s=="BySidCount()":
-        return BySidCount()
-
-    if s=="Beta":
-        return Beta()
-
-    if s.startswith("Beta("):
-        standardizer = eval(s)
-        return standardizer
-
-def standardize_with_lambda(snps, lambdax, blocksize = None):
+def _standardize_with_lambda(snps, lambdax, blocksize = None):
     if blocksize==None:
        return lambdax(snps)
 
@@ -42,7 +31,7 @@ def standardize_with_lambda(snps, lambdax, blocksize = None):
 
     return snps
 
-def standardize_unit_python(snps, returnStats=False):
+def _standardize_unit_python(snps, returnStats=False):
     '''
     standardize snps to zero-mean and unit variance
     '''
@@ -70,7 +59,7 @@ def standardize_unit_python(snps, returnStats=False):
 
     return snps
 
-def standardize_beta_python(snps, betaA, betaB):
+def _standardize_beta_python(snps, betaA, betaB):
     '''
     standardize snps with Beta prior
     '''

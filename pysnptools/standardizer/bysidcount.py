@@ -3,7 +3,7 @@ import scipy as sp
 import logging
 
 class BySidCount(object):  #IStandardizer  #!!LATER need to make abstract class and to document
-    """The specificiation for BySidCount standardization"""
+    """Standardize data by dividing every value by the number of SNPs"""
     def __init__(self, sid_count=None):
         self._sid_count = sid_count
 

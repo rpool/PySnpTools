@@ -7,24 +7,7 @@ from snpreader import SnpReader
 from snpdata import SnpData
 import math
 
-
-
-WRAPPED_PLINK_PARSER_PRESENT = None
-
-def _decide_once_on_plink_reader():
-    #This is now done in a method, instead of at the top of the file, so that messages can be re-directed to the appropriate stream.
-    #(Usually messages go to stdout, but when the code is run on Hadoop, they are sent to stderr)
-
-    global WRAPPED_PLINK_PARSER_PRESENT
-    if WRAPPED_PLINK_PARSER_PRESENT == None:
-        # attempt to import wrapped plink parser
-        try:
-            import pysnptools.snpreader.wrap_plink_parser
-            WRAPPED_PLINK_PARSER_PRESENT = True #!! does the standardizer work without c++
-            logging.info("using c-based plink parser")
-        except Exception, detail:
-            logging.warn(detail)
-            WRAPPED_PLINK_PARSER_PRESENT = False
+from pysnptools.snpreader import wrap_plink_parser
 
 
 #!!LATER fix bug in Hadoop whereas it won't use data two levels down
@@ -117,9 +100,6 @@ class Bed(SnpReader):
             force_python_only = False
 
 
-        _decide_once_on_plink_reader()
-        global WRAPPED_PLINK_PARSER_PRESENT
-
         #!! this could be re-factored to not use so many names
         iid_count_in = self.iid_count
         sid_count_in = self.sid_count
@@ -138,8 +118,8 @@ class Bed(SnpReader):
             sid_count_out = sid_count_in
             sid_index_out = range(sid_count_in)
 
-        if WRAPPED_PLINK_PARSER_PRESENT and not force_python_only:
-            import pysnptools.snpreader.wrap_plink_parser as wrap_plink_parser
+        if not force_python_only:
+            from pysnptools.snpreader import wrap_plink_parser
             val = np.zeros((iid_count_out, sid_count_out), order=order, dtype=dtype)
             bed_fn = self.basefilename + ".bed"
 

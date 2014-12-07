@@ -3,7 +3,8 @@ import scipy as sp
 import logging
 
 class Identity(object):  #IStandardizer #!!LATER make an abstract object
-    """The specificiation for unit standardization"""
+    """Do nothing to the data"""
+
     def __init__(self):
         pass
 
@@ -12,10 +13,5 @@ class Identity(object):  #IStandardizer #!!LATER make an abstract object
 
     def __repr__(self): 
         return "{0}()".format(self.__class__.__name__)
-
-    def lambdaFactory(self, snps, blocksize=None, force_python_only=False):
-        import pysnptools.standardizer as stdizer
-        return lambda s : s
-
 
 

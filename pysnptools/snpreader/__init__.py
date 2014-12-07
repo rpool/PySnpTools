@@ -3,9 +3,11 @@
 
 """
 
-# attempt to import wrapped plink parser
-WRAPPED_PLINK_PARSER_PRESENT = True
-try:
-    import pysnptools.snpreader.wrap_plink_parser
-except Exception:
-    WRAPPED_PLINK_PARSER_PRESENT = False
+from pysnptools.snpreader.bed import Bed
+from pysnptools.snpreader.snpreader import SnpReader
+from pysnptools.snpreader.snpdata import SnpData
+from pysnptools.snpreader.ped import Ped
+from pysnptools.snpreader.dat import Dat
+from pysnptools.snpreader.hdf5 import Hdf5
+
+from pysnptools.snpreader import wrap_plink_parser

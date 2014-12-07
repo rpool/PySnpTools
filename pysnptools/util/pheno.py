@@ -3,19 +3,25 @@ import scipy as sp
 def loadOnePhen(filename,  i_pheno = 0, missing ='-9', vectorize = False):
     '''
     Load one column of a phenotype file. Remove any rows with missing data
-    --------------------------------------------------------------------------
-    Input:
-    filename        : string of the filename
-    missing         : string indicating a missing phenotype (default '-9')
-    i_pheno         : i_pheno of column to return (default '0', the first column)
-    vectorize       : if true, return a 1-D vector rather than a 2-D array
-    --------------------------------------------------------------------------
-    Output dictionary:
-    'header' : [1] array phenotype namesv (only if header line is specified in file),
-    'vals'   : [N*1] array of phenotype-data,
-    'iid'    : [N*2] array of family IDs and individual IDs
-    --------------------------------------------------------------------------
+
+    :param filename: name of the file
+    :type filename: string
+    :param i_pheno: column to return (default '0', the first column)
+    :type i_pheno: int
+    :param missing: value to threat as missing
+    :type missing: string
+    :param vectorize: if true, return a 1-D vector rather than a 2-D array
+    :type vectorize: bool
+
+    :rtype: An output dictionary
+
+    The output dictionary looks like:
+
+    * 'header' : [1] array phenotype namesv (only if header line is specified in file),
+    * 'vals'   : [N*1] array of phenotype-data,
+    * 'iid'    : [N*2] array of family IDs and individual IDs
     '''
+
     allColumns = loadPhen(filename, missing)
     i_present=allColumns['vals'][:,i_pheno]==allColumns['vals'][:,i_pheno]
     valsvector = allColumns['vals'][i_present,i_pheno]
@@ -39,17 +45,22 @@ def loadOnePhen(filename,  i_pheno = 0, missing ='-9', vectorize = False):
 
 def loadPhen(filename, missing ='-9', pheno = None):
     '''
-    load a phenotype or covariate file. Covariates have the same file format.
-    --------------------------------------------------------------------------
-    Input:
-    filename        : string of the filename
-    missing         : string indicating a missing phenotype (default '-9')
-    --------------------------------------------------------------------------
-    Output dictionary:
-    'header' : [P] array phenotype namesv (only if header line is specified in file),
-    'vals'   : [N*P] array of phenotype-data,
-    'iid'    : [N*2] array of family IDs and individual IDs
-    --------------------------------------------------------------------------
+    Load a phenotype or covariate file. Covariates have the same file format.
+
+    :param filename: name of the file
+    :type filename: string
+    :param missing: value to threat as missing
+    :type missing: string
+    :param vectorize: if true, return a 1-D vector rather than a 2-D array
+    :type vectorize: bool
+
+    :rtype: An output dictionary
+
+    The output dictionary looks like:
+
+    * 'header' : [1] array phenotype namesv (only if header line is specified in file),
+    * 'vals'   : [N*1] array of phenotype-data,
+    * 'iid'    : [N*2] array of family IDs and individual IDs
     '''
     data = sp.loadtxt(filename,dtype = 'str',comments=None)
     if data[0,0] == 'FID':

@@ -5,7 +5,7 @@ from itertools import *
 import pandas as pd
 import logging
 import time
-import pysnptools.util.util as srutil
+import pysnptools.util as pstutil
 
 #!!why do the examples use ../tests/datasets instead of "examples"?
 class SnpReader(object):
@@ -103,6 +103,7 @@ class SnpReader(object):
 
         * If you request the values for only a subset of the sids or iids, (to the degree practical) only that subset will be read from disk.
           for example:
+
             >>> subset_on_disk = Bed('../tests/datasets/all_chr.maf0.001.N300')[[3,4],::2] # Construct a subsetting SnpReader. No data is read.
             >>> snpdata_subset = subset_on_disk.read() # from disk, read the SNP values for the iids with index 3 and 4 AND sids with even numbered indexes.
             >>> print snpdata_subset.val[0,2] # print the SNP value with subset iid index 0 and sid index 2 (corresponding to iid index 3 and sid index 4 in the full data). No data is read from disk.
@@ -125,6 +126,7 @@ class SnpReader(object):
 
         Here are two efficient alternatives. First, if all SNP values can all fit in memory, read them once into a :class:`SnpData` and then
         access that :class:`SnpData` multiple times.
+
             >>> snp_on_disk = Bed('../tests/datasets/all_chr.maf0.001.N300') # Construct a Bed SnpReader. No data is read.
             >>> snpdata1 = snp_on_disk.read() # read all values into a new SnpData
             >>> print snpdata1.val[0,2] # print a SNP value from snpdata1's in-memory ndarray
@@ -467,9 +469,9 @@ class SnpReader(object):
     def kernel(self, standardizer, allowlowrank=False, blocksize=10000):
         """Returns a ndarray of size iid_count x iid_count. The returned array has the value of the standardized SNP values transposed and then multiplied with themselves.
 
-        :param standardizer: -- Specify standardization to be applied before the matrix multiply. Any :class:`standardizer` may be used. Some choices include :class:`.Identity` 
+        :param standardizer: -- Specify standardization to be applied before the matrix multiply. Any class from :mod:`pysnptools.standardizer` may be used. Some choices include :class:`.Identity` 
             (do nothing), :class:`.Unit` (make values for each SNP have mean zero and standard deviation 1.0), :class:`Beta`, :class:`BySidCount`, :class:`BySqrtSidCount`.
-        :type order: :class:`standardizer`
+        :type order: class from :mod:`pysnptools.standardizer`
 
         :param blocksize: optional -- Default of 10000. None means to load all. Suggested number of sids to read into memory at a time.
         :type blocksize: int or None
@@ -578,7 +580,7 @@ class SnpReader(object):
         if not force_python_only:
             iid_index = SnpReader._make_sparray_from_sparray_or_slice(self.iid_count, iid_indexer)
             sid_index = SnpReader._make_sparray_from_sparray_or_slice(self.sid_count, sid_indexer)
-            sub_val = srutil.sub_matrix(val, iid_index, sid_index, order=order, dtype=dtype)
+            sub_val = pstutil.sub_matrix(val, iid_index, sid_index, order=order, dtype=dtype)
             return sub_val, False
 
 

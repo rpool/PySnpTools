@@ -3,21 +3,21 @@ import scipy as sp
 import logging
 
 class Beta(object): #IStandardizer
-    """The specification for beta standardization"""
+    """Beta standardize the data"""
     def __init__(self,a=1,b=25):
         self.a = a
         self.b = b
 
     def standardize(self, snps, blocksize=None, force_python_only=False):
-        l = self.lambdaFactory(snps, blocksize=blocksize, force_python_only=force_python_only)
+        l = self._lambda_factory(snps, blocksize=blocksize, force_python_only=force_python_only)
         import pysnptools.standardizer as stdizer
-        return stdizer.standardize_with_lambda(snps, l, blocksize)
+        return stdizer._standardize_with_lambda(snps, l, blocksize)
 
     def __repr__(self): 
         return "{0}()".format(self.__class__.__name__)
 
-    def lambdaFactory(self, snps, blocksize=None, force_python_only=False):
-        import pysnptools.snpreader.wrap_plink_parser as wrap_plink_parser
+    def _lambda_factory(self, snps, blocksize=None, force_python_only=False):
+        from pysnptools.snpreader import wrap_plink_parser
         if not force_python_only:
             if snps.dtype == np.float64:
                 if snps.flags['F_CONTIGUOUS'] and (snps.flags["OWNDATA"] or snps.base.nbytes == snps.nbytes): #!!create a method called is_single_segment
@@ -37,4 +37,4 @@ class Beta(object): #IStandardizer
                 logging.info("Array type is not float64 or float32, so will standardize with python only instead of C++")
 
         import pysnptools.standardizer as stdizer
-        return lambda s, a=self.a, b=self.b, stdizer=stdizer: stdizer.standardize_beta_python(s, a, b)
+        return lambda s, a=self.a, b=self.b, stdizer=stdizer: stdizer._standardize_beta_python(s, a, b)

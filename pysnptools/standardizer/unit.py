@@ -2,28 +2,22 @@ import numpy as np
 import scipy as sp
 import logging
 
-# attempt to import wrapped plink parser
-WRAPPED_PLINK_PARSER_PRESENT = True
-try:
-    import pysnptools.snpreader.wrap_plink_parser as wrap_plink_parser
-except Exception:
-    WRAPPED_PLINK_PARSER_PRESENT = False
-
+from pysnptools.snpreader import wrap_plink_parser
 
 class Unit(object):  #IStandardizer
-    """The specification for unit standardization"""
+    """Standardize data so that, for each snp, the mean of the values is zero with standard deviation 1"""
     def __init__(self):
         pass
 
     def standardize(self, snps, blocksize=None, force_python_only=False):
-        l = self.lambdaFactory(snps, blocksize=blocksize, force_python_only=force_python_only)
+        l = self._lambda_factory(snps, blocksize=blocksize, force_python_only=force_python_only)
         import pysnptools.standardizer as stdizer
-        return stdizer.standardize_with_lambda(snps, l, blocksize)
+        return stdizer._standardize_with_lambda(snps, l, blocksize)
 
     def __repr__(self): 
         return "{0}()".format(self.__class__.__name__)
 
-    def lambdaFactory(self, snps, blocksize=None, force_python_only=False):
+    def _lambda_factory(self, snps, blocksize=None, force_python_only=False):
         if not force_python_only:
             if snps.dtype == np.float64:
                 if snps.flags['F_CONTIGUOUS'] and (snps.flags["OWNDATA"] or snps.base.nbytes == snps.nbytes):
@@ -44,7 +38,4 @@ class Unit(object):  #IStandardizer
                 logging.info("Array type is not float64 or float32, so will standardize with python only instead of C++")
 
         import pysnptools.standardizer as stdizer
-        return lambda s: stdizer.standardize_unit_python(s)
-
-
-
+        return lambda s: stdizer._standardize_unit_python(s)

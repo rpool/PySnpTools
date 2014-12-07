@@ -358,10 +358,10 @@ class TestDocStrings(unittest.TestCase):
 
 
     def test_util(self):
-        import pysnptools.util.util
+        import pysnptools.util
         old_dir = os.getcwd()
         os.chdir(os.path.dirname(os.path.realpath(__file__))+"/util")
-        result = doctest.testmod(pysnptools.util.util)
+        result = doctest.testmod(pysnptools.util)
         os.chdir(old_dir)
         assert result.failed == 0, "failed doc test: " + __file__
 
