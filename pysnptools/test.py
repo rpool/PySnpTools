@@ -259,13 +259,13 @@ class NaNCNCTestCases(unittest.TestCase):
     @staticmethod
     def factory_iterator():
 
-        previous_wd = os.getcwd()
-        os.chdir(os.path.dirname(os.path.realpath(__file__)))
-
         snp_reader_factory_bed = lambda : Bed("examples/toydata")
         snp_reader_factory_snpmajor_hdf5 = lambda : Hdf5("examples/toydata.snpmajor.hdf5")
         snp_reader_factory_iidmajor_hdf5 = lambda : Hdf5("examples/toydata.iidmajor.hdf5",blocksize=6000)
         snp_reader_factory_dat = lambda : Dat("examples/toydata.dat")
+
+        previous_wd = os.getcwd()
+        os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
         snpreader0 = snp_reader_factory_bed()
         S_original = snpreader0.sid_count
