@@ -5,11 +5,14 @@ PySnpTools is a library for reading and manipulating genetic data.
 
 Main Features:
 
-snpreader: Efficiently read genetic PLINK formats including *.bed/bim/fam files. Also, efficiently read parts of files and standardize data. 
+snpreader: Efficiently read genetic PLINK formats including *.bed/bim/fam files.
+          Also, efficiently read parts of files and standardize data. 
 
-util: In one line, intersect and re-order IIDs from snpreader and other sources. Also, efficiently extract a submatrix from an ndarray. 
+util: In one line, intersect and re-order IIDs from snpreader and other sources.
+          Also, efficiently extract a submatrix from an ndarray. 
 
-util.IntRangeSet: Efficiently manipulate ranges of integers – for example, genetic position – with set operators including union, intersection, and set difference. 
+util.IntRangeSet: Efficiently manipulate ranges of integers - for example, genetic position
+ - with set operators including union, intersection, and set difference. 
 
 util.pheno: Read the PLINK pheno type file format. 
 
