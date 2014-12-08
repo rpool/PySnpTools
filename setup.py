@@ -79,26 +79,11 @@ setup(
         "pysnptools"
 	],
 	package_data={"pysnptools" : [
-        "test/datasets/all_chr.maf0.001.N300.bed"
-        "test/datasets/all_chr.maf0.001.N300.bim"
-        "test/datasets/all_chr.maf0.001.N300.fam"
-        "test/datasets/phenSynthFrom22.23.N300.randcidorder.txt"
+        "test/datasets/all_chr.maf0.001.N300.bed",
+        "test/datasets/all_chr.maf0.001.N300.bim",
+        "test/datasets/all_chr.maf0.001.N300.fam",
+        "test/datasets/phenSynthFrom22.23.N300.randcidorder.txt",
         "tests/datasets/all_chr.maf0.001.covariates.N300.txt"
-        "examples/toydata.5chrom.bed",
-        "examples/toydata.5chrom.bim",
-        "examples/toydata.5chrom.fam",
-        "examples/toydata.bed",
-        "examples/toydata.bim",
-        "examples/toydata.cov",
-        "examples/toydata.dat",
-        "examples/toydata.fam",
-        "examples/toydata.iidmajor.hdf5",
-        "examples/toydata.map",
-        "examples/toydata.ped",
-        "examples/toydata.phe",
-        "examples/toydata.shufflePlus.phe",
-        "examples/toydata.sim",
-        "examples/toydata.snpmajor.hdf5"
         ]
                  },
     requires = ['cython', 'numpy', 'scipy', 'pandas'],
