@@ -73,7 +73,6 @@ setup(
     author_email='fastlmm@microsoft.com',
     license='Apache 2.0',
     packages=[
-        "pysnptools/altset_list",
         "pysnptools/snpreader",
         "pysnptools/standardizer",
         "pysnptools/util",
