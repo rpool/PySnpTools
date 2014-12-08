@@ -1611,11 +1611,6 @@ share memory and so it may ignore your suggestion and allocate a new ndarray any
 </div>
 </dd></dl>
 
-<dl class="staticmethod">
-<dt id="pysnptools.snpreader.Hdf5.is_sorted_without_repeats">
-<em class="property">static </em><tt class="descname">is_sorted_without_repeats</tt><big>(</big><em>list</em><big>)</big><a class="headerlink" href="#pysnptools.snpreader.Hdf5.is_sorted_without_repeats" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
 <dl class="method">
 <dt id="pysnptools.snpreader.Hdf5.kernel">
 <tt class="descname">kernel</tt><big>(</big><em>standardizer</em>, <em>allowlowrank=False</em>, <em>blocksize=10000</em><big>)</big><a class="headerlink" href="#pysnptools.snpreader.Hdf5.kernel" title="Permalink to this definition">¶</a></dt>
@@ -1954,8 +1949,8 @@ It differs from other Python interval libraries (that we know of) by being speci
 </tr>
 </tbody>
 </table>
+<p>Here we take the union (operator &#8220;|&#8221;) of two IntRangeSets:</p>
 <img alt="_images/example1.png" src="_images/example1.png" />
-<p>Here we take the union of two IntRangeSets:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">IntRangeSet</span><span class="p">(</span><span class="s">&quot;100:500,501:1000&quot;</span><span class="p">)</span> <span class="c"># a is the set of integers from 100 to 500 (exclusive) and 501 to 1000 (exclusive)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">IntRangeSet</span><span class="p">(</span><span class="s">&quot;-20,400:600&quot;</span><span class="p">)</span>      <span class="c"># b is the set of integers -20 and the range 400 to 600 (exclusive)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">a</span> <span class="o">|</span> <span class="n">b</span>                           <span class="c"># c is the union of a and b, namely -20 and 100 to 1000 (exclusive)</span>
@@ -2463,6 +2458,33 @@ negative integers counting from the end. Position indexes can also be specified 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">&amp;=</span> <span class="s">&#39;3:8&#39;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">a</span>
 <span class="go">IntRangeSet(&#39;3:5,6:8&#39;)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysnptools.util.IntRangeSet.__imul__">
+<tt class="descname">__imul__</tt><big>(</big><em>n</em><big>)</big><a class="headerlink" href="#pysnptools.util.IntRangeSet.__imul__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Put produces n copies of a unioned together in a, where a is an IntRangeSet.
+Because a is a set, the result will either be an empty IntRangeSet (n is 0 or less) or the original a.</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">a</span> <span class="pre">*=</span> <span class="pre">n</span></tt></li>
+</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">IntRangeSet</span><span class="p">(</span><span class="s">&#39;0:5,6:11&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">*=</span> <span class="mi">5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">a</span> <span class="c"># should be unchanged</span>
+<span class="go">IntRangeSet(&#39;0:5,6:11&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">*=</span> <span class="mi">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">a</span> <span class="c"># should be empty</span>
+<span class="go">IntRangeSet(&#39;&#39;)</span>
 </pre></div>
 </div>
 </dd></dl>

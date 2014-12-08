@@ -199,7 +199,6 @@ class IntRangeSet(object):
 
     **Methods and Operators**
     '''
-    #!!!cmk coverage check
     _rangeExpression = re.compile(r"^(?P<start>-?\d+)(\:(?P<stop>-?\d+))?$")
 
     def __init__(self, *ranges_inputs):
@@ -256,7 +255,7 @@ class IntRangeSet(object):
     update = add
 
 
-    def __imul(self, n):
+    def __imul__(self, n):
         '''
         Put produces n copies of a unioned together in a, where a is an IntRangeSet.
         Because a is a set, the result will either be an empty IntRangeSet (n is 0 or less) or the original a.
@@ -274,8 +273,8 @@ class IntRangeSet(object):
         IntRangeSet('')
         '''
         if n <= 0:
-            a.clear()
-        return a
+            self.clear()
+        return self
 
 
     def copy(self):
@@ -372,7 +371,7 @@ class IntRangeSet(object):
             result += (start + start + length - 1)*length//2
         return result
 
-    def __eq__(self, other):#!!!cmk change others to ranges_input
+    def __eq__(self, other):#!!  'others' to ranges_input
         '''
         True exactly when the IntRangeSet on the left is *set equivalent* to the ranges input on the right.
 
@@ -879,10 +878,6 @@ class IntRangeSet(object):
 
         IntRangeSet("10:15,55:60").sum() == sum(IntRangeSet("10:15,55:60"))
 
-        try:
-            IntRangeSet("10:14")
-        except Exception:
-            pass
 
         add0 = IntRangeSet("1,12:15,55:61,71,102")
         add0.add("12:101")
@@ -899,7 +894,27 @@ class IntRangeSet(object):
         assert IntRangeSet('0:6,6:10') - '3:100' == '0:3'
 
 
+        a = IntRangeSet('100:200')
+        a *= 3
+        assert a == IntRangeSet('100:200')
+        a *= 0
+        assert a.isempty
+        a = IntRangeSet('100:200')
+        a *= -1
+        assert a.isempty
 
+        assert IntRangeSet('').ranges_len == 0
+        assert IntRangeSet('3').ranges_len == 1
+        assert IntRangeSet('3,6').ranges_len == 2
+        assert IntRangeSet('3,4,5,6').ranges_len == 1
+
+
+        assert IntRangeSet('100:200')['10:20,30'] == IntRangeSet('110:120,130')
+
+        try:
+            IntRangeSet('100..200') # not well formed
+        except:
+            pass
 
 
     #s[i] ith item of s, origin 0 (3) 
@@ -1504,10 +1519,7 @@ class IntRangeSet(object):
             self -= (start_and_stop_generator)
 
     def _two_index(self,start_index,stop_index):
-        try:
-            start = self[start_index]
-        except:
-            print "!!!cmk"
+        start = self[start_index]
         if stop_index == start_index+1:
             stop = start+1
         else:

@@ -77,7 +77,7 @@ class Hdf5(SnpReader):
 
     @staticmethod
     #should move into utils
-    def is_sorted_without_repeats(list):
+    def _is_sorted_without_repeats(list):
         if len(list) < 2:
             return True
         for i in xrange(1,len(list)):
@@ -131,7 +131,7 @@ class Hdf5(SnpReader):
         if iid_index_or_none is not None:
             N = len(iid_index_or_none)
             iid_index_list = iid_index_or_none
-            iid_is_sorted = Hdf5.is_sorted_without_repeats(iid_index_list)
+            iid_is_sorted = Hdf5._is_sorted_without_repeats(iid_index_list)
         else:
             N = N_original
             iid_index_list = range(N_original)
@@ -144,7 +144,7 @@ class Hdf5(SnpReader):
             S = S_original
             sid_index_list = range(S_original)
         # Check if snps and iids indexes are in order and in range
-        snps_are_sorted = Hdf5.is_sorted_without_repeats(sid_index_list)
+        snps_are_sorted = Hdf5._is_sorted_without_repeats(sid_index_list)
 
         val = sp.empty([N, S], dtype=dtype, order=order)
 
