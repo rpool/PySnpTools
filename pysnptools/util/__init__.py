@@ -37,7 +37,7 @@ def intersect_apply(data_list, sort_by_dataset=True):
 
     :Example:
 
-    >>> from pysnptools.snpreader.bed import Bed
+    >>> from pysnptools.snpreader import Bed
     >>> from pysnptools.util.pheno import loadOnePhen,loadPhen
     >>>
     >>> #Create five datasets in different formats

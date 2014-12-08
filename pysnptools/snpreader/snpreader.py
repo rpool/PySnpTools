@@ -15,7 +15,7 @@ class SnpReader(object):
 
     * A class such as :class:`.Bed` for you to specify data in file. For example,
 
-        >>> from pysnptools.snpreader.bed import Bed
+        >>> from pysnptools.snpreader import Bed
         >>> snp_on_disk = Bed('../tests/datasets/all_chr.maf0.001.N300')
         >>> print snp_on_disk # prints specification for reading from file
         Bed('../tests/datasets/all_chr.maf0.001.N300')
@@ -281,7 +281,7 @@ class SnpReader(object):
 
         :Example:
 
-        >>> from pysnptools.snpreader.bed import Bed
+        >>> from pysnptools.snpreader import Bed
         >>> snp_on_disk = Bed('../tests/datasets/all_chr.maf0.001.N300')
         >>> print snp_on_disk.iid[:3] # print the first three iids
         [['POP1' '0']
@@ -310,7 +310,7 @@ class SnpReader(object):
 
         :Example:
 
-        >>> from pysnptools.snpreader.bed import Bed
+        >>> from pysnptools.snpreader import Bed
         >>> snp_on_disk = Bed('../tests/datasets/all_chr.maf0.001.N300')
         >>> print snp_on_disk.sid[:10] # print the first ten sids
         ['1_12' '1_34' '1_10' '1_35' '1_28' '1_25' '1_36' '1_39' '1_4' '1_13']
@@ -341,7 +341,7 @@ class SnpReader(object):
 
         :Example:
 
-        >>> from pysnptools.snpreader.bed import Bed
+        >>> from pysnptools.snpreader import Bed
         >>> snp_on_disk = Bed('../tests/datasets/all_chr.maf0.001.N300')
         >>> print snp_on_disk.pos[:3] # print position information for the first three sids:
         [[ 1.          0.00800801  0.        ]
@@ -392,7 +392,7 @@ class SnpReader(object):
 
         :Example:
 
-        >>> from pysnptools.snpreader.bed import Bed
+        >>> from pysnptools.snpreader import Bed
         >>> snp_on_disk = Bed('../tests/datasets/all_chr.maf0.001.N300') # Specify SNP data on disk
         >>> snpdata1 = snp_on_disk.read() # Read all the SNP data returning a SnpData instance
         >>> print type(snpdata1.val) # The SnpData instance contains a ndarray of the data.
@@ -421,7 +421,7 @@ class SnpReader(object):
 
         :Example:
 
-        >>> from pysnptools.snpreader.bed import Bed
+        >>> from pysnptools.snpreader import Bed
         >>> snp_on_disk = Bed('../tests/datasets/all_chr.maf0.001.N300') # Specify SNP data on disk
         >>> print snp_on_disk.iid_to_index([['POP1','44'],['POP1','12']]) #Find the indexes for two iids.
         [2 1]
@@ -447,7 +447,7 @@ class SnpReader(object):
 
         :Example:
 
-        >>> from pysnptools.snpreader.bed import Bed
+        >>> from pysnptools.snpreader import Bed
         >>> snp_on_disk = Bed('../tests/datasets/all_chr.maf0.001.N300') # Specify SNP data on disk
         >>> print snp_on_disk.sid_to_index(['1_10','1_13']) #Find the indexes for two sids.
         [2 9]
@@ -486,8 +486,8 @@ class SnpReader(object):
 
         :Example:
 
-        >>> from pysnptools.snpreader.bed import Bed
-        >>> from pysnptools.standardizer.unit import Unit
+        >>> from pysnptools.snpreader import Bed
+        >>> from pysnptools.standardizer import Unit
         >>> snp_on_disk = Bed('../tests/datasets/all_chr.maf0.001.N300') # Specify SNP data on disk
         >>> kernel = snp_on_disk.kernel(Unit())
         >>> print (int(kernel.shape[0]),int(kernel.shape[1])), kernel[0,0]
@@ -609,7 +609,7 @@ class SnpReader(object):
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
-    #from pysnptools.snpreader.bed import Bed
+    #from pysnptools.snpreader import Bed
     
 
     #snp_on_disk = Bed('../tests/datasets/all_chr.maf0.001.N300') # Construct a Bed SnpReader. No data is read.

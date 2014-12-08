@@ -4,8 +4,8 @@ from itertools import *
 import pandas as pd
 import logging
 from snpreader import SnpReader
-from pysnptools.standardizer.unit import Unit
-from pysnptools.standardizer.identity import Identity
+from pysnptools.standardizer import Unit
+from pysnptools.standardizer import Identity
 
 class SnpData(SnpReader):
     """  This is a class hold SNP values in-memory along with related iid and sid information.
@@ -104,7 +104,7 @@ class SnpData(SnpReader):
 
         :rtype: :class:`.SnpData` (standardizes in place, but for convenience, returns 'self')
 
-        >>> from pysnptools.snpreader.bed import Bed
+        >>> from pysnptools.snpreader import Bed
         >>> snp_on_disk = Bed('../tests/datasets/all_chr.maf0.001.N300') # Specify some data on disk in Bed format
         >>> snpdata1 = snp_on_disk.read() # read all SNP values into memory
         >>> print snpdata1 # Prints the specification for this SnpData

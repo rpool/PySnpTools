@@ -3,12 +3,12 @@ import scipy as sp
 import logging
 import doctest
 
-from pysnptools.snpreader.bed import *
-from pysnptools.snpreader.hdf5 import Hdf5
-from pysnptools.snpreader.dat import Dat
-from pysnptools.snpreader.ped import Ped
-from pysnptools.standardizer.unit import Unit
-from pysnptools.standardizer.beta import Beta
+from pysnptools.snpreader import Bed
+from pysnptools.snpreader import Hdf5
+from pysnptools.snpreader import Dat
+from pysnptools.snpreader import Ped
+from pysnptools.standardizer import Unit
+from pysnptools.standardizer import Beta
 
 
 import unittest
@@ -258,13 +258,15 @@ class NaNCNCTestCases(unittest.TestCase):
 
     @staticmethod
     def factory_iterator():
+
+        previous_wd = os.getcwd()
+        os.chdir(os.path.dirname(os.path.realpath(__file__)))
+
         snp_reader_factory_bed = lambda : Bed("examples/toydata")
         snp_reader_factory_snpmajor_hdf5 = lambda : Hdf5("examples/toydata.snpmajor.hdf5")
         snp_reader_factory_iidmajor_hdf5 = lambda : Hdf5("examples/toydata.iidmajor.hdf5",blocksize=6000)
         snp_reader_factory_dat = lambda : Dat("examples/toydata.dat")
 
-        previous_wd = os.getcwd()
-        os.chdir(os.path.dirname(os.path.realpath(__file__)))
         snpreader0 = snp_reader_factory_bed()
         S_original = snpreader0.sid_count
         N_original = snpreader0.iid_count
