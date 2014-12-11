@@ -295,6 +295,22 @@ def sub_matrix(val, row_index_list, col_index_list, order='A', dtype=sp.float64)
     logging.debug("Back from cython matrixSubset")
     return sub_val
 
+def create_directory_if_necessary(name, isfile=True):    
+    import os
+    if isfile:
+        directory_name = os.path.dirname(name)
+    else:
+        directory_name = name
+
+    if directory_name != "":
+        try:
+            os.makedirs(directory_name)
+        except OSError, e:
+            if not os.path.isdir(directory_name):
+                raise Exception("not valid path: '{0}'. (Working directory is '{1}'".format(directory_name,os.getcwd()))
+
+
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 

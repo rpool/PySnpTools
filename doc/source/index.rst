@@ -53,7 +53,7 @@ PySnpTools: A library for reading and manipulating genetic data.
     :exclude-members: copyinputs
 
 
-:class:`snpreader.snpdata`
+:class:`snpreader.SnpData`
 ++++++++++++++++++++++++++
 .. autoclass:: pysnptools.snpreader.SnpData
     :members:
@@ -64,7 +64,7 @@ PySnpTools: A library for reading and manipulating genetic data.
     :exclude-members: copyinputs
 
 
-:class:`snpreader.ped`
+:class:`snpreader.Ped`
 +++++++++++++++++++++++++
 .. autoclass:: pysnptools.snpreader.Ped
     :members:
@@ -74,7 +74,7 @@ PySnpTools: A library for reading and manipulating genetic data.
 	:special-members:
     :exclude-members: copyinputs
 
-:class:`snpreader.dat`
+:class:`snpreader.Dat`
 +++++++++++++++++++++++++
 .. autoclass:: pysnptools.snpreader.Dat
     :members:
@@ -84,7 +84,7 @@ PySnpTools: A library for reading and manipulating genetic data.
 	:special-members:
     :exclude-members: copyinputs
 
-:class:`snpreader.hdf5`
+:class:`snpreader.Hdf5`
 +++++++++++++++++++++++++
 .. autoclass:: pysnptools.snpreader.Hdf5
     :members:

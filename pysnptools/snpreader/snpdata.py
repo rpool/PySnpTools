@@ -13,7 +13,7 @@ class SnpData(SnpReader):
 
     See :class:`.SnpReader` for details and examples.
     """
-    def __init__(self, iid, sid, pos, val, parent_string="",copyinputs_function=None):
+    def __init__(self, iid, sid, pos, val, parent_string="",copyinputs_function=None): #!!!autodoc doesn't generate good doc for this constructor
         self._iid = iid
         self._sid = sid
         self._pos = pos
