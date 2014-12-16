@@ -541,7 +541,7 @@ void SUFFIX(readPlinkBedFile)(std::string bed_fn, int inputNumIndividuals, int i
 	SUFFIX(CBedFile) bedFile = SUFFIX(CBedFile)();
 	bedFile.Open(bed_fn, inputNumIndividuals, inputNumSNPs);
 
-	for (size_t i=0; i!=snpIdxList.size(); i++){
+	for (size_t i = 0; i != snpIdxList.size(); i++){
 		int idx = snpIdxList[i];
 
 #ifdef ORDERF
@@ -549,7 +549,84 @@ void SUFFIX(readPlinkBedFile)(std::string bed_fn, int inputNumIndividuals, int i
 #else
 		uint64_t_ startpos = ((uint64_t_)i);
 #endif
-		bedFile.ReadGenotypes( idx, individuals_idx, out, startpos, outputNumSNPs);
+		bedFile.ReadGenotypes(idx, individuals_idx, out, startpos, outputNumSNPs);
 	}
-
 }
+
+
+// wrapper to be used from cython
+void SUFFIX(writePlinkBedFile)(std::string bed_fn, int iid_count, int sid_count, REAL* in)
+{
+	auto bed_filepointer = fopen(bed_fn.c_str(), "wb");
+	if (!bed_filepointer)
+	{
+		printf("Cannot open input file [%s].\n", bed_fn.c_str()); //TODO: removed errorNO
+		return;
+	}
+	putc(bedFileMagic1, bed_filepointer);
+	putc(bedFileMagic2, bed_filepointer);
+	putc(1, bed_filepointer);
+
+	//printf("c\n");
+
+	uint64_t_ startpos = 0;
+#ifdef ORDERF
+	long int sid_increment = (long int)0;
+	long int iid_increment = (long int)1;
+#else
+	long int sid_increment = (long int)1 - iid_count*sid_count;
+	long int iid_increment = (long int)sid_count;
+#endif
+
+	//printf("d\n");
+
+	for (int sid_index = 0; sid_index < sid_count; ++sid_index)
+	{
+		//printf("a %d of %d\n", sid_index, sid_count);
+		for (int iid_by_four = 0; iid_by_four < iid_count; iid_by_four += 4)
+		{
+			//printf("e %d of %d\n", iid_by_four, iid_count);
+			unsigned char b = 0;
+
+			int end = iid_count - iid_by_four;
+			if (end > 4)
+			{
+				end = 4;
+			}
+				
+
+			for (int val_index = 0; val_index < end; ++val_index)
+			{
+				//printf("f %d and %d\n", startpos, sid_index * iid_count + iid_by_four + val_index);
+				//printf("g %d of %d\n", val_index, end);
+				REAL val = in[startpos];
+				unsigned char code;
+				if (val == 0)
+					code = 0;
+				else if (val == 1)
+					code = 2; //0b10 backwards on purpose
+				else if (val == 2)
+					code = 3;
+				else if (val != val) //So NaN
+					code = 1; //0b01 #backwards on purpose
+				else
+				{
+					//printf("Can't convert value '%s' to BED format (only 0,1,2,NAN allowed)", val);
+					fclose(bed_filepointer);
+					return;
+				}
+
+				//printf("before b %d, val_index=%d, code=%d, (code << (val_index * 2))=%d\n", b, val_index, code, (code << (val_index * 2)));
+				b |= (code << (val_index * 2));
+				//printf("code %d makes b %d\n", code, b);
+				startpos += iid_increment;
+			}
+			//printf("writing byte %d\n", b);
+			putc(b, bed_filepointer);
+		}
+		startpos += sid_increment;
+		}
+	fclose(bed_filepointer);
+	//printf("b \n");
+}
+

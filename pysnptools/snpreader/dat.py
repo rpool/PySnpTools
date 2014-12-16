@@ -16,7 +16,7 @@ class Dat(SnpReader):
         '''
         filename    : string of the name of the Dat file.
         '''
-        self.dat_filename = dat_filename
+        self.dat_filename = SnpReader._name_of_other_file(dat_filename,remove_suffix="dat", add_suffix="dat")
 
     def __repr__(self): 
         return "{0}('{1}')".format(self.__class__.__name__,self.dat_filename)
@@ -25,7 +25,7 @@ class Dat(SnpReader):
     @property
     def iid(self):
         self.run_once()
-        return self._original_iid
+        return self._iid
 
     @property
     def sid(self):
@@ -37,34 +37,13 @@ class Dat(SnpReader):
         self.run_once()
         return self._pos
 
-
-
-    def names_of_other_files(self):
-        return Dat.names_of_other_files_static(self.dat_filename)
-
-    @staticmethod
-    def names_of_other_files_static(dat_filename):
-        base_filename = (".").join(dat_filename.split(".")[:-1])
-        famfile = base_filename + '.fam'
-        mapfile = base_filename + '.map'
-        return famfile, mapfile
-
     def run_once(self):
         if (self._ran_once):
             return
         self._ran_once = True
 
-        famfile, mapfile = self.names_of_other_files()
-
-        #!!similar code in BED reader
-        logging.info("Loading fam file {0}".format(famfile))
-        self._original_iid = np.loadtxt(famfile,delimiter = ' ',dtype = 'str',usecols=(0,1),comments=None)
-
-        #!!similar code in BED reader
-        logging.info("Loading map file {0}".format(mapfile))
-        bimfields = pd.read_csv(mapfile,delimiter = '\t',usecols = (0,1,2,3),header=None,index_col=False)
-        self._sid = np.array(bimfields[1].tolist(),dtype='str')
-        self._pos = bimfields.as_matrix([0,2,3])
+        self._iid = SnpReader._read_fam(self.dat_filename,remove_suffix="dat")
+        self._sid, self._pos = SnpReader._read_map_or_bim(self.dat_filename,remove_suffix="dat", add_suffix="map")
 
         return self
 
@@ -74,10 +53,9 @@ class Dat(SnpReader):
 
     def copyinputs(self, copier):
         # doesn't need to self.run_once() because creates name of all files itself
-        famfile, mapfile = self.names_of_other_files()
-        copier.input(self.dat_filename)
-        copier.input(famfile)
-        copier.input(mapfile)
+        copier.input(SnpReader._name_of_other_file(self.dat_filename,remove_suffix="dat", add_suffix="dat"))
+        copier.input(SnpReader._name_of_other_file(self.dat_filename,remove_suffix="dat", add_suffix="fam"))
+        copier.input(SnpReader._name_of_other_file(self.dat_filename,remove_suffix="dat", add_suffix="map"))
 
     @property
     def datfields(self):
@@ -86,7 +64,7 @@ class Dat(SnpReader):
             datfields = pd.read_csv(self.dat_filename,delimiter = '\t',header=None,index_col=False)
             if not np.array_equal(np.array(datfields[0],dtype="string"), self.sid) : raise Exception("Expect snp list in map file to exactly match snp list in dat file")
             self.start_column = 3
-            if len(self._original_iid) != datfields.shape[1]-self.start_column : raise Exception("Expect # iids in fam file to match dat file")
+            if len(self._iid) != datfields.shape[1]-self.start_column : raise Exception("Expect # iids in fam file to match dat file")
             self._datfields = datfields.T
         return self._datfields
 
@@ -135,25 +113,12 @@ class Dat(SnpReader):
 
     @staticmethod
     def write(snpdata, basefilename):
+        SnpReader._write_fam(snpdata, basefilename, remove_suffix="dat")
+        SnpReader._write_map_or_bim(snpdata, basefilename, remove_suffix="dat", add_suffix="map")
 
-        iid_list = snpdata.iid
-        sid_list = snpdata.sid
-        pos_list = snpdata.pos
         snpsarray = snpdata.val
-
-        famfile, mapfile = Dat.names_of_other_files_static(basefilename)
-
-        with open(famfile,"w") as fam_filepointer:
-            for iid_row in iid_list:
-                fam_filepointer.write("{0} {1} 0 0 0 0\n".format(iid_row[0],iid_row[1]))
-
-        with open(mapfile,"w") as map_filepointer:
-            for sid_index, sid in enumerate(sid_list):
-                posrow = pos_list[sid_index]
-                map_filepointer.write("{0}\t{1}\t{2}\t{3}\n".format(posrow[0], sid, posrow[1], posrow[2]))
-
         with open(basefilename,"w") as dat_filepointer:
-            for sid_index, sid in enumerate(sid_list):
+            for sid_index, sid in enumerate(snpdata.sid):
                 if sid_index % 1000 == 0:
                     logging.info("Writing snp # {0} to file '{1}'".format(sid_index, basefilename))
                 dat_filepointer.write("{0}\tj\tn\t".format(sid)) #use "j" and "n" as the major and minor allele

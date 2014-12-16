@@ -36,7 +36,7 @@ class Bed(SnpReader):
         """list of iids
         """
         self._run_once()
-        return self._original_iid
+        return self._iid
 
     @property
     def sid(self):
@@ -57,16 +57,8 @@ class Bed(SnpReader):
             return
         self._ran_once = True
 
-        famfile = self.basefilename+ '.fam'
-        bimfile = self.basefilename+'.bim'
-
-        logging.info("Loading fam file {0}".format(famfile))
-        self._original_iid = np.loadtxt(famfile,delimiter = ' ',dtype = 'str',usecols=(0,1),comments=None)
-        logging.info("Loading bim file {0}".format(bimfile))
-
-        bimfields = pd.read_csv(bimfile,delimiter = '\t',usecols = (0,1,2,3),header=None,index_col=False)
-        self._sid = np.array(bimfields[1].tolist(),dtype='str')
-        self._pos = bimfields.as_matrix([0,2,3])
+        self._iid = SnpReader._read_fam(self.basefilename,remove_suffix="bed")
+        self._sid, self._pos = SnpReader._read_map_or_bim(self.basefilename,remove_suffix="bed", add_suffix="bim")
 
         bedfile = self.basefilename+ '.bed'
         self._filepointer = open(bedfile, "rb")
@@ -82,11 +74,75 @@ class Bed(SnpReader):
 
     def copyinputs(self, copier):
         # doesn't need to self.run_once() because only uses original inputs
-        copier.input(self.basefilename + ".bed")
-        copier.input(self.basefilename + ".bim")
-        copier.input(self.basefilename + ".fam")
+        copier.input(SnpReader._name_of_other_file(self.basefilename,remove_suffix="bed", add_suffix="bed"))
+        copier.input(SnpReader._name_of_other_file(self.basefilename,remove_suffix="bed", add_suffix="bim"))
+        copier.input(SnpReader._name_of_other_file(self.basefilename,remove_suffix="bed", add_suffix="fam"))
 
 
+    @staticmethod
+    def write(snpdata, basefilename,force_python_only=False):
+        SnpReader._write_fam(snpdata, basefilename, remove_suffix="bed")
+        SnpReader._write_map_or_bim(snpdata, basefilename, remove_suffix="bed", add_suffix="bim")
+
+        bedfile = SnpReader._name_of_other_file(basefilename,remove_suffix="bed", add_suffix="bed")
+
+
+        if not force_python_only:
+            from pysnptools.snpreader import wrap_plink_parser
+
+            if snpdata.val.flags["C_CONTIGUOUS"]:
+                order = "C"
+            elif snpdata.val.flags["F_CONTIGUOUS"]:
+                order = "F"
+            else:
+                raise Exception("order '{0}' not known, only 'F' and 'C'".format(order))
+
+            if snpdata.val.dtype == np.float64:
+                if order=="F":
+                    wrap_plink_parser.writePlinkBedFiledoubleFAAA(bedfile, snpdata.iid_count, snpdata.sid_count, snpdata.val)
+                else:
+                    wrap_plink_parser.writePlinkBedFiledoubleCAAA(bedfile, snpdata.iid_count, snpdata.sid_count, snpdata.val)
+            elif snpdata.val.dtype == np.float32:
+                if order=="F":
+                    wrap_plink_parser.writePlinkBedFilefloatFAAA(bedfile, snpdata.iid_count, snpdata.sid_count, snpdata.val)
+                else:
+                    wrap_plink_parser.writePlinkBedFilefloatCAAA(bedfile, snpdata.iid_count, snpdata.sid_count, snpdata.val)
+            else:
+                raise Exception("dtype '{0}' not known, only float64 and float32".format(snpdata.val.dtype))
+            
+        else:
+            with open(bedfile,"wb") as bed_filepointer:
+                #see http://pngu.mgh.harvard.edu/~purcell/plink/binary.shtml
+                bed_filepointer.write(chr(0b01101100)) #magic numbers
+                bed_filepointer.write(chr(0b00011011)) #magic numbers
+                bed_filepointer.write(chr(0b00000001)) #snp major
+
+                for sid_index in xrange(snpdata.sid_count):
+                    if sid_index % 1 == 0:
+                        logging.info("Writing snp # {0} to file '{1}'".format(sid_index, basefilename))
+
+                    col = snpdata.val[:, sid_index]
+                    for iid_by_four in xrange(0,snpdata.iid_count,4):
+                        vals_for_this_byte = col[iid_by_four:iid_by_four+4]
+                        byte = 0b00000000
+                        for val_index in xrange(len(vals_for_this_byte)):
+                            val = vals_for_this_byte[val_index]
+                            if val == 0:
+                                code = 0b00
+                            elif val == 1:
+                                code = 0b10 #backwards on purpose
+                            elif val == 2:
+                                code = 0b11
+                            elif np.isnan(val):
+                                code = 0b01 #backwards on purpose
+                            else:
+                                raise Exception("Can't convert value '{0}' to BED format (only 0,1,2,NAN allowed)".format(val))
+                            byte |= (code << (val_index*2))
+                        bed_filepointer.write(chr(byte))
+        logging.info("Done writing " + basefilename)
+
+
+        
     def _read(self, iid_index_or_none, sid_index_or_none, order, dtype, force_python_only, view_ok):
         self._run_once()
         assert not hasattr(self, 'ind_used'), "A SnpReader should not have a 'ind_used' attribute"
@@ -143,7 +199,7 @@ class Bed(SnpReader):
         else:
             # An earlier version of this code had a way to read consecutive SNPs of code in one read. May want
             # to add that ability back to the code. 
-            # Also, note that reading with python will often result in non-contigious memory, so the python standardizers will automatically be used, too.       
+            # Also, note that reading with python will often result in non-contiguous memory, so the python standardizers will automatically be used, too.       
             logging.warn("using pure python plink parser (might be much slower!!)")
             val = np.zeros(((int(np.ceil(0.25*iid_count_in))*4),sid_count_out),order=order, dtype=dtype) #allocate it a little big
             for SNPsIndex, bimIndex in enumerate(sid_index_out):

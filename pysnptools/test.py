@@ -9,6 +9,7 @@ from pysnptools.snpreader import Dat
 from pysnptools.snpreader import Ped
 from pysnptools.standardizer import Unit
 from pysnptools.standardizer import Beta
+from pysnptools.util import create_directory_if_necessary
 
 
 import unittest
@@ -154,6 +155,96 @@ class TestLoader(unittest.TestCase):
     def test_load_and_standardize_bed(self):
         snpreader2 = Bed(self.currentFolder + "/examples/toydata")
         self.load_and_standardize(snpreader2, snpreader2)
+
+    @staticmethod
+    def is_same(snpdata0, snpdata1): #!!! should this be an equality _eq_ operator on snpdata?
+        if not (np.array_equal(snpdata0.iid,snpdata1.iid) and 
+                  np.array_equal(snpdata0.sid, snpdata1.sid) and 
+                  np.array_equal(snpdata0.pos, snpdata1.pos)):
+            return False
+
+        try:
+            np.testing.assert_equal(snpdata0.val, snpdata1.val)
+        except:
+            return False
+        return True
+
+    def test_write_bed_f64cpp_0(self):
+        snpreader = Bed(self.currentFolder + "/examples/toydata")
+        iid_index = 0
+        logging.info("iid={0}".format(iid_index))
+        #if snpreader.iid_count % 4 == 0: # divisible by 4 isn't a good test
+        #    snpreader = snpreader[0:-1,:]
+        #assert snpreader.iid_count % 4 != 0
+        snpdata = snpreader[0:iid_index,:].read(order='F',dtype=np.float64)
+        if snpdata.iid_count > 0:
+            snpdata.val[-1,0] = float("NAN")
+        output = "tempdir/toydata.F64cpp.{0}".format(iid_index)
+        create_directory_if_necessary(output)
+        Bed.write(snpdata, output)
+        snpdata2 = Bed(output).read()
+        assert TestLoader.is_same(snpdata, snpdata2) #!!!define an equality method on snpdata?
+
+    def test_write_bed_f64cpp_1(self):
+        snpreader = Bed(self.currentFolder + "/examples/toydata")
+        iid_index = 1
+        logging.info("iid={0}".format(iid_index))
+        #if snpreader.iid_count % 4 == 0: # divisible by 4 isn't a good test
+        #    snpreader = snpreader[0:-1,:]
+        #assert snpreader.iid_count % 4 != 0
+        snpdata = snpreader[0:iid_index,:].read(order='F',dtype=np.float64)
+        if snpdata.iid_count > 0:
+            snpdata.val[-1,0] = float("NAN")
+        output = "tempdir/toydata.F64cpp.{0}".format(iid_index)
+        create_directory_if_necessary(output)
+        Bed.write(snpdata, output)
+        snpdata2 = Bed(output).read()
+        assert TestLoader.is_same(snpdata, snpdata2) #!!!define an equality method on snpdata?
+
+    def test_write_bed_f64cpp_5(self):
+        snpreader = Bed(self.currentFolder + "/examples/toydata")
+        iid_index = 5
+        logging.info("iid={0}".format(iid_index))
+        #if snpreader.iid_count % 4 == 0: # divisible by 4 isn't a good test
+        #    snpreader = snpreader[0:-1,:]
+        #assert snpreader.iid_count % 4 != 0
+        snpdata = snpreader[0:iid_index,:].read(order='F',dtype=np.float64)
+        if snpdata.iid_count > 0:
+            snpdata.val[-1,0] = float("NAN")
+        output = "tempdir/toydata.F64cpp.{0}".format(iid_index)
+        create_directory_if_necessary(output)
+        Bed.write(snpdata, output) #,force_python_only=True)
+        snpdata2 = Bed(output).read()
+        assert TestLoader.is_same(snpdata, snpdata2) #!!!define an equality method on snpdata?
+
+    def test_write_bed_f64cpp_5_python(self):
+        snpreader = Bed(self.currentFolder + "/examples/toydata")
+        iid_index = 5
+        logging.info("iid={0}".format(iid_index))
+        #if snpreader.iid_count % 4 == 0: # divisible by 4 isn't a good test
+        #    snpreader = snpreader[0:-1,:]
+        #assert snpreader.iid_count % 4 != 0
+        snpdata = snpreader[0:iid_index,:].read(order='F',dtype=np.float64)
+        if snpdata.iid_count > 0:
+            snpdata.val[-1,0] = float("NAN")
+        output = "tempdir/toydata.F64python.{0}".format(iid_index)
+        create_directory_if_necessary(output)
+        Bed.write(snpdata, output,force_python_only=True)
+        snpdata2 = Bed(output).read()
+        assert TestLoader.is_same(snpdata, snpdata2) #!!!define an equality method on snpdata?
+
+
+    def test_write_x_x_cpp(self):
+        snpreader = Bed(self.currentFolder + "/examples/toydata")
+        for order in ['C','F']:
+            for dtype in [np.float32,np.float64]:
+                snpdata = snpreader.read(order=order,dtype=dtype)
+                snpdata.val[-1,0] = float("NAN")
+                output = "tempdir/toydata.{0}{1}.cpp".format(order,"32" if dtype==np.float32 else "64")
+                create_directory_if_necessary(output)
+                Bed.write(snpdata, output)
+                snpdata2 = Bed(output).read()
+                assert TestLoader.is_same(snpdata, snpdata2) #!!!define an equality method on snpdata?
 
     def test_subset_view(self):
         snpreader2 = Bed(self.currentFolder + "/examples/toydata")[:,:]
@@ -385,9 +476,9 @@ def getTestSuite():
 if __name__ == '__main__':
 
     suites = getTestSuite()
-    if True:
+    if True: #!!!cmk
         # TestFeatureSelection().test_aaa_hdf5_speed()
-        r = unittest.TextTestRunner(failfast=False)
+        r = unittest.TextTestRunner(failfast=True) #!!!cmk
         r.run(suites)
     else: #Cluster test run
         task_count = 500
@@ -396,8 +487,8 @@ if __name__ == '__main__':
                      update_remote_python_parent=True,
                      min=150,
                      priority="AboveNormal",mkl_num_threads=1)
-        #runner = Local()
-        runner = LocalMultiProc(taskcount=4,mkl_num_threads=5)
+        runner = Local()
+        #runner = LocalMultiProc(taskcount=4,mkl_num_threads=5)
         #runner = LocalInParts(1,2,mkl_num_threads=1) # For debugging the cluster runs
         #runner = Hadoop2(100, mapmemory=8*1024, reducememory=8*1024, mkl_num_threads=1, queue="default")
         distributable_test = DistributableTest(suites,"temp_test")

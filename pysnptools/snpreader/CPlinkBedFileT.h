@@ -134,6 +134,7 @@ void SUFFIX(ImputeAndZeroMeanSNPs)(
 
 // to be used by cython wrapper
 void SUFFIX(readPlinkBedFile)(std::string bed_fn, int inputNumIndividuals, int inputNumSNPs, std::vector<size_t> individuals_idx, std::vector<int> snpIdxList, REAL* out);
+void SUFFIX(writePlinkBedFile)(std::string bed_fn, int iid_count, int sid_count, REAL* in);
 
 /*#endif      // CPlinkBedFile_h
 */

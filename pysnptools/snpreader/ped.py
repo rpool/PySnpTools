@@ -48,14 +48,10 @@ class Ped(SnpReader):
             return
         self._ran_once = True
 
-        pedfile = self.basefilename+".ped"
-        mapfile = self.basefilename+".map"
-        map = np.loadtxt(mapfile,dtype = 'str',comments=None)
+        self._sid, self._pos = SnpReader._read_map_or_bim(self.basefilename,remove_suffix="bed", add_suffix="map")
 
-        self._sid = map[:,1]
-        self._pos = np.array(map[:,(0,2,3)],dtype = 'float')
-        map = None
 
+        pedfile = SnpReader._name_of_other_file(self.basefilename,remove_suffix="ped", add_suffix="ped")
         ped = np.loadtxt(pedfile,dtype = 'str',comments=None)
         self._iid = ped[:,0:2]
         snpsstr = ped[:,6::]
@@ -65,10 +61,11 @@ class Ped(SnpReader):
             self._snps[inan[:,2*i],i]=np.nan
             vals=snpsstr[~inan[:,2*i],2*i:2*(i+1)]
             self._snps[~inan[:,2*i],i]+=(vals==vals[0,0]).sum(1)
+
     def copyinputs(self, copier):
         # doesn't need to self.run_once() because only uses original inputs
-        copier.input(self.basefilename + ".ped")
-        copier.input(self.basefilename + ".map")
+        copier.input(SnpReader._name_of_other_file(self.basefilename,remove_suffix="ped", add_suffix="ped"))
+        copier.input(SnpReader._name_of_other_file(self.basefilename,remove_suffix="ped", add_suffix="map"))
 
 
     def _read(self, iid_index_or_none, sid_index_or_none, order, dtype, force_python_only, view_ok):
@@ -91,16 +88,7 @@ class Ped(SnpReader):
 
     @staticmethod
     def write(snpdata, basefilename):
-
-        pedfile = basefilename + ".ped"
-        mapfile = basefilename + ".map"
-
-        #!!LATER this could be made faster
-
-        with open(mapfile,"w") as map_filepointer:
-            for sid_index, sid in enumerate(snpdata.sid):
-                posrow = snpdata.pos[sid_index]
-                map_filepointer.write("{0}\t{1}\t{2}\t{3}\n".format(posrow[0], sid, posrow[1], posrow[2]))
+        SnpReader._write_map_or_bim(snpdata, basefilename, remove_suffix="ped", add_suffix="map")
 
          # The PED file is a white-space (space or tab) delimited file: the first six columns are mandatory:
          # Family ID
@@ -110,11 +98,12 @@ class Ped(SnpReader):
          # Sex (1=male; 2=female; other=unknown)
          # Phenotype
 
+        pedfile = SnpReader._name_of_other_file(basefilename,remove_suffix="ped", add_suffix="ped")
         with open(pedfile,"w") as ped_filepointer:
             for iid_index, iid_row in enumerate(snpdata.iid):
                 ped_filepointer.write("{0} {1} 0 0 0 0".format(iid_row[0],iid_row[1]))
-                col = snpdata.val[iid_index,:]
-                for sid_index, val in enumerate(col):
+                row = snpdata.val[iid_index,:]
+                for sid_index, val in enumerate(row):
                     if val == 0:
                         s = "A A"
                     elif val == 1:

@@ -605,6 +605,52 @@ class SnpReader(object):
         assert(SnpReader._array_properties_are_ok(sub_val, order, dtype))
         return sub_val, shares_memory
 
+    @staticmethod
+    def _name_of_other_file(filename,remove_suffix,add_suffix):
+        if filename.lower().endswith(remove_suffix.lower()):
+            filename = filename[0:-1-len(remove_suffix)]
+        return filename+"."+add_suffix
+
+    @staticmethod
+    def _write_fam(snpdata, basefilename, remove_suffix):
+        famfile = SnpReader._name_of_other_file(basefilename, remove_suffix, "fam")
+
+        with open(famfile,"w") as fam_filepointer:
+            for iid_row in snpdata.iid:
+                fam_filepointer.write("{0} {1} 0 0 0 0\n".format(iid_row[0],iid_row[1]))
+
+
+    @staticmethod
+    def _write_map_or_bim(snpdata, basefilename, remove_suffix, add_suffix):
+        mapfile = SnpReader._name_of_other_file(basefilename, remove_suffix, add_suffix)
+
+        with open(mapfile,"w") as map_filepointer:
+            for sid_index, sid in enumerate(snpdata.sid):
+                posrow = snpdata.pos[sid_index]
+                map_filepointer.write("{0}\t{1}\t{2}\t{3}\n".format(posrow[0], sid, posrow[1], posrow[2]))
+
+
+    @staticmethod
+    def _read_fam(basefilename, remove_suffix):
+        famfile = SnpReader._name_of_other_file(basefilename, remove_suffix, "fam")
+
+        logging.info("Loading fam file {0}".format(famfile))
+        iid = np.loadtxt(famfile,delimiter = ' ',dtype = 'str',usecols=(0,1),comments=None)
+        if len(iid.shape) == 1: #When empty or just one item, make sure the result is (x,2)
+            iid = iid.reshape((len(iid)//2,2))
+        return iid
+
+
+    @staticmethod
+    def _read_map_or_bim( basefilename, remove_suffix, add_suffix):
+        mapfile = SnpReader._name_of_other_file(basefilename, remove_suffix, add_suffix)
+
+        logging.info("Loading {0} file {1}".format(add_suffix, mapfile))
+        fields = pd.read_csv(mapfile,delimiter = '\t',usecols = (0,1,2,3),header=None,index_col=False)
+        sid = np.array(fields[1].tolist(),dtype='str')
+        pos = fields.as_matrix([0,2,3])
+        return sid,pos
+
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)

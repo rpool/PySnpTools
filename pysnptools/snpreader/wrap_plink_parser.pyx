@@ -12,6 +12,11 @@ cdef extern from "./CPlinkBedFile.h":
 	void _readPlinkBedFilefloatCAAA "readPlinkBedFilefloatCAAA"(string bed_fn, int input_num_ind, int input_num_snps, vector[size_t] iid_idx_list, vector[int] sid_idx_list, float* out)
 	void _readPlinkBedFiledoubleCAAA "readPlinkBedFiledoubleCAAA"(string bed_fn, int input_num_ind, int input_num_snps, vector[size_t] iid_idx_list, vector[int] sid_idx_list, double* out)
 
+	void _writePlinkBedFilefloatFAAA "writePlinkBedFilefloatFAAA"(string bed_fn, int input_num_ind, int input_num_snps, float* inx)
+	void _writePlinkBedFiledoubleFAAA "writePlinkBedFiledoubleFAAA"(string bed_fn, int input_num_ind, int input_num_snps, double* inx)
+	void _writePlinkBedFilefloatCAAA "writePlinkBedFilefloatCAAA"(string bed_fn, int input_num_ind, int input_num_snps, float* inx)
+	void _writePlinkBedFiledoubleCAAA "writePlinkBedFiledoubleCAAA"(string bed_fn, int input_num_ind, int input_num_snps, double* inx)
+
 
 	void _ImputeAndZeroMeanSNPsfloatFAAA "ImputeAndZeroMeanSNPsfloatFAAA"( 
 		float *SNPs,
@@ -129,3 +134,16 @@ def readPlinkBedFiledoubleCAAA(bed_fn, input_num_ind, input_num_snps, iidIdxList
 
 	_readPlinkBedFiledoubleCAAA(bed_fn, input_num_ind, input_num_snps, iid_idx_list, sid_idx_list, <double*> out.data)
 	return out
+
+
+def writePlinkBedFilefloatFAAA(bed_fn, input_num_ind, input_num_snps, np.ndarray[np.float32_t, ndim=2] inx):
+	_writePlinkBedFilefloatFAAA(bed_fn, input_num_ind, input_num_snps, <float*> inx.data)
+
+def writePlinkBedFilefloatCAAA(bed_fn, input_num_ind, input_num_snps, np.ndarray[np.float32_t, ndim=2] inx):
+	_writePlinkBedFilefloatCAAA(bed_fn, input_num_ind, input_num_snps, <float*> inx.data)
+
+def writePlinkBedFiledoubleFAAA(bed_fn, input_num_ind, input_num_snps, np.ndarray[np.float64_t, ndim=2] inx):
+	_writePlinkBedFiledoubleFAAA(bed_fn, input_num_ind, input_num_snps, <double*> inx.data)
+
+def writePlinkBedFiledoubleCAAA(bed_fn, input_num_ind, input_num_snps, np.ndarray[np.float64_t, ndim=2] inx):
+	_writePlinkBedFiledoubleCAAA(bed_fn, input_num_ind, input_num_snps, <double*> inx.data)
