@@ -557,7 +557,7 @@ void SUFFIX(readPlinkBedFile)(std::string bed_fn, int inputNumIndividuals, int i
 // wrapper to be used from cython
 void SUFFIX(writePlinkBedFile)(std::string bed_fn, int iid_count, int sid_count, REAL* in)
 {
-	auto bed_filepointer = fopen(bed_fn.c_str(), "wb");
+	FILE* bed_filepointer = fopen(bed_fn.c_str(), "wb");
 	if (!bed_filepointer)
 	{
 		printf("Cannot open input file [%s].\n", bed_fn.c_str()); //TODO: removed errorNO
