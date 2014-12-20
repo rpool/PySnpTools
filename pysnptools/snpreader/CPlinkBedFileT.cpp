@@ -571,11 +571,11 @@ void SUFFIX(writePlinkBedFile)(std::string bed_fn, int iid_count, int sid_count,
 
 	uint64_t_ startpos = 0;
 #ifdef ORDERF
-	long int sid_increment = (long int)0;
-	long int iid_increment = (long int)1;
+	long long int sid_increment = (long long int)0;
+	long long int iid_increment = (long long int)1;
 #else
-	long int sid_increment = (long int)1 - iid_count*sid_count;
-	long int iid_increment = (long int)sid_count;
+	long long int sid_increment = (long long int)1 - (long long int) iid_count*(long long int)sid_count;
+	long long int iid_increment = (long long int)sid_count;
 #endif
 
 	//printf("d\n");
