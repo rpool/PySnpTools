@@ -245,6 +245,7 @@ class SnpReader(object):
     The :meth:`.SnpData.standardize` Method
         The :meth:`.SnpData.standardize` method, available only on :class:`.SnpData`, does in-place standardization of the in-memory
         SNP data. By default, it applies 'Unit' standardization, that is: the values for each SNP will have mean zero and standard deviation 1.0.
+        NaN values are then filled with zero, the mean (consequently, if there are NaN values, the final standard deviation will not be zero.
         Note that, for efficiently, this method works in-place, actually changing values in the ndarray. Although it works in place, for convenience
         it also returns itself. See :meth:`.SnpData.standardize` for options and details.
 

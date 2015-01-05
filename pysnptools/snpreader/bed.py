@@ -7,9 +7,6 @@ from snpreader import SnpReader
 from snpdata import SnpData
 import math
 
-from pysnptools.snpreader import wrap_plink_parser
-
-
 #!!LATER fix bug in Hadoop whereas it won't use data two levels down
 
 class Bed(SnpReader):

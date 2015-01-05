@@ -2,10 +2,10 @@ import numpy as np
 import scipy as sp
 import logging
 
-from pysnptools.snpreader import wrap_plink_parser
-
 class Unit(object):  #IStandardizer
-    """Standardize data so that, for each snp, the mean of the values is zero with standard deviation 1"""
+    """Standardize data so that, for each snp, the mean of the values is zero with standard deviation 1.
+    NaN values are then filled with zero, the mean (consequently, if there are NaN values, the final standard deviation will not be zero.
+    """
     def __init__(self):
         pass
 
@@ -18,6 +18,8 @@ class Unit(object):  #IStandardizer
         return "{0}()".format(self.__class__.__name__)
 
     def _lambda_factory(self, snps, blocksize=None, force_python_only=False):
+        from pysnptools.snpreader import wrap_plink_parser
+
         if not force_python_only:
             if snps.dtype == np.float64:
                 if snps.flags['F_CONTIGUOUS'] and (snps.flags["OWNDATA"] or snps.base.nbytes == snps.nbytes):

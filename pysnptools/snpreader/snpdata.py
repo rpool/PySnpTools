@@ -88,9 +88,11 @@ class SnpData(SnpReader):
             val = val.copy(order='K')
         return val
 
+    #!!! should there be a single warning if Unit() finds and imputes NaNs?
     def standardize(self, standardizer=Unit(), blocksize=None, force_python_only=False):
         """Does in-place standardization of the in-memory
         SNP data. By default, it applies 'Unit' standardization, that is: the values for each SNP will have mean zero and standard deviation 1.0.
+        NaN values are then filled with zero, the mean (consequently, if there are NaN values, the final standard deviation will not be zero.
         Note that, for efficiently, this method works in-place, actually changing values in the ndarray. Although it works in place, for convenience
         it also returns itself.
 
