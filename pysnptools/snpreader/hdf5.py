@@ -62,6 +62,8 @@ class Hdf5(SnpReader):
             self._sid = sp.array(self.h5['rs'])
             self.val_in_file = self.h5['snps']
 
+        self._assert_iid_sid_pos()
+
         if "SNP-major" not in self.val_in_file.attrs: raise Exception("In Hdf5 the 'val' matrix must have a Boolean 'SNP-major' attribute")
         self.is_snp_major = self.val_in_file.attrs["SNP-major"]
 

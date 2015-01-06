@@ -14,9 +14,12 @@ class SnpData(SnpReader):
     See :class:`.SnpReader` for details and examples.
     """
     def __init__(self, iid, sid, pos, val, parent_string="",copyinputs_function=None): #!!!autodoc doesn't generate good doc for this constructor
-        self._iid = iid
-        self._sid = sid
-        self._pos = pos
+        self._iid = iid if len(iid)>0 else np.array([],dtype=str).reshape(0,2)
+        self._sid = sid if len(sid)>0 else np.array([],dtype=str)
+        self._pos = pos if len(sid)>0 else np.array([],dtype=int).reshape(0,3)
+
+        self._assert_iid_sid_pos()
+
         assert type(val) == np.ndarray, "expect SnpData's val to be a ndarray"
         self.val = val
         self._parent_string = parent_string

@@ -45,6 +45,9 @@ class Dat(SnpReader):
         self._iid = SnpReader._read_fam(self.dat_filename,remove_suffix="dat")
         self._sid, self._pos = SnpReader._read_map_or_bim(self.dat_filename,remove_suffix="dat", add_suffix="map")
 
+        self._assert_iid_sid_pos()
+
+
         return self
 
     #def __del__(self):

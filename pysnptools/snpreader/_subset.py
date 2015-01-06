@@ -98,6 +98,7 @@ class _Subset(SnpReader):
         self._iid = self._internal.iid[self._iid_indexer]
         self._sid = self._internal.sid[self._sid_indexer]
         self._pos = self._internal.pos[self._sid_indexer]
+        self._assert_iid_sid_pos()
 
     @staticmethod
     def compose_indexer_with_index_or_none(countA, indexerA, countB, index_or_noneB):

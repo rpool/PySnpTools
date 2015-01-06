@@ -491,22 +491,5 @@ def getTestSuite():
 if __name__ == '__main__':
 
     suites = getTestSuite()
-    if True: #!!!cmk
-        # TestFeatureSelection().test_aaa_hdf5_speed()
-        r = unittest.TextTestRunner(failfast=True) #!!!cmk
-        r.run(suites)
-    else: #Cluster test run
-        task_count = 500
-        runner = HPC(task_count, 'RR1-N13-09-H44',r'\\msr-arrays\Scratch\msr-pool\Scratch_Storage6\Redmond',
-                     remote_python_parent=r"\\msr-arrays\Scratch\msr-pool\Scratch_Storage6\REDMOND\carlk\Source\carlk\july_7_14\pythonpath",
-                     update_remote_python_parent=True,
-                     min=150,
-                     priority="AboveNormal",mkl_num_threads=1)
-        runner = Local()
-        #runner = LocalMultiProc(taskcount=4,mkl_num_threads=5)
-        #runner = LocalInParts(1,2,mkl_num_threads=1) # For debugging the cluster runs
-        #runner = Hadoop2(100, mapmemory=8*1024, reducememory=8*1024, mkl_num_threads=1, queue="default")
-        distributable_test = DistributableTest(suites,"temp_test")
-        print runner.run(distributable_test)
-
-
+    r = unittest.TextTestRunner(failfast=False)
+    r.run(suites)

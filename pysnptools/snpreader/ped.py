@@ -54,6 +54,9 @@ class Ped(SnpReader):
         pedfile = SnpReader._name_of_other_file(self.basefilename,remove_suffix="ped", add_suffix="ped")
         ped = np.loadtxt(pedfile,dtype = 'str',comments=None)
         self._iid = ped[:,0:2]
+
+        self._assert_iid_sid_pos()
+
         snpsstr = ped[:,6::]
         inan=snpsstr==self.missing
         self._snps = np.zeros((snpsstr.shape[0],snpsstr.shape[1]/2))

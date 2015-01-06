@@ -334,7 +334,7 @@ class SnpReader(object):
     #!!Also what about telling the ref and alt allele? Also, what about tri and quad alleles, etc?
     @property
     def pos(self):
-        """A ndarray of the position information for each sid. Each element is a ndarray of three scipy.float64's (chromosome, genetic distance, basepair distance).
+        """A ndarray of the position information for each sid. Each element is a ndarray of three scipy.numbers's (chromosome, genetic distance, basepair distance).
 
         :rtype: ndarray (length :attr:`.sid_count`) of ndarray (length 3) of scipy.float64
 
@@ -538,10 +538,7 @@ class SnpReader(object):
             return slice(None)
 
         if isinstance(indexer,np.ndarray):
-            if indexer.dtype == bool:
-                return np.arange(len(indexer))[indexer]
-            else:
-                return indexer
+            return SnpReader._process_ndarray(indexer)
 
         if isinstance(indexer, slice):
             return indexer
@@ -549,13 +546,26 @@ class SnpReader(object):
         if isinstance(indexer, int):
             return np.array([indexer])
 
-        return np.array(indexer)
+        return SnpReader._process_ndarray(np.array(indexer))
+
+    @staticmethod
+    def _process_ndarray(indexer):
+        if indexer.dtype == bool:
+            return np.arange(len(indexer))[indexer]
+        elif np.issubdtype(indexer.dtype, np.integer):
+            return indexer
+
 
     @staticmethod
     def _make_sparray_from_sparray_or_slice(count, indexer):
         if isinstance(indexer,slice):
             return apply(np.arange, indexer.indices(count))
         return indexer
+
+    def _assert_iid_sid_pos(self):
+        assert np.issubdtype(self._iid.dtype, str) and len(self._iid.shape)==2 and self._iid.shape[1]==2
+        assert np.issubdtype(self._sid.dtype, str) and len(self._sid.shape)==1
+        assert np.issubdtype(self._pos.dtype, np.number) and len(self._pos.shape)==2 and self._pos.shape[1]==3
 
 
     @staticmethod
@@ -647,25 +657,34 @@ class SnpReader(object):
         mapfile = SnpReader._name_of_other_file(basefilename, remove_suffix, add_suffix)
 
         logging.info("Loading {0} file {1}".format(add_suffix, mapfile))
-        fields = pd.read_csv(mapfile,delimiter = '\t',usecols = (0,1,2,3),header=None,index_col=False)
-        sid = np.array(fields[1].tolist(),dtype='str')
-        pos = fields.as_matrix([0,2,3])
-        return sid,pos
+        if os.path.getsize(mapfile) == 0: #If the map/bim file is empty, return empty arrays
+            sid = np.array([],dtype='str')
+            pos = np.array([[]],dtype=int).reshape(0,3)
+            return sid,pos
+        else:
+            fields = pd.read_csv(mapfile,delimiter = '\t',usecols = (0,1,2,3),header=None,index_col=False)
+            sid = np.array(fields[1].tolist(),dtype='str')
+            pos = fields.as_matrix([0,2,3])
+            return sid,pos
 
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
     #from pysnptools.snpreader import Bed
-    
 
-    #snp_on_disk = Bed('../tests/datasets/all_chr.maf0.001.N300') # Construct a Bed SnpReader. No data is read.
-    #snpdata1 = snp_on_disk.read() # read all data from disk into a SnpData with a new ndarray
-    #column01 = snpdata1[:,0:1].read(view_ok=True,order='A') #create SnpData with the data from just the first two SNPs. Sharing memory is OK. The memory may be laid out in any order (that is sid-major and iid-major are both OK).
-    #import numpy as np
-    #print np.may_share_memory(snpdata1.val, column01.val) # Do the two ndarray's share memory? Yes
-    ##        True
-
+    #snp_on_disk = Bed('tests/datasets/all_chr.maf0.001.N300') # Specify some data on disk in Bed format
+    #subset_snpreader_1 = snp_on_disk[[3,4],:] #index with an array of indexes
+    #print subset_snpreader_1.iid_count, subset_snpreader_1.sid_count
+    ##2 1015
+    #snpdata1 = subset_snpreader_1.read() # read just the two rows of interest from the disk
+    #subset_snpreader_2 = snp_on_disk[:,:0:-2] #index with a slice
+    #print subset_snpreader_2.iid_count, subset_snpreader_2.sid_count
+    ##300 507
+    #boolindexes = [s.startswith('23_') for s in snp_on_disk.sid] # create a Boolean index of sids that start '23_'
+    #subset_snpreader_3 = snp_on_disk[:,boolindexes] #index with array of Booleans
+    #print subset_snpreader_3.iid_count, subset_snpreader_3.sid_count
+    ##300 24
 
     import doctest
     doctest.testmod()

@@ -56,6 +56,7 @@ class Bed(SnpReader):
 
         self._iid = SnpReader._read_fam(self.basefilename,remove_suffix="bed")
         self._sid, self._pos = SnpReader._read_map_or_bim(self.basefilename,remove_suffix="bed", add_suffix="bim")
+        self._assert_iid_sid_pos()
 
         bedfile = self.basefilename+ '.bed'
         self._filepointer = open(bedfile, "rb")
