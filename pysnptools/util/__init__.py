@@ -2,6 +2,7 @@ from pysnptools.util.intrangeset import IntRangeSet
 
 import scipy as sp
 import logging
+import numpy as np
 
 
 
@@ -308,6 +309,36 @@ def create_directory_if_necessary(name, isfile=True):
         except OSError, e:
             if not os.path.isdir(directory_name):
                 raise Exception("not valid path: '{0}'. (Working directory is '{1}'".format(directory_name,os.getcwd()))
+
+def weighted_mean(ys, weights):
+    '''
+    >>> ys = np.array([103.664086,89.80645161,83.86888046,90.54141176])
+    >>> weights = np.array([2.340862423,4.982888433,0.17522245,0.098562628])
+    >>> round(weighted_mean(ys, weights),5)
+    93.9487
+    '''
+    mean = ys.dot(weights)/weights.sum()
+    return mean
+
+
+def weighted_simple_linear_regression(xs, ys, weights):
+    '''
+    >>> xs = np.array([53.8329911,57.49486653,60.07392197,60.21081451])
+    >>> ys = np.array([103.664086,89.80645161,83.86888046,90.54141176])
+    >>> weights = np.array([2.340862423,4.982888433,0.17522245,0.098562628])
+    >>> slope, intercept, xmean, ymean = weighted_simple_linear_regression(xs, ys, weights)
+    >>> print round(slope,5), round(intercept,5), round(xmean,5), round(ymean,5)
+    -3.52643 293.05586 56.46133 93.9487
+
+    '''
+    xmean = weighted_mean(xs,weights)
+    xs_less_mean = xs - xmean
+    ymean = weighted_mean(ys,weights)
+    ys_less_mean = ys - ymean
+    weighted_xs_less_mean = xs_less_mean * weights
+    slope = ys_less_mean.dot(weighted_xs_less_mean)/xs_less_mean.dot(weighted_xs_less_mean)
+    intercept = ymean - xmean * slope
+    return slope, intercept, xmean, ymean
 
 
 
