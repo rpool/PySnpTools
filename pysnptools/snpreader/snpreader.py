@@ -550,10 +550,12 @@ class SnpReader(object):
 
     @staticmethod
     def _process_ndarray(indexer):
+        if len(indexer)==0: # If it's very length the type is unrelible and unneeded.
+            return np.zeros((0),dtype=np.integer)
         if indexer.dtype == bool:
-            return np.arange(len(indexer))[indexer]
-        elif np.issubdtype(indexer.dtype, np.integer):
-            return indexer
+            return np.arange(len(indexer),dtype=np.integer)[indexer]
+        assert np.issubdtype(indexer.dtype, np.integer), "Indexer of unknown type"
+        return indexer
 
 
     @staticmethod
@@ -563,9 +565,9 @@ class SnpReader(object):
         return indexer
 
     def _assert_iid_sid_pos(self):
-        assert np.issubdtype(self._iid.dtype, str) and len(self._iid.shape)==2 and self._iid.shape[1]==2
-        assert np.issubdtype(self._sid.dtype, str) and len(self._sid.shape)==1
-        assert np.issubdtype(self._pos.dtype, np.number) and len(self._pos.shape)==2 and self._pos.shape[1]==3
+        assert np.issubdtype(self._iid.dtype, str) and len(self._iid.shape)==2 and self._iid.shape[1]==2, "iid should be dtype str, have two dimensions, and the second dimension should be size 2"
+        assert np.issubdtype(self._sid.dtype, str) and len(self._sid.shape)==1, "sid should be of dtype of str and one dimensional"
+        assert np.issubdtype(self._pos.dtype, np.number) and len(self._pos.shape)==2 and self._pos.shape[1]==3, "pos should be dtype number, have two dimensions, and the second dimension should be size 3"
 
 
     @staticmethod
