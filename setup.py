@@ -13,21 +13,21 @@ from distutils.extension import Extension
 from distutils.command.clean import clean as Clean
 
 try:
-	from Cython.Distutils import build_ext
+    from Cython.Distutils import build_ext
 except Exception:
-	print "cython needed for installation, please install cython first"
-	sys.exit()
+    print "cython needed for installation, please install cython first"
+    sys.exit()
 
 try:
-	import numpy
+    import numpy
 except Exception:
-	print "numpy needed for installation, please install numpy first"
-	sys.exit()
+    print "numpy needed for installation, please install numpy first"
+    sys.exit()
 
 
 def readme():
     with open('README.md') as f:
-       return f.read()
+        return f.read()
 
 class CleanCommand(Clean):
     description = "Remove build directories, and compiled files (including .pyc)"
@@ -77,8 +77,8 @@ setup(
         "pysnptools/standardizer",
         "pysnptools/util",
         "pysnptools"
-	],
-	package_data={"pysnptools" : [
+    ],
+    package_data={"pysnptools" : [
         "test/datasets/all_chr.maf0.001.N300.bed",
         "test/datasets/all_chr.maf0.001.N300.bim",
         "test/datasets/all_chr.maf0.001.N300.fam",
@@ -91,6 +91,6 @@ setup(
     # extensions
     cmdclass = {'build_ext': build_ext, 'clean': CleanCommand},
     ext_modules = ext,
-	include_dirs = [numpy.get_include()]
+    include_dirs = [numpy.get_include()]
   )
 
