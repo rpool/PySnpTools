@@ -93,13 +93,13 @@ class Ped(SnpReader):
     def write(snpdata, basefilename):
         SnpReader._write_map_or_bim(snpdata, basefilename, remove_suffix="ped", add_suffix="map")
 
-         # The PED file is a white-space (space or tab) delimited file: the first six columns are mandatory:
-         # Family ID
-         # Individual ID
-         # Paternal ID
-         # Maternal ID
-         # Sex (1=male; 2=female; other=unknown)
-         # Phenotype
+        # The PED file is a white-space (space or tab) delimited file: the first six columns are mandatory:
+        # Family ID
+        # Individual ID
+        # Paternal ID
+        # Maternal ID
+        # Sex (1=male; 2=female; other=unknown)
+        # Phenotype
 
         pedfile = SnpReader._name_of_other_file(basefilename,remove_suffix="ped", add_suffix="ped")
         with open(pedfile,"w") as ped_filepointer:
