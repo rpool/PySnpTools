@@ -543,7 +543,7 @@ class SnpReader(object):
         if isinstance(indexer, slice):
             return indexer
 
-        if isinstance(indexer, int):
+        if np.isscalar(indexer):
             return np.array([indexer])
 
         return SnpReader._process_ndarray(np.array(indexer))

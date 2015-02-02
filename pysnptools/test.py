@@ -74,6 +74,11 @@ class TestLoader(unittest.TestCase):
         snpreader = Bed(self.currentFolder + "/examples/toydata")
         self.c_reader(snpreader)
 
+    def test_scalar_index(self):
+        snpreader = Bed(self.currentFolder + "/examples/toydata")
+        arr=np.int64(1)
+        snpreader[arr,arr]
+
     def test_c_reader_hdf5(self):
         snpreader = Hdf5(self.currentFolder + "/examples/toydata.snpmajor.hdf5")
         self.c_reader(snpreader)
