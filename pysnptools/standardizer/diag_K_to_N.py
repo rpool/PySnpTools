@@ -5,7 +5,7 @@ class DiagKtoN(object):
     def __init__(self, N):
         self._N = N
 
-    def standardize(self, snps, blocksize=None, force_python_only=False):
+    def standardize(self, snps):
 
         vec = snps.reshape(-1, order="A")
         
