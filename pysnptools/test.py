@@ -70,6 +70,23 @@ class TestLoader(unittest.TestCase):
         self.pheno_fn = self.currentFolder + "/examples/toydata.phe"
         self.snps = snpreader.read(order='F',force_python_only=True).val
 
+
+    def test_diagKtoN(self):
+        """
+        make sure standardization on SNPs results in sum(diag(K))=N
+        """
+        
+        np.random.seed(42)
+        m = np.random.random((100,1000))
+        from pysnptools.standardizer.diag_K_to_N import DiagKtoN
+        s = DiagKtoN(100)
+        s.standardize(m)
+        K = m.dot(m.T)
+        sum_diag = np.sum(np.diag(K))
+        
+        np.testing.assert_almost_equal(100, sum_diag)
+        
+        
     def test_c_reader_bed(self):
         snpreader = Bed(self.currentFolder + "/examples/toydata")
         self.c_reader(snpreader)
