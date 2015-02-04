@@ -10,7 +10,7 @@ class DiagKtoN(object):
         vec = snps.reshape(-1, order="A")
         
         # make sure no copy was made
-        assert vec.base is snps
+        assert not vec.flags['OWNDATA']
         squared_sum = vec.dot(vec)
         factor = 1./np.sqrt(squared_sum / float(self._N))
         
