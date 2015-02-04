@@ -312,6 +312,7 @@ ask for scipy.float32 or for C-contiguous order or any order. See <a class="refe
 <dt>The <a class="reference internal" href="#pysnptools.snpreader.SnpData.standardize" title="pysnptools.snpreader.SnpData.standardize"><tt class="xref py py-meth docutils literal"><span class="pre">SnpData.standardize()</span></tt></a> Method</dt>
 <dd><p class="first">The <a class="reference internal" href="#pysnptools.snpreader.SnpData.standardize" title="pysnptools.snpreader.SnpData.standardize"><tt class="xref py py-meth docutils literal"><span class="pre">SnpData.standardize()</span></tt></a> method, available only on <a class="reference internal" href="#pysnptools.snpreader.SnpData" title="pysnptools.snpreader.SnpData"><tt class="xref py py-class docutils literal"><span class="pre">SnpData</span></tt></a>, does in-place standardization of the in-memory
 SNP data. By default, it applies &#8216;Unit&#8217; standardization, that is: the values for each SNP will have mean zero and standard deviation 1.0.
+NaN values are then filled with zero, the mean (consequently, if there are NaN values, the final standard deviation will not be zero.
 Note that, for efficiently, this method works in-place, actually changing values in the ndarray. Although it works in place, for convenience
 it also returns itself. See <a class="reference internal" href="#pysnptools.snpreader.SnpData.standardize" title="pysnptools.snpreader.SnpData.standardize"><tt class="xref py py-meth docutils literal"><span class="pre">SnpData.standardize()</span></tt></a> for options and details.</p>
 <div class="last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">snp_on_disk</span> <span class="o">=</span> <span class="n">Bed</span><span class="p">(</span><span class="s">&#39;../tests/datasets/all_chr.maf0.001.N300&#39;</span><span class="p">)</span> <span class="c"># Specify some data on disk in Bed format</span>
@@ -457,7 +458,7 @@ the method can save memory by reading (and standardizing) the data in blocks. Se
 <dl class="attribute">
 <dt id="pysnptools.snpreader.SnpReader.pos">
 <tt class="descname">pos</tt><a class="headerlink" href="#pysnptools.snpreader.SnpReader.pos" title="Permalink to this definition">¶</a></dt>
-<dd><p>A ndarray of the position information for each sid. Each element is a ndarray of three scipy.float64&#8217;s (chromosome, genetic distance, basepair distance).</p>
+<dd><p>A ndarray of the position information for each sid. Each element is a ndarray of three scipy.numbers&#8217;s (chromosome, genetic distance, basepair distance).</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -843,6 +844,11 @@ share memory and so it may ignore your suggestion and allocate a new ndarray any
 </div>
 </dd></dl>
 
+<dl class="staticmethod">
+<dt id="pysnptools.snpreader.Bed.write">
+<em class="property">static </em><tt class="descname">write</tt><big>(</big><em>snpdata</em>, <em>basefilename</em>, <em>force_python_only=False</em><big>)</big><a class="headerlink" href="#pysnptools.snpreader.Bed.write" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 </div>
@@ -1035,6 +1041,7 @@ share memory and so it may ignore your suggestion and allocate a new ndarray any
 <tt class="descname">standardize</tt><big>(</big><em>standardizer=Unit()</em>, <em>blocksize=None</em>, <em>force_python_only=False</em><big>)</big><a class="headerlink" href="#pysnptools.snpreader.SnpData.standardize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Does in-place standardization of the in-memory
 SNP data. By default, it applies &#8216;Unit&#8217; standardization, that is: the values for each SNP will have mean zero and standard deviation 1.0.
+NaN values are then filled with zero, the mean (consequently, if there are NaN values, the final standard deviation will not be zero.
 Note that, for efficiently, this method works in-place, actually changing values in the ndarray. Although it works in place, for convenience
 it also returns itself.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -1409,16 +1416,6 @@ share memory and so it may ignore your suggestion and allocate a new ndarray any
 </div>
 </dd></dl>
 
-<dl class="method">
-<dt id="pysnptools.snpreader.Dat.names_of_other_files">
-<tt class="descname">names_of_other_files</tt><big>(</big><big>)</big><a class="headerlink" href="#pysnptools.snpreader.Dat.names_of_other_files" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="staticmethod">
-<dt id="pysnptools.snpreader.Dat.names_of_other_files_static">
-<em class="property">static </em><tt class="descname">names_of_other_files_static</tt><big>(</big><em>dat_filename</em><big>)</big><a class="headerlink" href="#pysnptools.snpreader.Dat.names_of_other_files_static" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
 <dl class="attribute">
 <dt id="pysnptools.snpreader.Dat.pos">
 <tt class="descname">pos</tt><a class="headerlink" href="#pysnptools.snpreader.Dat.pos" title="Permalink to this definition">¶</a></dt>
@@ -1787,6 +1784,11 @@ share memory and so it may ignore your suggestion and allocate a new ndarray any
 <div class="section" id="module-pysnptools.util">
 <span id="util-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">util</span></tt> Module<a class="headerlink" href="#module-pysnptools.util" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
+<dt id="pysnptools.util.create_directory_if_necessary">
+<tt class="descclassname">pysnptools.util.</tt><tt class="descname">create_directory_if_necessary</tt><big>(</big><em>name</em>, <em>isfile=True</em><big>)</big><a class="headerlink" href="#pysnptools.util.create_directory_if_necessary" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
 <dt id="pysnptools.util.intersect_apply">
 <tt class="descclassname">pysnptools.util.</tt><tt class="descname">intersect_apply</tt><big>(</big><em>data_list</em>, <em>sort_by_dataset=True</em><big>)</big><a class="headerlink" href="#pysnptools.util.intersect_apply" title="Permalink to this definition">¶</a></dt>
 <dd><p>Intersects and sorts the iids from a list of datasets, returning new version of the datasets with all the same iids in the same order.</p>
@@ -1930,6 +1932,30 @@ If order is &#8216;A&#8217;, then sub-matrix may be in any order F or C.</li>
 </pre></div>
 </div>
 <p>Note: Behind the scenes, for performance, this function selects and then calls one of 16 C++ helper functions.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pysnptools.util.weighted_mean">
+<tt class="descclassname">pysnptools.util.</tt><tt class="descname">weighted_mean</tt><big>(</big><em>ys</em>, <em>weights</em><big>)</big><a class="headerlink" href="#pysnptools.util.weighted_mean" title="Permalink to this definition">¶</a></dt>
+<dd><div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">ys</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">103.664086</span><span class="p">,</span><span class="mf">89.80645161</span><span class="p">,</span><span class="mf">83.86888046</span><span class="p">,</span><span class="mf">90.54141176</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">2.340862423</span><span class="p">,</span><span class="mf">4.982888433</span><span class="p">,</span><span class="mf">0.17522245</span><span class="p">,</span><span class="mf">0.098562628</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">round</span><span class="p">(</span><span class="n">weighted_mean</span><span class="p">(</span><span class="n">ys</span><span class="p">,</span> <span class="n">weights</span><span class="p">),</span><span class="mi">5</span><span class="p">)</span>
+<span class="go">93.9487</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="pysnptools.util.weighted_simple_linear_regression">
+<tt class="descclassname">pysnptools.util.</tt><tt class="descname">weighted_simple_linear_regression</tt><big>(</big><em>xs</em>, <em>ys</em>, <em>weights</em><big>)</big><a class="headerlink" href="#pysnptools.util.weighted_simple_linear_regression" title="Permalink to this definition">¶</a></dt>
+<dd><div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">xs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">53.8329911</span><span class="p">,</span><span class="mf">57.49486653</span><span class="p">,</span><span class="mf">60.07392197</span><span class="p">,</span><span class="mf">60.21081451</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ys</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">103.664086</span><span class="p">,</span><span class="mf">89.80645161</span><span class="p">,</span><span class="mf">83.86888046</span><span class="p">,</span><span class="mf">90.54141176</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">2.340862423</span><span class="p">,</span><span class="mf">4.982888433</span><span class="p">,</span><span class="mf">0.17522245</span><span class="p">,</span><span class="mf">0.098562628</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">slope</span><span class="p">,</span> <span class="n">intercept</span><span class="p">,</span> <span class="n">xmean</span><span class="p">,</span> <span class="n">ymean</span> <span class="o">=</span> <span class="n">weighted_simple_linear_regression</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="nb">round</span><span class="p">(</span><span class="n">slope</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">intercept</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">xmean</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">ymean</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span>
+<span class="go">-3.52643 293.05586 56.46133 93.9487</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <div class="section" id="util-intrangeset">
@@ -3373,7 +3399,8 @@ in time linear in the number of ranges, rather than integer elements.</p>
 <dl class="class">
 <dt id="pysnptools.standardizer.Unit">
 <em class="property">class </em><tt class="descclassname">pysnptools.standardizer.</tt><tt class="descname">Unit</tt><a class="headerlink" href="#pysnptools.standardizer.Unit" title="Permalink to this definition">¶</a></dt>
-<dd><p>Standardize data so that, for each snp, the mean of the values is zero with standard deviation 1</p>
+<dd><p>Standardize data so that, for each snp, the mean of the values is zero with standard deviation 1.
+NaN values are then filled with zero, the mean (consequently, if there are NaN values, the final standard deviation will not be zero.</p>
 <dl class="method">
 <dt id="pysnptools.standardizer.Unit.standardize">
 <tt class="descname">standardize</tt><big>(</big><em>snps</em>, <em>blocksize=None</em>, <em>force_python_only=False</em><big>)</big><a class="headerlink" href="#pysnptools.standardizer.Unit.standardize" title="Permalink to this definition">¶</a></dt>
@@ -3446,7 +3473,7 @@ in time linear in the number of ranges, rather than integer elements.</p>
 <dd><p>diag(K)=N standardization of the data</p>
 <dl class="method">
 <dt id="pysnptools.standardizer.DiagKtoN.standardize">
-<tt class="descname">standardize</tt><big>(</big><em>snps</em>, <em>blocksize=None</em>, <em>force_python_only=False</em><big>)</big><a class="headerlink" href="#pysnptools.standardizer.DiagKtoN.standardize" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">standardize</tt><big>(</big><em>snps</em><big>)</big><a class="headerlink" href="#pysnptools.standardizer.DiagKtoN.standardize" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
