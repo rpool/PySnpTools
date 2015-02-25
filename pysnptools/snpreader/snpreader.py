@@ -640,7 +640,7 @@ class SnpReader(object):
         with open(mapfile,"w") as map_filepointer:
             for sid_index, sid in enumerate(snpdata.sid):
                 posrow = snpdata.pos[sid_index]
-                map_filepointer.write("{0}\t{1}\t{2}\t{3}\n".format(posrow[0], sid, posrow[1], posrow[2]))
+                map_filepointer.write("{0}\t{1}\t{2}\t{3}\tA\tC\n".format(posrow[0], sid, posrow[1], posrow[2]))
 
 
     @staticmethod

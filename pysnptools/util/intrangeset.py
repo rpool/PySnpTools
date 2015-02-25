@@ -147,11 +147,13 @@ class IntRangeSet(object):
                                         ``a.difference(b)``
     iterate integers in a, from low    ``for element in a:``              :meth:`__iter__`
     iterate integers in a, from high   ``for element in reverse(a):``     :meth:`__reversed__`
-    iterate ranges in a, from low      ``for element in a.ranges:``       :meth:`ranges`
     symmetric difference into a        ``a ^= b``                         :meth:`__ixor__`
     a 'symmetric difference' b         ``a ^ b``                          :meth:`__xor__`
     count of integer elements in a     ``len(a)``                         :meth:`__len__`
-    count of ranges in a               ``ranges(a)``                      :meth:`ranges_len`
+    iterate ranges in a, from low      ``for start,stop in a.ranges():``  :meth:`ranges`
+    count of ranges in a               ``a.ranges_len``                   :meth:`ranges_len`
+    index of range containing b        ``a.ranges_index(b)``              :meth:`ranges_index`
+    get *i*th smallest range           ``a.ranges_getitem(i)``            :meth:`ranges_getitem`
     a as a string                      ``str(a)``                         :meth:`__str__`
     remove all elements from a         ``a.clear()``                      :meth:`clear`
     copy a                             ``a.copy()``                       :meth:`copy`
@@ -354,6 +356,36 @@ class IntRangeSet(object):
         '''
         return len(self._start_items)
 
+    def ranges_getitem(self, index):
+        '''
+        Returns the index-th range in the collection of ranges
+
+        >>> print IntRangeSet('-30:-20,0:10,12').ranges_getitem(1)
+        (0, 10)
+
+        '''
+        start = self._start_items[index]
+        stop = start+self._start_to_length[start]
+        return (start,stop)
+
+    def ranges_index(self, element):
+        '''
+        Returns the ranges index of range containing the element
+
+        >>> int_range_set = IntRangeSet('-30:-20,0:10,12')
+        >>> index = int_range_set.ranges_index(5)
+        >>> print index
+        1
+        >>> int_range_set.ranges_getitem(index)
+        (0, 10)
+        '''
+        index = bisect_left(self._start_items, element)
+        if index == len(self._start_items) or self._start_items[index] != element:
+            index -= 1
+        start, stop = self.ranges_getitem(index)
+        if element < start or stop <= element:
+            raise ValueError("element Not Found")
+        return index
 
     def sum(self):
         '''
@@ -915,6 +947,30 @@ class IntRangeSet(object):
             IntRangeSet('100..200') # not well formed
         except:
             pass
+
+        assert IntRangeSet("1,12:15,55:61,71,102").ranges_getitem(1) == (12,15)
+        assert IntRangeSet("1,12:15,55:61,71,102").ranges_getitem(-1) == (102,103)
+        try:
+            IntRangeSet("1,12:15,55:61,71,102").ranges_getitem(5)
+        except:
+            pass
+        assert IntRangeSet("1,12:15,55:61,71,102").ranges_index(13) == 1
+        try:
+            assert IntRangeSet("1,12:15,55:61,71,102").ranges_index(13) == 1
+        except:
+            pass
+        try:
+            IntRangeSet("1,12:15,55:61,71,102").ranges_index(2)
+        except:
+            pass
+        try:
+            IntRangeSet("1,12:15,55:61,71,102").ranges_index(103)
+        except:
+            pass
+        assert IntRangeSet("1,12:15,55:61,71,102").ranges_index(1) == 0
+        assert IntRangeSet("1,12:15,55:61,71,102").ranges_index(102) == 4
+
+
 
 
     #s[i] ith item of s, origin 0 (3) 
