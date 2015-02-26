@@ -2083,9 +2083,9 @@ It differs from other Python interval libraries (that we know of) by being speci
 <p><strong>Most Important Methods and Operators</strong></p>
 <table border="1" class="docutils">
 <colgroup>
-<col width="39%" />
-<col width="36%" />
-<col width="25%" />
+<col width="38%" />
+<col width="38%" />
+<col width="24%" />
 </colgroup>
 <tbody valign="top">
 <tr class="row-odd"><td><em>Description</em></td>
@@ -2173,25 +2173,33 @@ It differs from other Python interval libraries (that we know of) by being speci
 <td><tt class="docutils literal"><span class="pre">for</span> <span class="pre">element</span> <span class="pre">in</span> <span class="pre">reverse(a):</span></tt></td>
 <td><a class="reference internal" href="#pysnptools.util.IntRangeSet.__reversed__" title="pysnptools.util.IntRangeSet.__reversed__"><tt class="xref py py-meth docutils literal"><span class="pre">__reversed__()</span></tt></a></td>
 </tr>
-<tr class="row-odd"><td>iterate ranges in a, from low</td>
-<td><tt class="docutils literal"><span class="pre">for</span> <span class="pre">element</span> <span class="pre">in</span> <span class="pre">a.ranges:</span></tt></td>
-<td><a class="reference internal" href="#pysnptools.util.IntRangeSet.ranges" title="pysnptools.util.IntRangeSet.ranges"><tt class="xref py py-meth docutils literal"><span class="pre">ranges()</span></tt></a></td>
-</tr>
-<tr class="row-even"><td>symmetric difference into a</td>
+<tr class="row-odd"><td>symmetric difference into a</td>
 <td><tt class="docutils literal"><span class="pre">a</span> <span class="pre">^=</span> <span class="pre">b</span></tt></td>
 <td><a class="reference internal" href="#pysnptools.util.IntRangeSet.__ixor__" title="pysnptools.util.IntRangeSet.__ixor__"><tt class="xref py py-meth docutils literal"><span class="pre">__ixor__()</span></tt></a></td>
 </tr>
-<tr class="row-odd"><td>a &#8216;symmetric difference&#8217; b</td>
+<tr class="row-even"><td>a &#8216;symmetric difference&#8217; b</td>
 <td><tt class="docutils literal"><span class="pre">a</span> <span class="pre">^</span> <span class="pre">b</span></tt></td>
 <td><a class="reference internal" href="#pysnptools.util.IntRangeSet.__xor__" title="pysnptools.util.IntRangeSet.__xor__"><tt class="xref py py-meth docutils literal"><span class="pre">__xor__()</span></tt></a></td>
 </tr>
-<tr class="row-even"><td>count of integer elements in a</td>
+<tr class="row-odd"><td>count of integer elements in a</td>
 <td><tt class="docutils literal"><span class="pre">len(a)</span></tt></td>
 <td><a class="reference internal" href="#pysnptools.util.IntRangeSet.__len__" title="pysnptools.util.IntRangeSet.__len__"><tt class="xref py py-meth docutils literal"><span class="pre">__len__()</span></tt></a></td>
 </tr>
+<tr class="row-even"><td>iterate ranges in a, from low</td>
+<td><tt class="docutils literal"><span class="pre">for</span> <span class="pre">start,stop</span> <span class="pre">in</span> <span class="pre">a.ranges():</span></tt></td>
+<td><a class="reference internal" href="#pysnptools.util.IntRangeSet.ranges" title="pysnptools.util.IntRangeSet.ranges"><tt class="xref py py-meth docutils literal"><span class="pre">ranges()</span></tt></a></td>
+</tr>
 <tr class="row-odd"><td>count of ranges in a</td>
-<td><tt class="docutils literal"><span class="pre">ranges(a)</span></tt></td>
+<td><tt class="docutils literal"><span class="pre">a.ranges_len</span></tt></td>
 <td><a class="reference internal" href="#pysnptools.util.IntRangeSet.ranges_len" title="pysnptools.util.IntRangeSet.ranges_len"><tt class="xref py py-meth docutils literal"><span class="pre">ranges_len()</span></tt></a></td>
+</tr>
+<tr class="row-even"><td>index of range containing b</td>
+<td><tt class="docutils literal"><span class="pre">a.ranges_index(b)</span></tt></td>
+<td><a class="reference internal" href="#pysnptools.util.IntRangeSet.ranges_index" title="pysnptools.util.IntRangeSet.ranges_index"><tt class="xref py py-meth docutils literal"><span class="pre">ranges_index()</span></tt></a></td>
+</tr>
+<tr class="row-odd"><td>get <a href="#id1"><span class="problematic" id="id2">*</span></a>i*th smallest range</td>
+<td><tt class="docutils literal"><span class="pre">a.ranges_getitem(i)</span></tt></td>
+<td><a class="reference internal" href="#pysnptools.util.IntRangeSet.ranges_getitem" title="pysnptools.util.IntRangeSet.ranges_getitem"><tt class="xref py py-meth docutils literal"><span class="pre">ranges_getitem()</span></tt></a></td>
 </tr>
 <tr class="row-even"><td>a as a string</td>
 <td><tt class="docutils literal"><span class="pre">str(a)</span></tt></td>
@@ -3187,6 +3195,30 @@ in constant time rather than in time linear to the number of integer elements.</
 <span class="gp">... </span>      <span class="k">print</span> <span class="s">&quot;start is {0}, stop is {1}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">start</span><span class="p">,</span><span class="n">stop</span><span class="p">)</span>
 <span class="go">start is 0, stop is 10</span>
 <span class="go">start is 100, stop is 200</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysnptools.util.IntRangeSet.ranges_getitem">
+<tt class="descname">ranges_getitem</tt><big>(</big><em>index</em><big>)</big><a class="headerlink" href="#pysnptools.util.IntRangeSet.ranges_getitem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the index-th range in the collection of ranges</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">IntRangeSet</span><span class="p">(</span><span class="s">&#39;-30:-20,0:10,12&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">ranges_getitem</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="go">(0, 10)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysnptools.util.IntRangeSet.ranges_index">
+<tt class="descname">ranges_index</tt><big>(</big><em>element</em><big>)</big><a class="headerlink" href="#pysnptools.util.IntRangeSet.ranges_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the ranges index of range containing the element</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">int_range_set</span> <span class="o">=</span> <span class="n">IntRangeSet</span><span class="p">(</span><span class="s">&#39;-30:-20,0:10,12&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">index</span> <span class="o">=</span> <span class="n">int_range_set</span><span class="o">.</span><span class="n">ranges_index</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">index</span>
+<span class="go">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">int_range_set</span><span class="o">.</span><span class="n">ranges_getitem</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+<span class="go">(0, 10)</span>
 </pre></div>
 </div>
 </dd></dl>

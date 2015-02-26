@@ -115,7 +115,7 @@ class IntRangeSet(object):
 
     **Most Important Methods and Operators**
 
-    ================================== ================================   ======================
+    ================================== ================================== ======================
     *Description*                       *Method or Operator*              *For Details*
     is a 'set equal' to b?             ``a == b``                         :meth:`__eq__`
     is a is superset of b?             ``b in a``,                        :meth:`__contains__`
@@ -164,7 +164,7 @@ class IntRangeSet(object):
     largest element of a               ``a.max()``                        :meth:`max`
     sum of elements in a               ``a.sum()``                        :meth:`sum`
     remove and return an element       ``a.pop()``                        :meth:`pop`
-    ================================== ================================   ======================
+    ================================== ================================== ======================
     
     **Examples, Tips, and Warnings**
 

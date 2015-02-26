@@ -64,7 +64,7 @@ ext.append(Extension("pysnptools.snpreader.wrap_matrix_subset", ["pysnptools/snp
 #python setup.py sdist bdist_wininst upload
 setup(
     name='pysnptools',
-    version='0.2.5',
+    version='0.2.7',
     description='PySnpTools',
     long_description=readme(),
     keywords='gwas bioinformatics sets intervals ranges regions',
