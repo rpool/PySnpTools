@@ -1,33 +1,39 @@
-"""
-file to set up python package, see http://docs.python.org/2/distutils/setupscript.html for details.
-"""
-
-
 import platform
 import os
 import sys
 import shutil
-
-from distutils.core import setup
-from distutils.extension import Extension
+from setuptools import setup, Extension
 from distutils.command.clean import clean as Clean
+from Cython.Distutils import build_ext
+import numpy
 
-try:
-    from Cython.Distutils import build_ext
-except Exception:
-    print "cython needed for installation, please install cython first"
-    sys.exit()
 
-try:
-    import numpy
-except Exception:
-    print "numpy needed for installation, please install numpy first"
-    sys.exit()
 
+# Version number
+version = '0.2.8'
 
 def readme():
     with open('README.md') as f:
         return f.read()
+
+# set up macro
+if platform.system() == "Darwin":
+    macros = [("__APPLE__", "1")]
+elif "win" in platform.system().lower():
+    macros = [("_WIN32", "1")]
+else:
+    macros = [("_UNIX", "1")]
+
+ext_modules = [Extension(name="pysnptools.snpreader.wrap_plink_parser",
+                         language="c++",
+                         sources=["pysnptools/snpreader/wrap_plink_parser.pyx", "pysnptools/snpreader/CPlinkBedFile.cpp"],
+                         include_dirs = [numpy.get_include()],
+                         define_macros=macros),
+               Extension(name="pysnptools.snpreader.wrap_matrix_subset",
+                        language="c++",
+                        sources=["pysnptools/snpreader/wrap_matrix_subset.pyx", "pysnptools/snpreader/MatrixSubset.cpp"],
+                        include_dirs = [numpy.get_include()],
+                        define_macros=macros)]
 
 class CleanCommand(Clean):
     description = "Remove build directories, and compiled files (including .pyc)"
@@ -48,23 +54,10 @@ class CleanCommand(Clean):
                     print "removing", tmp_fn
                     os.unlink(tmp_fn)
 
-# set up macro
-if platform.system() == "Darwin":
-    macros = [("__APPLE__", "1")]
-elif "win" in platform.system().lower():
-    macros = [("_WIN32", "1")]
-else:
-    macros = [("_UNIX", "1")]
-
-
-ext = []
-ext.append(Extension("pysnptools.snpreader.wrap_plink_parser", ["pysnptools/snpreader/wrap_plink_parser.pyx", "pysnptools/snpreader/CPlinkBedFile.cpp"], language="c++", define_macros=macros))
-ext.append(Extension("pysnptools.snpreader.wrap_matrix_subset", ["pysnptools/snpreader/wrap_matrix_subset.pyx", "pysnptools/snpreader/MatrixSubset.cpp"], language="c++", define_macros=macros))
-
 #python setup.py sdist bdist_wininst upload
 setup(
     name='pysnptools',
-    version='0.2.7',
+    version=version,
     description='PySnpTools',
     long_description=readme(),
     keywords='gwas bioinformatics sets intervals ranges regions',
@@ -87,10 +80,8 @@ setup(
         ]
                  },
     requires = ['cython', 'numpy', 'scipy', 'pandas'],
-    #zip_safe=False,
     # extensions
     cmdclass = {'build_ext': build_ext, 'clean': CleanCommand},
-    ext_modules = ext,
-    include_dirs = [numpy.get_include()]
+    ext_modules = ext_modules
   )
 
