@@ -3,8 +3,17 @@ import logging
 from snpreader import SnpReader
 
 class Dense(SnpReader):
-    '''
-    This is a class that reads into memory from DAT/FAM/MAP files.
+    '''!!!cmk add test cases and source example and .write method
+    This is a class that reads into memory from DenseAnsi files. This format looks like:
+
+    var	4006	9570    22899	37676	41236	41978	55159	66828...
+    1-10004-rs12354060	22222222...
+    1-707348-rs12184279	222222?2...
+    1-724325-rs12564807	00000000...
+    ...
+
+    where rows are SNPs and columns are observations.
+    !!!cmk add example
     '''
 
     _ran_once = False
@@ -60,7 +69,7 @@ class Dense(SnpReader):
         return self
 
     #def __del__(self):
-    #    if self._filepointer != None:  # we need to test this because Python doesn't guarantee that __init__ was fully run
+    #    if self._filepointer is not None:  # we need to test this because Python doesn't guarantee that __init__ was fully run
     #        self._filepointer.close()
 
     def copyinputs(self, copier):
@@ -103,7 +112,7 @@ class Dense(SnpReader):
                         logging.info("reading values from line {0} of file '{1}'".format(line_index, self.filename))
                     sid_string, rest = line.strip().split()
                     assert len(rest) == len(self._original_iid)
-                    val_list = [int(val) for val in rest]
+                    val_list = [int(val) if val!="?" else np.NaN for val in rest]
                     val_list_list.append(val_list)
             self.val_list_list = val_list_list
 
@@ -114,75 +123,35 @@ class Dense(SnpReader):
             val[:,SNPsIndex] = row[iid_index_out]
         return val
 
+    @staticmethod
+    def write(snpdata, filename, join_iid_function=lambda iid_pair:iid_pair[1]):
+        snpsarray = snpdata.val
+        with open(filename,"w") as filepointer:
+            filepointer.write("var"+"\t")
+            filepointer.write("\t".join((join_iid_function(iid_pair) for iid_pair in snpdata.iid)) + "\n")
 
-    #@staticmethod
-    #def write(snpdata, basefilename):
+            for sid_index, sid in enumerate(snpdata.sid):
+                if sid_index % 1000 == 0:
+                    logging.info("Writing snp # {0} to file '{1}'".format(sid_index, filename))
+                filepointer.write("{0}\t".format(sid))
+                row = snpsarray[:,sid_index]
+                filepointer.write("".join((str(int(i)) if i==i else "?" for i in row)) + "\n")
+        logging.info("Done writing " + basefilename)
 
-    #    iid = snpdata.iid
-    #    sid = snpdata.sid
-    #    pos = snpdata.pos
-    #    snpsarray = snpdata.val
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
 
-    #    famfile, mapfile = Dat.names_of_other_files_static(basefilename)
+    #!!!cmk
+    import os
+    from pysnptools.snpreader.dense import Dense
+    from pysnptools.snpreader import Bed
 
-    #    with open(famfile,"w") as fam_filepointer:
-    #        for iid_row in iid:
-    #            fam_filepointer.write("{0} {1} 0 0 0 0\n".format(iid_row[0],iid_row[1]))
+    os.chdir(r"h:\deldir\x")
+    snpreader = Dense("del1.dense.txt")
+    snpdata=snpreader.read()
+    #Dense.write(snpdata,"del1.test.dense.txt")
+    Bed.write(snpdata,"del1.test")
 
-    #    with open(mapfile,"w") as map_filepointer:
-    #        for sid_index, sid in enumerate(sid):
-    #            posrow = pos[sid_index]
-    #            map_filepointer.write("{0}\t{1}\t{2}\t{3}\n".format(posrow[0], sid, posrow[1], posrow[2]))
+    #!!!cmkimport doctest
+    #!!!cmkdoctest.testmod()
 
-    #    with open(datfile,"w") as dat:
-    #        for sid_index, sid in enumerate(sid):
-    #            dat.write("{0}\tj\tn\t".format(sid)) #use "j" and "n" as the major and minor allele
-    #            row = snpsarray[:,sid_index]
-    #            dat.write("\t".join([str(i) for i in row]) + "\n")
-
-#if __name__ == "__main__":
-#    logging.basicConfig(level=logging.INFO)
-
-#    snpreader = Dat(r'../tests/datasets/all_chr.maf0.001.N300.dat')
-#    snp_matrix = snpreader.read()
-#    print len(snp_matrix['sid'])
-#    snp_matrix = snpreader[:,:].read()
-#    print len(snp_matrix['sid'])
-#    sid_index_list = snpreader.sid_to_index(['23_9','23_2'])
-#    snp_matrix = snpreader[:,sid_index_list].read()
-#    print ",".join(snp_matrix['sid'])
-#    snp_matrix = snpreader[:,0:10].read()
-#    print ",".join(snp_matrix['sid'])
-
-#    print snpreader.iid_count
-#    print snpreader.sid_count
-#    print len(snpreader.pos)
-
-#    snpreader2 = snpreader[::-1,4]
-#    print snpreader.iid_count
-#    print snpreader2.sid_count
-#    print len(snpreader2.pos)
-
-#    snp_matrix = snpreader2.read()
-#    print len(snp_matrix['iid'])
-#    print len(snp_matrix['sid'])
-
-#    snp_matrix = snpreader2[5,:].read()
-#    print len(snp_matrix['iid'])
-#    print len(snp_matrix['sid'])
-
-#    iid_index_list = snpreader2.iid_to_index(snpreader2.iid[::2])
-#    snp_matrix = snpreader2[iid_index_list,::3].read()
-#    print len(snp_matrix['iid'])
-#    print len(snp_matrix['sid'])
-
-#    snp_matrix = snpreader[[4,5],:].read()
-#    print len(snp_matrix['iid'])
-#    print len(snp_matrix['sid'])
-
-#    print snpreader2
-#    print snpreader[::-1,4]
-#    print snpreader2[iid_index_list,::3]
-#    print snpreader[:,sid_index_list]
-#    print snpreader2[5,:]
-#    print snpreader[[4,5],:]

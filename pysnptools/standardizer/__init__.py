@@ -14,7 +14,7 @@ from pysnptools.standardizer.bysqrtsidcount import BySqrtSidCount
 from pysnptools.standardizer.diag_K_to_N import DiagKtoN
 
 def _standardize_with_lambda(snps, lambdax, blocksize = None):
-    if blocksize==None:
+    if blocksize is None:
        return lambdax(snps)
 
     idx_start = 0
