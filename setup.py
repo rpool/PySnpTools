@@ -4,17 +4,42 @@ import sys
 import shutil
 from setuptools import setup, Extension
 from distutils.command.clean import clean as Clean
-from Cython.Distutils import build_ext
 import numpy
 
-
-
 # Version number
-version = '0.2.8'
+version = '0.2.14'
 
 def readme():
     with open('README.md') as f:
         return f.read()
+
+try:
+    from Cython.Distutils import build_ext
+except ImportError:
+    use_cython = False
+else:
+    use_cython = True
+
+#use_cython=False
+
+class CleanCommand(Clean):
+    description = "Remove build directories, and compiled files (including .pyc)"
+
+    def run(self):
+        Clean.run(self)
+        if os.path.exists('build'):
+            shutil.rmtree('build')
+        for dirpath, dirnames, filenames in os.walk('.'):
+            for filename in filenames:
+                if (   filename.endswith('.so')
+                    or filename.endswith('.pyd')
+                    #or filename.find("wrap_plink_parser.cpp") != -1 # remove automatically generated source file
+                    #or filename.find("wrap_matrix_subset.cpp") != -1 # remove automatically generated source file
+                    or filename.endswith('.pyc')
+                                ):
+                    tmp_fn = os.path.join(dirpath, filename)
+                    print "removing", tmp_fn
+                    os.unlink(tmp_fn)
 
 # set up macro
 if platform.system() == "Darwin":
@@ -24,16 +49,34 @@ elif "win" in platform.system().lower():
 else:
     macros = [("_UNIX", "1")]
 
-ext_modules = [Extension(name="pysnptools.snpreader.wrap_plink_parser",
-                         language="c++",
-                         sources=["pysnptools/snpreader/wrap_plink_parser.pyx", "pysnptools/snpreader/CPlinkBedFile.cpp"],
-                         include_dirs = [numpy.get_include()],
-                         define_macros=macros),
-               Extension(name="pysnptools.snpreader.wrap_matrix_subset",
-                        language="c++",
-                        sources=["pysnptools/snpreader/wrap_matrix_subset.pyx", "pysnptools/snpreader/MatrixSubset.cpp"],
-                        include_dirs = [numpy.get_include()],
-                        define_macros=macros)]
+
+#see http://stackoverflow.com/questions/4505747/how-should-i-structure-a-python-package-that-contains-cython-code
+if use_cython:
+    ext_modules = [Extension(name="pysnptools.snpreader.wrap_plink_parser",
+                             language="c++",
+                             sources=["pysnptools/snpreader/wrap_plink_parser.pyx", "pysnptools/snpreader/CPlinkBedFile.cpp"],
+                             include_dirs = [numpy.get_include()],
+                             define_macros=macros),
+                   Extension(name="pysnptools.snpreader.wrap_matrix_subset",
+                            language="c++",
+                            sources=["pysnptools/snpreader/wrap_matrix_subset.pyx", "pysnptools/snpreader/MatrixSubset.cpp"],
+                            include_dirs = [numpy.get_include()],
+                            define_macros=macros)]
+    cmdclass = {'build_ext': build_ext, 'clean': CleanCommand}
+else:
+    ext_modules = [Extension(name="pysnptools.snpreader.wrap_plink_parser",
+                             language="c++",
+                             sources=["pysnptools/snpreader/wrap_plink_parser.cpp", "pysnptools/snpreader/CPlinkBedFile.cpp"],
+                             include_dirs = [numpy.get_include()],
+                             define_macros=macros),
+                   Extension(name="pysnptools.snpreader.wrap_matrix_subset",
+                            language="c++",
+                            sources=["pysnptools/snpreader/wrap_matrix_subset.cpp", "pysnptools/snpreader/MatrixSubset.cpp"],
+                            include_dirs = [numpy.get_include()],
+                            define_macros=macros)]
+    cmdclass = {}
+
+
 
 class CleanCommand(Clean):
     description = "Remove build directories, and compiled files (including .pyc)"
@@ -79,9 +122,10 @@ setup(
         "tests/datasets/all_chr.maf0.001.covariates.N300.txt"
         ]
                  },
-    requires = ['cython', 'numpy', 'scipy', 'pandas'],
+    install_requires = ['scipy>=0.13', 'numpy>=1.6', 'pandas>=0.15.2'],
+
     # extensions
-    cmdclass = {'build_ext': build_ext, 'clean': CleanCommand},
+    cmdclass = cmdclass,
     ext_modules = ext_modules
   )
 

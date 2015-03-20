@@ -114,9 +114,11 @@
     <Content Include="snpreader\MatrixSubset.h" />
     <Content Include="snpreader\MatrixSubsetT.cpp" />
     <Content Include="snpreader\MatrixSubsetT.h" />
+    <Content Include="snpreader\wrap_matrix_subset.cpp" />
     <Content Include="snpreader\wrap_matrix_subset.pyx">
       <SubType>Code</SubType>
     </Content>
+    <Content Include="snpreader\wrap_plink_parser.cpp" />
     <Content Include="snpreader\wrap_plink_parser.pyx" />
   </ItemGroup>
   <Import Project="$(PtvsTargetsFile)" Condition="Exists($(PtvsTargetsFile))" />

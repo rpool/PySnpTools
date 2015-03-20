@@ -58,7 +58,7 @@ def loadPhen(filename, missing ='-9', pheno = None):
 
     The output dictionary looks like:
 
-    * 'header' : [1] array phenotype namesv (only if header line is specified in file),
+    * 'header' : [1] array phenotype names (only if header line is specified in file), #!!!cmk is [1], etc right?
     * 'vals'   : [N*1] array of phenotype-data,
     * 'iid'    : [N*2] array of family IDs and individual IDs
     '''

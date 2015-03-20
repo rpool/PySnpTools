@@ -143,7 +143,7 @@ if __name__ == "__main__":
 
     #!!!cmk
     import os
-    from pysnptools.snpreader.dense import Dense
+    from pysnptools.snpreader import Dense
     from pysnptools.snpreader import Bed
 
     os.chdir(r"h:\deldir\x")
