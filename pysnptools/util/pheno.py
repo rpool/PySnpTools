@@ -1,4 +1,5 @@
 import scipy as sp
+import logging
 
 def loadOnePhen(filename,  i_pheno = 0, missing ='-9', vectorize = False):
     '''
@@ -43,7 +44,7 @@ def loadOnePhen(filename,  i_pheno = 0, missing ='-9', vectorize = False):
     return ret
 
 
-def loadPhen(filename, missing ='-9', pheno = None):
+def loadPhen(filename, missing ='-9'):
     '''
     Load a phenotype or covariate file. Covariates have the same file format.
 
@@ -62,22 +63,27 @@ def loadPhen(filename, missing ='-9', pheno = None):
     * 'vals'   : [N*1] array of phenotype-data,
     * 'iid'    : [N*2] array of family IDs and individual IDs
     '''
+    if missing == '-9':
+        logging.warning("loadPhen is using default missing value of '-9'.")
+
     data = sp.loadtxt(filename,dtype = 'str',comments=None)
-    if data[0,0] == 'FID':
-        header = data[0,2::]
-        data = data[1::]
+    if data[0,0] == 'ID': #One column of ids - use the single id as both the family id and the iid
+        header = data[0,1::].tolist()
+        iid = data[1:,[0,0]]
+        valsStr = data[1:,1:]
+    elif data[0,0] == 'FID':
+        header = data[0,2::].tolist() #!!!cmk add test cases for this method
+        iid = data[1:,0:2]
+        valsStr = data[1:,2:]
     else:
         header = [None] * (data.shape[1]-2) # create a header containing a list of None's
-    iid = data[:,0:2]
-    data = data[:,2::]
-    imissing = data==missing
-    vals = sp.array(data,dtype = 'float')
-    vals[imissing] = sp.nan
+        iid = data[:,0:2]
+        valsStr = data[:,2:]
 
+    
+    valsStr[valsStr==missing] = "NaN"
+    vals = sp.array(valsStr,dtype = 'float')
 
-    if pheno is not None:
-        #TODO: sort and filter SNPs according to pheno.
-        pass
     ret = {
             'header':header,
             'vals':vals,

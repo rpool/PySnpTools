@@ -194,7 +194,7 @@ class TestLoader(unittest.TestCase):
     def too_slow_test_write_bedbig(self):
         iid_count = 100000
         sid_count = 50000
-        from pysnptools.snpreader.snpdata import SnpData #!!! promote on level up innamespace
+        from pysnptools.snpreader import SnpData #!!! promote on level up innamespace
         iid = np.array([[str(i),str(i)] for i in xrange(iid_count)])
         sid = np.array(["sid_{0}".format(i) for i in xrange(sid_count)])
         pos = np.array([[i,i,i] for i in xrange(sid_count)])

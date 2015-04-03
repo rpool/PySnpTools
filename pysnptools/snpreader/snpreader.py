@@ -494,34 +494,39 @@ class SnpReader(object):
         >>> print (int(kernel.shape[0]),int(kernel.shape[1])), kernel[0,0]
         (300, 300) 901.421835903
         """        #print "entering kernel with {0},{1},{2}".format(self, standardizer, blocksize)
-        t0 = time.time()
-        K = np.zeros([self.iid_count,self.iid_count])
-
-        logging.info("reading {0} SNPs in blocks of {1} and adding up kernels (for {2} individuals)".format(self.sid_count, blocksize, self.iid_count))
-
-        ct = 0
-        ts = time.time()
-
-        if (not allowlowrank) and self.sid_count < self.iid_count: raise Exception("need to adjust code to handle low rank")
-
         import pysnptools.standardizer as stdizer
-        for start in xrange(0, self.sid_count, blocksize):
-            ct += blocksize
-            snpdata = self[:,start:start+blocksize].read().standardize(standardizer)
-            K += snpdata.kernel(stdizer.identity.Identity())
-            if ct % blocksize==0:
-                logging.info("read %s SNPs in %.2f seconds" % (ct, time.time()-ts))
+
+        if blocksize is None or self.sid_count <= blocksize:
+            snpdata = self.read(order="F").standardize(standardizer)
+            return snpdata.kernel(stdizer.Identity(),blocksize=self.sid_count)
+        else:
+            t0 = time.time()
+            K = np.zeros([self.iid_count,self.iid_count])
+
+            logging.info("reading {0} SNPs in blocks of {1} and adding up kernels (for {2} individuals)".format(self.sid_count, blocksize, self.iid_count))
+
+            ct = 0
+            ts = time.time()
+
+            if (not allowlowrank) and self.sid_count < self.iid_count: raise Exception("need to adjust code to handle low rank")
+
+            for start in xrange(0, self.sid_count, blocksize):
+                ct += blocksize
+                snpdata = self[:,start:start+blocksize].read(order="F").standardize(standardizer)
+                K += snpdata.kernel(stdizer.Identity(),blocksize=blocksize)
+                if ct % blocksize==0:
+                    logging.info("read %s SNPs in %.2f seconds" % (ct, time.time()-ts))
 
 
-        # normalize kernel
-        #K = K/sp.sqrt(self.sid_count)
+            # normalize kernel
+            #K = K/sp.sqrt(self.sid_count)
 
-        #K = K + 1e-5*sp.eye(N,N)     
-        t1 = time.time()
-        logging.info("%.2f seconds elapsed" % (t1-t0))
+            #K = K + 1e-5*sp.eye(N,N)     
+            t1 = time.time()
+            logging.info("%.2f seconds elapsed" % (t1-t0))
 
-        #print "leaving kernel with {0},{1},{2}".format(self, standardizer, blocksize)
-        return K
+            #print "leaving kernel with {0},{1},{2}".format(self, standardizer, blocksize)
+            return K
 
     def copyinputs(self, copier):
         raise NotImplementedError
