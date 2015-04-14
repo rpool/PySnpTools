@@ -44,7 +44,7 @@ def loadOnePhen(filename,  i_pheno = 0, missing ='-9', vectorize = False):
     return ret
 
 
-def loadPhen(filename, missing ='-9'):
+def loadPhen(filename, missing ='-9',famid='FID', sampid='ID'):
     '''
     Load a phenotype or covariate file. Covariates have the same file format.
 
@@ -66,12 +66,12 @@ def loadPhen(filename, missing ='-9'):
     if missing == '-9':
         logging.warning("loadPhen is using default missing value of '-9'.")
 
-    data = sp.loadtxt(filename,dtype = 'str',comments=None)
-    if data[0,0] == 'ID': #One column of ids - use the single id as both the family id and the iid
+    data = sp.loadtxt(filename,dtype = 'str',comments=None,delimiter="\t")
+    if data[0,0] == sampid: #One column of ids - use the single id as both the family id and the iid
         header = data[0,1::].tolist()
         iid = data[1:,[0,0]]
         valsStr = data[1:,1:]
-    elif data[0,0] == 'FID':
+    elif data[0,0] == famid:
         header = data[0,2::].tolist() #!!!cmk add test cases for this method
         iid = data[1:,0:2]
         valsStr = data[1:,2:]
@@ -82,7 +82,11 @@ def loadPhen(filename, missing ='-9'):
 
     
     valsStr[valsStr==missing] = "NaN"
-    vals = sp.array(valsStr,dtype = 'float')
+    try:
+        vals = sp.array(valsStr,dtype = 'float')
+    except Exception, details:
+        print details
+        print "!!!cmk"
 
     ret = {
             'header':header,
