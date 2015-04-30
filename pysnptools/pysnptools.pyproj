@@ -5,9 +5,9 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{60f1cb4a-9da3-47c2-9b89-60ac1ce93347}</ProjectGuid>
     <ProjectHome />
-    <StartupFile>snpreader\dense.py</StartupFile>
-    <SearchPath>C:\Users\carlk\Source\Repos\pysnptools</SearchPath>
-    <WorkingDirectory>..</WorkingDirectory>
+    <StartupFile>pstreader\pstreader.py</StartupFile>
+    <SearchPath>..</SearchPath>
+    <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <ProjectTypeGuids>{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
@@ -36,6 +36,17 @@
     <Compile Include="..\setup.py">
       <Link>setup\setup.py</Link>
     </Compile>
+    <Compile Include="kernelreader\kerneldata.py" />
+    <Compile Include="kernelreader\kernelreader.py" />
+    <Compile Include="kernelreader\snpkernel.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="kernelreader\__init__.py" />
+    <Compile Include="pstreader\pstdata.py" />
+    <Compile Include="pstreader\pstnpz.py" />
+    <Compile Include="pstreader\pstreader.py" />
+    <Compile Include="pstreader\_subset.py" />
+    <Compile Include="pstreader\__init__.py" />
     <Compile Include="snpreader\bed.py" />
     <Compile Include="snpreader\dense.py" />
     <Compile Include="snpreader\dat.py" />
@@ -67,6 +78,8 @@
   <ItemGroup>
     <Folder Include="examples\" />
     <Folder Include="docsource\" />
+    <Folder Include="kernelreader\" />
+    <Folder Include="pstreader\" />
     <Folder Include="setup\" />
     <Folder Include="util\" />
     <Folder Include="snpreader" />

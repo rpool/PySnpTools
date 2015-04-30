@@ -3,12 +3,12 @@ import subprocess, sys, os.path
 from itertools import *
 import pandas as pd
 import logging
-from snpreader import SnpReader
-from snpdata import SnpData
+from pstreader import PstReader
+from pstdata import PstData
 
-class _Subset(SnpReader):
+class _Subset(PstReader):
 
-    def __init__(self, internal, iid_indexer, sid_indexer):
+    def __init__(self, internal, row_indexer, col_indexer):
         '''
         an indexer can be:
              an integer i (same as [i])
@@ -17,13 +17,13 @@ class _Subset(SnpReader):
              a list of booleans
         '''
         self._internal = internal
-        self._iid_indexer = SnpReader._make_sparray_or_slice(iid_indexer)
-        self._sid_indexer = SnpReader._make_sparray_or_slice(sid_indexer)
+        self._row_indexer = PstReader._make_sparray_or_slice(row_indexer)
+        self._col_indexer = PstReader._make_sparray_or_slice(col_indexer)
 
     _ran_once = False
 
     def __repr__(self): #!!Should this be __str__ (and elsewhere) because it uses "nice_string" which uses "..." so may be ambiguous?
-        s = "{0}[{1},{2}]".format(self._internal,self._nice_string(self._iid_indexer),self._nice_string(self._sid_indexer))
+        s = "{0}[{1},{2}]".format(self._internal,self._nice_string(self._row_indexer),self._nice_string(self._col_indexer))
         return s
 
     _slice_format = {(False,False,False):":",
@@ -49,45 +49,50 @@ class _Subset(SnpReader):
         self._internal.copyinputs(copier)
 
     @property
-    def iid(self):
+    def row(self):
         self.run_once()
-        return self._iid
+        return self._row
 
     @property
-    def sid(self):
+    def col(self):
         self.run_once()
-        return self._sid
+        return self._col
 
     @property
-    def pos(self):
+    def row_property(self):
         self.run_once()
-        return self._pos
+        return self._row_property
+
+    @property
+    def col_property(self):
+        self.run_once()
+        return self._col_property
 
     #!!commented out because doesn't guarantee that the shortcut will return with the dtype and order requested.
     #                  Also, didn't handle stacked do-nothing subsets
     #def read(self, order='F', dtype=np.float64, force_python_only=False, view_ok=False):
-    #    if view_ok and hasattr(self._internal,"val") and _Subset._is_all_slice(self._iid_indexer) and _Subset._is_all_slice(self._sid_indexer):
+    #    if view_ok and hasattr(self._internal,"val") and _Subset._is_all_slice(self._row_indexer) and _Subset._is_all_slice(self._col_indexer):
     #        return self._internal
     #    else:
-    #        return SnpReader.read(self, order, dtype, force_python_only, view_ok)
+    #        return PstReader.read(self, order, dtype, force_python_only, view_ok)
 
 
     # Most _read's support only indexlists or None, but this one supports Slices, too.
     _read_accepts_slices = None
-    def _read(self, iid_indexer, sid_indexer, order, dtype, force_python_only, view_ok):
+    def _read(self, row_indexer, col_indexer, order, dtype, force_python_only, view_ok):
         self.run_once()
 
         if hasattr(self._internal,'_read_accepts_slices'):
-            composed_iid_index_or_none = self.compose_indexer_with_indexer(self._internal.iid_count, self._iid_indexer, self.iid_count, iid_indexer)
-            composed_sid_index_or_none = self.compose_indexer_with_indexer(self._internal.sid_count, self._sid_indexer, self.sid_count, sid_indexer)
-            val = self._internal._read(composed_iid_index_or_none, composed_sid_index_or_none, order, dtype, force_python_only, view_ok)
+            composed_row_index_or_none = self.compose_indexer_with_indexer(self._internal.row_count, self._row_indexer, self.row_count, row_indexer)
+            composed_col_index_or_none = self.compose_indexer_with_indexer(self._internal.col_count, self._col_indexer, self.col_count, col_indexer)
+            val = self._internal._read(composed_row_index_or_none, composed_col_index_or_none, order, dtype, force_python_only, view_ok)
             return val
         else:
-            iid_index_or_none = self._make_sparray_from_sparray_or_slice(self.iid_count, iid_indexer)
-            composed_iid_index_or_none = self.compose_indexer_with_index_or_none(self._internal.iid_count, self._iid_indexer, self.iid_count, iid_index_or_none)
-            sid_index_or_none = self._make_sparray_from_sparray_or_slice(self.sid_count, sid_indexer)
-            composed_sid_index_or_none = self.compose_indexer_with_index_or_none(self._internal.sid_count, self._sid_indexer, self.sid_count, sid_index_or_none)
-            val = self._internal._read(composed_iid_index_or_none, composed_sid_index_or_none, order, dtype, force_python_only, view_ok)
+            row_index_or_none = self._make_sparray_from_sparray_or_slice(self.row_count, row_indexer)
+            composed_row_index_or_none = self.compose_indexer_with_index_or_none(self._internal.row_count, self._row_indexer, self.row_count, row_index_or_none)
+            col_index_or_none = self._make_sparray_from_sparray_or_slice(self.col_count, col_indexer)
+            composed_col_index_or_none = self.compose_indexer_with_index_or_none(self._internal.col_count, self._col_indexer, self.col_count, col_index_or_none)
+            val = self._internal._read(composed_row_index_or_none, composed_col_index_or_none, order, dtype, force_python_only, view_ok)
             return val
 
     def run_once(self):
@@ -95,17 +100,18 @@ class _Subset(SnpReader):
             return
 
         self._ran_once = True
-        self._iid = self._internal.iid[self._iid_indexer]
-        self._sid = self._internal.sid[self._sid_indexer]
-        self._pos = self._internal.pos[self._sid_indexer]
-        self._assert_iid_sid_pos()
+        self._row = self._internal.row[self._row_indexer]
+        self._col = self._internal.col[self._col_indexer]
+        self._row_property = self._internal.row_property[self._row_indexer]
+        self._col_property = self._internal.col_property[self._col_indexer]
+        #self._assert_row_col_pos()
 
     @staticmethod
     def compose_indexer_with_index_or_none(countA, indexerA, countB, index_or_noneB):
         if _Subset._is_all_slice(indexerA):
             return index_or_noneB
 
-        indexA = SnpReader._make_sparray_from_sparray_or_slice(countA, indexerA)
+        indexA = PstReader._make_sparray_from_sparray_or_slice(countA, indexerA)
 
         if _Subset._is_all_slice(index_or_noneB):
             return indexA
@@ -123,8 +129,8 @@ class _Subset(SnpReader):
         if _Subset._is_all_slice(indexerB):
             return indexerA
 
-        indexA = SnpReader._make_sparray_from_sparray_or_slice(countA, indexerA)
-        indexB = SnpReader._make_sparray_from_sparray_or_slice(countB, indexerB)
+        indexA = PstReader._make_sparray_from_sparray_or_slice(countA, indexerA)
+        indexB = PstReader._make_sparray_from_sparray_or_slice(countB, indexerB)
 
         indexAB = indexA[indexB]
 

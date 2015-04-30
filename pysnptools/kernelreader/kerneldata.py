@@ -3,22 +3,26 @@ import subprocess, sys, os.path
 from itertools import *
 import pandas as pd
 import logging
-from snpreader import SnpReader
-from pysnptools.standardizer import Unit
-from pysnptools.standardizer import Identity
+from kernelreader import KernelReader
+from pysnptools.pstreader import PstData
 
-class SnpData(SnpReader):
+class KernelData(KernelReader,PstData):
     """  This is a class hold SNP values in-memory along with related iid and sid information.
     It is created by calling the :meth:`.SnpReader.read` method on another :class:`.SnpReader`, for example, :class:`.Bed`.
 
     See :class:`.SnpReader` for details and examples.
     """
-    def __init__(self, iid, sid, pos, val, parent_string="",copyinputs_function=None): #!!!autodoc doesn't generate good doc for this constructor
-        self._iid = iid if len(iid)>0 else np.array([],dtype=str).reshape(0,2)
-        self._sid = sid if len(sid)>0 else np.array([],dtype=str)
-        self._pos = pos if len(sid)>0 else np.array([],dtype=int).reshape(0,3)
+    def __init__(self, iid=None, iid0=None, iid1=None, val=None, parent_string="",copyinputs_function=None): #!!!autodoc doesn't generate good doc for this constructor
+        assert val is not None, "'val' must not be None"
+        assert iid is None ^ (iid0 is None and iid1 is None), "Either 'iid' or both 'iid0' 'iid1' must be provided."
+        if iid is not None:
+            iid0 = iid
+            iid1 = iid
 
-        self._assert_iid_sid_pos()
+        self._row = iid0 if len(iid0)>0 else np.array([],dtype=str).reshape(0,2)
+        self._col = iid1 if len(iid1)>0 else np.array([],dtype=str)
+
+        self._assert_iid0_iid1()
 
         assert type(val) == np.ndarray, "expect SnpData's val to be a ndarray"
         self.val = val
@@ -33,21 +37,9 @@ class SnpData(SnpReader):
     See :class:`.SnpReader` for details and examples.
     """
 
-    def __repr__(self):
-        if self._parent_string == "":
-            if len(self._std_string_list) > 0:
-                s = "SnpData({0})".format(",".join(self._std_string_list))
-            else:
-                s = "SnpData()"
-        else:
-            if len(self._std_string_list) > 0:
-                s = "SnpData({0},{1})".format(self._parent_string,",".join(self._std_string_list))
-            else:
-                s = "SnpData({0})".format(self._parent_string)
-        return s
 
-    def copyinputs(self, copier):
-        pass
+    #!!!cmk does __repr__ do the right thing?
+    #!!!cmk does copyinputs do the right thing?
 
     @property
     def iid(self):
@@ -55,89 +47,30 @@ class SnpData(SnpReader):
 
         See :attr:`.SnpReader.iid` for details and examples.
         """
-        return self._iid
+        assert self.assume_symmetric, "When 'iid' is used, iid0 must be the same as iid1"
+        return self._iid0
 
     @property
-    def sid(self):
-        """A ndarray of the sids.
+    def iid0(self):
+        """A ndarray of the iid0s.
 
-        See :attr:`.SnpReader.sid` for details and examples.
+        See :attr:`.SnpReader.iid` for details and examples.
         """
-        return self._sid
+        return self._iid0
 
     @property
-    def pos(self):
-        """A ndarray of the position information for each sid.
+    def iid1(self):
+        """A ndarray of the iid0s.
 
-        See :attr:`.SnpReader.pos` for details and examples.
+        See :attr:`.SnpReader.iid` for details and examples.
         """
-        return self._pos
+        return self._iid1
 
-    #!!Seems like we can't short cut the view_OK this because the .val wouldn't necessarily have the right order and dtype
-    #def read(self, order='F', dtype=np.float64, force_python_only=False, view_ok=False):
-    #    """creates an in-memory :class:`.SnpData` with a copy of the genotype data
-    #    """
-    #    if view_ok:
-    #        return self
-    #    else:
-    #        return SnpReader.read(self, order, dtype, force_python_only, view_ok)
-
-
+    #!!!cmk is this needed?
     # Most _read's support only indexlists or None, but this one supports Slices, too.
     _read_accepts_slices = None
-    def _read(self, iid_index_or_none, sid_index_or_none, order, dtype, force_python_only, view_ok):
-        val, shares_memory = self._apply_sparray_or_slice_to_val(self.val, iid_index_or_none, sid_index_or_none, order, dtype, force_python_only)
-        if shares_memory and not view_ok:
-            val = val.copy(order='K')
-        return val
 
-    #!!! should there be a single warning if Unit() finds and imputes NaNs?
-    def standardize(self, standardizer=Unit(), blocksize=None, force_python_only=False):
-        """Does in-place standardization of the in-memory
-        SNP data. By default, it applies 'Unit' standardization, that is: the values for each SNP will have mean zero and standard deviation 1.0.
-        NaN values are then filled with zero, the mean (consequently, if there are NaN values, the final standard deviation will not be zero.
-        Note that, for efficiently, this method works in-place, actually changing values in the ndarray. Although it works in place, for convenience
-        it also returns itself.
 
-        :param standardizer: optional -- Specify standardization to be applied before the matrix multiply. 
-             Any class from :mod:`pysnptools.standardizer` may be used. Some choices include :class:`.Unit` (default, makes values for each SNP have mean zero and
-             standard deviation 1.0)and :class:`.Beta`.
-        :type order: class from :mod:`pysnptools.standardizer`
-
-        :param blocksize: optional -- Default of None. None means to load all. Suggested number of sids to read into memory at a time.
-        :type blocksize: int or None
-
-        :rtype: :class:`.SnpData` (standardizes in place, but for convenience, returns 'self')
-
-        >>> from pysnptools.snpreader import Bed
-        >>> snp_on_disk = Bed('../tests/datasets/all_chr.maf0.001.N300') # Specify some data on disk in Bed format
-        >>> snpdata1 = snp_on_disk.read() # read all SNP values into memory
-        >>> print snpdata1 # Prints the specification for this SnpData
-        SnpData(Bed('../tests/datasets/all_chr.maf0.001.N300'))
-        >>> print snpdata1.val[0,0]
-        2.0
-        >>> snpdata1.standardize() # standardize changes the values in snpdata1.val and changes the specification.
-        SnpData(Bed('../tests/datasets/all_chr.maf0.001.N300'),Unit())
-        >>> print snpdata1.val[0,0]
-        0.229415733871
-        >>> snpdata2 = snp_on_disk.read().standardize() # Read and standardize in one expression with only one ndarray allocated.
-        >>> print snpdata2.val[0,0]
-        0.229415733871
-        """
-        self.val = standardizer.standardize(self.val, blocksize=blocksize, force_python_only=force_python_only)
-        self._std_string_list.append(str(standardizer))
-        return self
-
-    def kernel(self, standardizer, blocksize=10000, allowlowrank=False):
-        """
-            See :meth:`.SnpReader.kernel` for details and examples.
-        """
-        if type(standardizer) is Identity:
-            K = self.val.dot(self.val.T)
-            return K
-        else:
-            K = SnpReader.kernel(self, standardizer, blocksize=blocksize, allowlowrank=allowlowrank)
-            return K
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)

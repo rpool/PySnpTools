@@ -54,7 +54,7 @@ class SnpReader(object):
         Every SnpReader, such as :class:`.Bed` and :class:`.SnpData`, has these properties: :attr:`iid`, :attr:`iid_count`, :attr:`sid`, :attr:`sid_count`,
         :attr:`pos` and these methods: :meth:`read`, :meth:`iid_to_index`, :meth:`sid_to_index`, :meth:`kernel`. See below for details.
 
-        :class:`.SnpData` is a SnpReader so it supports the above properties and method. In addition, it supports property :attr:`.SnpData.val` and method :meth:`.SnpData.standardize`.
+        :class:`.SnpData` is a SnpReader so it supports the above properties and methods. In addition, it supports property :attr:`.SnpData.val` and method :meth:`.SnpData.standardize`.
         See below for details.
 
     iids and sids:
@@ -74,7 +74,7 @@ class SnpReader(object):
         
     When Data is Read:
 
-        SNP data can be enormous so generally avoid reading it to the degree practical. Specifically,
+        SNP data can be enormous so we generally avoid reading it to the degree practical. Specifically,
         
         * Constructing and printing a SnpReader causes no file reading. For example, these commands read no data:
 
@@ -85,7 +85,7 @@ class SnpReader(object):
             >>> print subset_on_disk # print the subset SnpReader. No data is read.
             Bed('../tests/datasets/all_chr.maf0.001.N300')[[3,4],::2]
 
-        * Properties and methods related to the iids and sids (to the degree practical) read only iid and sid data from the disk,
+        * Properties and methods related to the iids and sids (to the degree practical) read just some iid and sid data from the disk,
           not SNP value data. Moreover, the iid and sid data is read from file only once. Consider these commands:
 
             >>> snp_on_disk = Bed('../tests/datasets/all_chr.maf0.001.N300') # Construct a Bed SnpReader. No data is read.
@@ -101,7 +101,7 @@ class SnpReader(object):
             >>> print snpdata1.val[0,2] # print the SNP value for the iid with index 0 and the sid with index 2. (No data is read from disk.)
             1.0
 
-        * If you request the values for only a subset of the sids or iids, (to the degree practical) only that subset will be read from disk.
+        * If you request the values for only a subset of the iids or sids, (to the degree practical) only that subset will be read from disk.
           for example:
 
             >>> subset_on_disk = Bed('../tests/datasets/all_chr.maf0.001.N300')[[3,4],::2] # Construct a subsetting SnpReader. No data is read.
