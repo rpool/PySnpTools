@@ -407,7 +407,7 @@ class SnpReader(object):
         """
         val = self._read(None, None, order, dtype, force_python_only, view_ok)
         from snpdata import SnpData
-        ret = SnpData(self.iid,self.sid,self.pos, val, str(self), self.copyinputs)
+        ret = SnpData(self.iid,self.sid,self.pos, val, str(self))
         return ret
 
     def iid_to_index(self, list):

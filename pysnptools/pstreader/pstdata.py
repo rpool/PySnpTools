@@ -25,8 +25,6 @@ class PstData(PstReader):
         self.val = val
         self._parent_string = parent_string
         self._std_string_list = []
-        if copyinputs_function is not None:
-            self.copyinputs = copyinputs_function
 
     val = None
     """The in-memory data. A numpy.ndarray with dimensions :attr:`.row_count` x :attr:`.col_count`.

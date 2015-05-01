@@ -3,8 +3,10 @@ import subprocess, sys, os.path
 from itertools import *
 import pandas as pd
 import logging
+from pysnptools.standardizer import Unit
 from kernelreader import KernelReader
-from pstdata import PstData
+from kerneldata import KernelData
+#from pstdata import PstData !!!cmk
 
 class SnpKernel(KernelReader):
     #!!!cmk update all comments
@@ -21,11 +23,7 @@ class SnpKernel(KernelReader):
     #!!!cmk does copyinputs do the right thing? Probably not. Need to look at self.snpreader
 
     @property
-    def assume_symmetric(self):
-        return True
-
-    @property
-    def iid(self):
+    def row(self):
         """A ndarray of the iids.
 
         See :attr:`.SnpReader.iid` for details and examples.
@@ -33,30 +31,35 @@ class SnpKernel(KernelReader):
         return self.snpreader.iid
 
     @property
-    def iid0(self):
+    def col(self):
         """A ndarray of the iid0s.
 
         See :attr:`.SnpReader.iid` for details and examples.
         """
         return self.snpreader.iid
 
-    @property
-    def iid1(self):
-        """A ndarray of the iid0s.
+    def __repr__(self):
+        if isinstance(self.standardizer,Unit):
+            s = "SnpKernel({0})".format(self.snpreader)
+        else:
+            s = "SnpKernel({0},standardizer={1})".format(self.snpreader,self.standardizer)
+        return s
 
-        See :attr:`.SnpReader.iid` for details and examples.
-        """
-        return self.snpreader.iid
 
     #!!!cmk is this needed?
     # Most _read's support only indexlists or None, but this one supports Slices, too.
     _read_accepts_slices = None
 
     def _read(self, row_index_or_none, col_index_or_none, order, dtype, force_python_only, view_ok):
-        assert row_index_or_none == col_index_or_none, "!!!cmk fix up test and message"
-        snpreader_subset = self.snpreader[row_index_or_none, col_index_or_none]
+        #!!!cmk this code is not complete - if the row_index is not equal to the colum_index then should read the union of them, then compute the kernel then slice the bit we want
+        try:
+            assert np.array_equal(row_index_or_none, col_index_or_none), "!!!cmk fix up test and message"
+        except:
+            print "!!!cmk"
+            raise Exception()
+        snpreader_subset = self.snpreader[row_index_or_none, :]
         val = snpreader_subset.kernel(self.standardizer) #!!!cmk what about order, dtype, and batch rows??
-        return KernelData(iid=snpreader_subset.iid, val=val)
+        return val
 
 
 if __name__ == "__main__":

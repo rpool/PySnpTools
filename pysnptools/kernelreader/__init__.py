@@ -1,7 +1,9 @@
-"""Tools for reading SNP files
+"""Tools for reading SNP files #!!!cmkfix comment
 
 
 """
 
-from pysnptools.snpreader.kernelreader import KernelReader
-from pysnptools.snpreader.kerneldata import KernelData
+from pysnptools.kernelreader.kernelreader import KernelReader
+from pysnptools.kernelreader.kerneldata import KernelData
+from pysnptools.kernelreader.snpkernel import SnpKernel
+from pysnptools.kernelreader.identity import Identity

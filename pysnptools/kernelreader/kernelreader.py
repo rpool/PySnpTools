@@ -290,12 +290,8 @@ class KernelReader(PstReader):
          ['POP1' '12']
          ['POP1' '44']]
         """
-        raise NotImplementedError
-
-    @property
-    def assume_symmetric(self):
-        return self.iid0 is self.iid1
-
+        assert self.iid0 is self.iid1, "When 'iid' is used, iid0 must be the same as iid1"
+        return self.iid0
 
     @property
     def iid0(self):
@@ -314,7 +310,7 @@ class KernelReader(PstReader):
          ['POP1' '12']
          ['POP1' '44']]
         """
-        raise NotImplementedError
+        return self.row
 
     @property
     def iid1(self):
@@ -333,7 +329,7 @@ class KernelReader(PstReader):
          ['POP1' '12']
          ['POP1' '44']]
         """
-        raise NotImplementedError
+        return self.col
 
     @property
     def iid_count(self):
@@ -343,7 +339,11 @@ class KernelReader(PstReader):
 
         This property (to the degree practical) reads only iid and sid data from the disk, not SNP value data. Moreover, the iid and sid data is read from file only once.
         """
-        assert self.assume_symmetric, "When 'iid_count' is used, iid0 must be the same as iid1"
+        try:
+            assert self.iid0 is self.iid1, "When 'iid_count' is used, iid0 must be the same as iid1"
+        except:
+            print "!!!cmk"
+            raise Exception()
         return self.iid0_count
 
     @property
@@ -365,6 +365,20 @@ class KernelReader(PstReader):
         This property (to the degree practical) reads only iid and sid data from the disk, not SNP value data. Moreover, the iid and sid data is read from file only once.
         """
         return self.col_count
+
+
+    @property
+    def row_property(self):
+        if not hasattr(self,"_row_property"):
+            self._row_property = np.empty((self.row_count,0))
+        return self._row_property
+
+    @property
+    def col_property(self):
+        if not hasattr(self,"_col_property"):
+            self._col_property = np.empty((self.col_count,0))
+        return self._col_property
+
 
 
     #!!check that views always return contiguous memory by default
@@ -418,7 +432,7 @@ class KernelReader(PstReader):
         """
         val = self._read(None, None, order, dtype, force_python_only, view_ok)
         from kerneldata import KernelData
-        ret = KernelData(self.iid0,self.iid1, val, str(self), self.copyinputs)
+        ret = KernelData(iid0=self.iid0,iid1=self.iid1, val=val, parent_string=str(self))
         return ret
 
     def iid_to_index(self, list):
@@ -438,7 +452,7 @@ class KernelReader(PstReader):
         >>> print snp_on_disk.iid_to_index([['POP1','44'],['POP1','12']]) #Find the indexes for two iids.
         [2 1]
         """
-        assert self.assume_symmetric, "When 'iid_to_index' is used, iid0 must be the same as iid1"
+        assert self.iid0 is self.iid1, "When 'iid_to_index' is used, iid0 must be the same as iid1"
         return self.iid0_to_index(list)
 
     def iid0_to_index(self, list):
@@ -467,7 +481,7 @@ class KernelReader(PstReader):
             iid0_indexer, iid1_indexer = iid_indexer_and_snp_indexer
         except:
             iid0_indexer = iid_indexer_and_snp_indexer
-            iid1_index = iid0_index
+            iid1_indexer = iid0_indexer
 
         return _Subset(self, iid0_indexer, iid1_indexer)
 

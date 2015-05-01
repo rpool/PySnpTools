@@ -36,11 +36,13 @@
     <Compile Include="..\setup.py">
       <Link>setup\setup.py</Link>
     </Compile>
+    <Compile Include="kernelreader\identity.py" />
     <Compile Include="kernelreader\kerneldata.py" />
     <Compile Include="kernelreader\kernelreader.py" />
     <Compile Include="kernelreader\snpkernel.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="kernelreader\_subset.py" />
     <Compile Include="kernelreader\__init__.py" />
     <Compile Include="pstreader\pstdata.py" />
     <Compile Include="pstreader\pstnpz.py" />

@@ -6,6 +6,7 @@ import pandas as pd
 import logging
 import time
 import pysnptools.util as pstutil
+import numbers
 
 #!!why do the examples use ../tests/datasets instead of "examples"?
 class PstReader(object):
@@ -397,7 +398,7 @@ class PstReader(object):
         """
         val = self._read(None, None, order, dtype, force_python_only, view_ok)
         from pstdata import PstData
-        ret = PstData(self.row,self.col,self.row_property,self.col_property, val, str(self), self.copyinputs)
+        ret = PstData(self.row,self.col,self.row_property,self.col_property, val, str(self))
         return ret
 
     def row_to_index(self, list):
@@ -487,13 +488,14 @@ class PstReader(object):
             return indexer
 
         if np.isscalar(indexer):
+            assert isinstance(indexer, numbers.Integral), "Expect scalar indexes to be integers"
             return np.array([indexer])
 
         return PstReader._process_ndarray(np.array(indexer))
 
     @staticmethod
     def _process_ndarray(indexer):
-        if len(indexer)==0: # If it's very length the type is unrelible and unneeded.
+        if len(indexer)==0: # If it's very length the type is unreliable and unneeded.
             return np.zeros((0),dtype=np.integer)
         if indexer.dtype == bool:
             return np.arange(len(indexer),dtype=np.integer)[indexer]

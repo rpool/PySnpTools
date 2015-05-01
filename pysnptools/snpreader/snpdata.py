@@ -24,8 +24,6 @@ class SnpData(SnpReader):
         self.val = val
         self._parent_string = parent_string
         self._std_string_list = []
-        if copyinputs_function is not None:
-            self.copyinputs = copyinputs_function
 
     val = None
     """The in-memory SNP data. A numpy.ndarray with dimensions :attr:`.iid_count` x :attr:`.sid_count`.
