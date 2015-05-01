@@ -28,7 +28,7 @@ class _Subset(PstReader):
 
 
     def __repr__(self):
-        return _Subset.static___repr__(self) #!!!cmk test this
+        return _Subset.static__repr__(self) #!!!cmk test this
 
     def copyinputs(self, copier):
         _Subset.static_copyinput(self,copier)

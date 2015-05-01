@@ -45,6 +45,11 @@ class SnpKernel(KernelReader):
             s = "SnpKernel({0},standardizer={1})".format(self.snpreader,self.standardizer)
         return s
 
+    def copyinputs(self, copier):
+        #Doesn't need run_once
+        copier.input(self.snpreader)
+        copier.input(self.standardizer)
+
 
     #!!!cmk is this needed?
     # Most _read's support only indexlists or None, but this one supports Slices, too.
@@ -52,11 +57,7 @@ class SnpKernel(KernelReader):
 
     def _read(self, row_index_or_none, col_index_or_none, order, dtype, force_python_only, view_ok):
         #!!!cmk this code is not complete - if the row_index is not equal to the colum_index then should read the union of them, then compute the kernel then slice the bit we want
-        try:
-            assert np.array_equal(row_index_or_none, col_index_or_none), "!!!cmk fix up test and message"
-        except:
-            print "!!!cmk"
-            raise Exception()
+        assert np.array_equal(row_index_or_none, col_index_or_none), "!!!cmk fix up test and message"
         snpreader_subset = self.snpreader[row_index_or_none, :]
         val = snpreader_subset.kernel(self.standardizer) #!!!cmk what about order, dtype, and batch rows??
         return val

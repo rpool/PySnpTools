@@ -339,11 +339,7 @@ class KernelReader(PstReader):
 
         This property (to the degree practical) reads only iid and sid data from the disk, not SNP value data. Moreover, the iid and sid data is read from file only once.
         """
-        try:
-            assert self.iid0 is self.iid1, "When 'iid_count' is used, iid0 must be the same as iid1"
-        except:
-            print "!!!cmk"
-            raise Exception()
+        assert self.iid0 is self.iid1, "When 'iid_count' is used, iid0 must be the same as iid1"
         return self.iid0_count
 
     @property

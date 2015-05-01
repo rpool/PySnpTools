@@ -39,6 +39,7 @@
     <Compile Include="kernelreader\identity.py" />
     <Compile Include="kernelreader\kerneldata.py" />
     <Compile Include="kernelreader\kernelreader.py" />
+    <Compile Include="kernelreader\kernelnpz.py" />
     <Compile Include="kernelreader\snpkernel.py">
       <SubType>Code</SubType>
     </Compile>

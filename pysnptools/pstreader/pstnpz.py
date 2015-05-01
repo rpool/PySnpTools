@@ -17,42 +17,87 @@ class PstNpz(PstReader):
         '''
         filename    : string of the name of the npz file.
         '''
-        self.pstnpz_filename = pstnpz_filename
+        PstNpz._static__init__(self,pstnpz_filename)
 
     def __repr__(self): 
-        return "{0}('{1}')".format(self.__class__.__name__,self.pstnpz_filename)
-
+        return PstNpz._static__repr__(self)
 
     @property
     def row(self):
-        self.run_once()
-        return self._row
+        return PstNpz._static_row(self)
 
     @property
     def col(self):
-        self.run_once()
-        return self._col
+        return PstNpz._static_col(self)
 
     @property
     def row_property(self):
-        self.run_once()
-        return self._row_property
+        return PstNpz._static_row_property(self)
 
     @property
     def col_property(self):
+        return PstNpz._static_col_property(self)
+
+    def run_once(self):
+        PstNpz._static_run_once(self)
+
+    #def __del__(self):
+    #    if self._filepointer != None:  # we need to test this because Python doesn't guarantee that __init__ was fully run
+    #        self._filepointer.close()
+
+    def copyinputs(self, copier):
+        PstNpz._static_copyinputs(self, copier)
+
+    def _read(self, row_index_or_none, col_index_or_none, order, dtype, force_python_only, view_ok):
+        return PstNpz._static_read(self, row_index_or_none, col_index_or_none, order, dtype, force_python_only, view_ok)
+
+    @staticmethod
+    def write(data, npz_filename):
+        logging.info("Start writing " + npz_filename)
+        np.savez(npz_filename, row=data.row, col=data.col, row_property=data.row_property, col_property=data.col_property,val=data.val)
+        logging.info("Done writing " + npz_filename)
+
+    @staticmethod
+    def _static__init__(self, pstnpz_filename):
+        self._npz_filename = pstnpz_filename
+
+    @staticmethod
+    def _static__repr__(self): 
+        return "{0}('{1}')".format(self.__class__.__name__,self._npz_filename)
+
+    @staticmethod
+    def _static_row(self):
+        self.run_once()
+        return self._row
+
+    @staticmethod
+    def _static_col(self):
+        self.run_once()
+        return self._col
+
+    @staticmethod
+    def _static_row_property(self):
+        self.run_once()
+        return self._row_property
+
+    @staticmethod
+    def _static_col_property(self):
         self.run_once()
         return self._col_property
 
 
-    def run_once(self):
+    @staticmethod
+    def _static_run_once(self):
         if (self._ran_once):
             return
         self._ran_once = True
 
         #!!!cmk is this really done without reading 'data'? could mmap support be used?
-        with np.load(self.pstnpz_filename) as data: #!! similar code in epistasis
+        with np.load(self._npz_filename) as data: #!! similar code in epistasis
             self._row = data['row']
             self._col = data['col']
+            if np.array_equal(self._row, self._col): #If it's square, mark it so by making the col and row the same object
+                self._col = self._row
             self._row_property = data['row_property']
             self._col_property = data['col_property']
         #!!!cmk??? self._assert_iid_sid_pos()
@@ -63,11 +108,13 @@ class PstNpz(PstReader):
     #    if self._filepointer != None:  # we need to test this because Python doesn't guarantee that __init__ was fully run
     #        self._filepointer.close()
 
-    def copyinputs(self, copier):
+    @staticmethod
+    def _static_copyinputs(self, copier):
         # doesn't need to self.run_once()
         copier.input(self._npz_filename)
 
-    def _read(self, row_index_or_none, col_index_or_none, order, dtype, force_python_only, view_ok):
+    @staticmethod
+    def _static_read(self, row_index_or_none, col_index_or_none, order, dtype, force_python_only, view_ok):
         if order is None:
             order = "F"
         if dtype is None:
@@ -93,17 +140,12 @@ class PstNpz(PstReader):
             col_count_out = col_count_in
             col_index_out = range(col_count_in)
 
-        with np.load(self.pstnpz_filename) as data: #!! similar code in epistasis
+        with np.load(self._npz_filename) as data: #!! similar code in epistasis
             val = pstutil.sub_matrix(data['val'], row_index_out, col_index_out, order=order, dtype=dtype)
 
         return val
 
 
-    @staticmethod
-    def write(data, npz_filename):
-        logging.info("Start writing " + npz_filename)
-        np.savez(npz_filename, row=data.row, col=data.col, row_property=data.row_property, col_property=data.col_property,val=data.val)
-        logging.info("Done writing " + npz_filename)
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)

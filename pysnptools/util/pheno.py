@@ -82,11 +82,7 @@ def loadPhen(filename, missing ='-9',famid='FID', sampid='ID'):
 
     
     valsStr[valsStr==missing] = "NaN"
-    try:
-        vals = sp.array(valsStr,dtype = 'float')
-    except Exception, details:
-        print details
-        print "!!!cmk"
+    vals = sp.array(valsStr,dtype = 'float')
 
     ret = {
             'header':header,
