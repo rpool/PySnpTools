@@ -14,20 +14,57 @@ class Identity(KernelReader):
     """
     def __init__(self, iid): #!!!autodoc doesn't generate good doc for this constructor
 
-        self._row = iid if len(iid)>0 else np.array([],dtype=str).reshape(0,2) #!!!cmk are these two lines right?
-        self._col = self._row
-        #self.val = np.identity(len(self._row))
+        self._iid = iid if len(iid)>0 else np.array([],dtype=str).reshape(0,2) #!!!cmk are these two lines right?
 
-    #!!!cmk remove all .val's  - val = None
     """The in-memory SNP data. A numpy.ndarray with dimensions :attr:`.iid_count` x :attr:`.sid_count`.
 
     See :class:`.SnpReader` for details and examples.
     """
 
-    _parent_string = ""
-    _std_string_list = []
-    def standardize(self):
-        return self
+    #_parent_string = ""
+    #_std_string_list = []
+    #def standardize(self):
+    #    return self
+
+    @property
+    def iid(self):
+        """A ndarray of the iids.
+
+        See :attr:`.SnpReader.iid` for details and examples.
+        """
+        return self._iid
+
+    @property
+    def iid0(self):
+        """A ndarray of the iid0s.
+
+        See :attr:`.SnpReader.iid` for details and examples.
+        """
+        return self._iid
+
+    @property
+    def iid1(self):
+        """A ndarray of the iid0s.
+
+        See :attr:`.SnpReader.iid` for details and examples.
+        """
+        return self._iid
+
+    @property
+    def row(self):
+        """A ndarray of the iid0s.
+
+        See :attr:`.SnpReader.iid` for details and examples.
+        """
+        return self._iid
+    #!!!cmk don't we need col_propoerty and row_property, too?
+    @property
+    def col(self):
+        """A ndarray of the iid0s.
+
+        See :attr:`.SnpReader.iid` for details and examples.
+        """
+        return self._iid
 
     #!!!cmk test this
     def _read(self, row_index_or_none, col_index_or_none, order, dtype, force_python_only, view_ok):

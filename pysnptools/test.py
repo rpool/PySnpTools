@@ -78,7 +78,7 @@ class TestLoader(unittest.TestCase):
         
         np.random.seed(42)
         m = np.random.random((100,1000))
-        from pysnptools.standardizer.diag_K_to_N import DiagKtoN
+        from pysnptools.standardizer import DiagKtoN
         s = DiagKtoN(100)
         s.standardize(m)
         K = m.dot(m.T)
