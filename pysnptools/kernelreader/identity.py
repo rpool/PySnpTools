@@ -3,10 +3,10 @@ import subprocess, sys, os.path
 from itertools import *
 import pandas as pd
 import logging
-from kerneldata import KernelData
+from kernelreader import KernelReader
 from pysnptools.pstreader import PstData
 
-class Identity(KernelData):
+class Identity(KernelReader):
     """  This is a class hold SNP values in-memory along with related iid and sid information.
     It is created by calling the :meth:`.SnpReader.read` method on another :class:`.SnpReader`, for example, :class:`.Bed`.
 
@@ -16,9 +16,9 @@ class Identity(KernelData):
 
         self._row = iid if len(iid)>0 else np.array([],dtype=str).reshape(0,2) #!!!cmk are these two lines right?
         self._col = self._row
-        self.val = np.identity(len(self._row))
+        #self.val = np.identity(len(self._row))
 
-    val = None
+    #!!!cmk remove all .val's  - val = None
     """The in-memory SNP data. A numpy.ndarray with dimensions :attr:`.iid_count` x :attr:`.sid_count`.
 
     See :class:`.SnpReader` for details and examples.
@@ -34,10 +34,7 @@ class Identity(KernelData):
         #!!!cmk this code is not complete - if the row_index is not equal to the colum_index should slice the bit we want
         assert row_index_or_none == col_index_or_none, "!!!cmk fix up test and message"
         if row_index_or_none is None:
-            if view_ok:
-                return self.val
-            else:
-                return np.copy(self.val)
+            return np.identity(self.row_count)
         else:
             return np.identity(len(row_index_or_none))
 
