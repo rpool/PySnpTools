@@ -87,6 +87,7 @@ class SnpKernel(KernelReader):
         except:
             iid0 = iid_indexer_and_snp_indexer
             iid1 = iid0
+
         assert iid0 is iid1 or np.array_equal(iid0,iid1), "when selecting a subset of snps from a SnpKernel, the two snps lists must be the same" #!!!cmk is this restriction good?
 
         return SnpKernel(self._snpreader[iid0,:],standardizer=self.standardizer)

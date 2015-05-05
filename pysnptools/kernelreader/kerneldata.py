@@ -68,7 +68,8 @@ class KernelData(KernelReader,PstData):
 
     def standardize(self):
         factor = self.iid_count / np.diag(self.val).sum()
-        self.val *= factor
+        if abs(factor-1.0)>1e-15:
+            self.val *= factor
         return self
 
 
