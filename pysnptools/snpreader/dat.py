@@ -23,27 +23,27 @@ class Dat(SnpReader):
 
 
     @property
-    def iid(self):
+    def row(self):
         self.run_once()
-        return self._iid
+        return self._row
 
     @property
-    def sid(self):
+    def col(self):
         self.run_once()
-        return self._sid
+        return self._col
 
     @property
-    def pos(self):
+    def col_property(self):
         self.run_once()
-        return self._pos
+        return self._col_property
 
     def run_once(self):
         if self._ran_once:
             return
         self._ran_once = True
 
-        self._iid = SnpReader._read_fam(self.dat_filename,remove_suffix="dat")
-        self._sid, self._pos = SnpReader._read_map_or_bim(self.dat_filename,remove_suffix="dat", add_suffix="map")
+        self._row = SnpReader._read_fam(self.dat_filename,remove_suffix="dat")
+        self._col, self._col_property = SnpReader._read_map_or_bim(self.dat_filename,remove_suffix="dat", add_suffix="map")
 
         self._assert_iid_sid_pos()
 
@@ -67,7 +67,7 @@ class Dat(SnpReader):
             datfields = pd.read_csv(self.dat_filename,delimiter = '\t',header=None,index_col=False)
             if not np.array_equal(np.array(datfields[0],dtype="string"), self.sid) : raise Exception("Expect snp list in map file to exactly match snp list in dat file")
             self.start_column = 3
-            if len(self._iid) != datfields.shape[1]-self.start_column : raise Exception("Expect # iids in fam file to match dat file")
+            if len(self._row) != datfields.shape[1]-self.start_column : raise Exception("Expect # iids in fam file to match dat file")
             self._datfields = datfields.T
         return self._datfields
 

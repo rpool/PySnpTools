@@ -29,33 +29,33 @@ class Bed(SnpReader):
         return "{0}('{1}')".format(self.__class__.__name__,self.basefilename)
 
     @property
-    def iid(self):
+    def row(self):
         """list of iids
         """
         self._run_once()
-        return self._iid
+        return self._row
 
     @property
-    def sid(self):
+    def col(self):
         """list of sids
         """
         self._run_once()
-        return self._sid
+        return self._col
 
     @property
-    def pos(self):
+    def col_property(self):
         """list of position information
         """
         self._run_once()
-        return self._pos
+        return self._col_property
 
     def _run_once(self):
         if self._ran_once:
             return
         self._ran_once = True
 
-        self._iid = SnpReader._read_fam(self.basefilename,remove_suffix="bed")
-        self._sid, self._pos = SnpReader._read_map_or_bim(self.basefilename,remove_suffix="bed", add_suffix="bim")
+        self._row = SnpReader._read_fam(self.basefilename,remove_suffix="bed")
+        self._col, self._col_property = SnpReader._read_map_or_bim(self.basefilename,remove_suffix="bed", add_suffix="bim")
         self._assert_iid_sid_pos()
 
         bedfile = self.basefilename+ '.bed'

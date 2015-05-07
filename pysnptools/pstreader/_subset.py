@@ -73,7 +73,7 @@ class _Subset(PstReader):
     @staticmethod
     def static_nice_string(self, some_slice):
         if isinstance(some_slice,slice):
-            return self._slice_format[(some_slice.start is not None, some_slice.stop is not None, some_slice.step is not None)].format(some_slice.start, some_slice.stop, some_slice.step)
+            return _Subset._slice_format[(some_slice.start is not None, some_slice.stop is not None, some_slice.step is not None)].format(some_slice.start, some_slice.stop, some_slice.step)
         elif len(some_slice) == 1:
             return str(some_slice[0])
         elif len(some_slice) < 10:

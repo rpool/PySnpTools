@@ -29,31 +29,31 @@ class Ped(SnpReader):
         return "{0}('{1}'{2})".format(self.__class__.__name__,self.basefilename,missing_string)
 
     @property
-    def iid(self):
+    def row(self):
         self.run_once()
-        return self._iid
+        return self._row
 
     @property
-    def sid(self):
+    def col(self):
         self.run_once()
-        return self._sid
+        return self._col
 
     @property
-    def pos(self):
+    def col_property(self):
         self.run_once()
-        return self._pos
+        return self._col_property
 
     def run_once(self):
         if (self._ran_once):
             return
         self._ran_once = True
 
-        self._sid, self._pos = SnpReader._read_map_or_bim(self.basefilename,remove_suffix="bed", add_suffix="map")
+        self._col, self._col_property = SnpReader._read_map_or_bim(self.basefilename,remove_suffix="bed", add_suffix="map")
 
 
         pedfile = SnpReader._name_of_other_file(self.basefilename,remove_suffix="ped", add_suffix="ped")
         ped = np.loadtxt(pedfile,dtype = 'str',comments=None)
-        self._iid = ped[:,0:2]
+        self._row = ped[:,0:2]
 
         self._assert_iid_sid_pos()
 

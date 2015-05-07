@@ -27,19 +27,19 @@ class Hdf5(SnpReader):
 
 
     @property
-    def iid(self):
+    def row(self):
         self.run_once()
-        return self._iid
+        return self._row
 
     @property
-    def sid(self):
+    def col(self):
         self.run_once()
-        return self._sid
+        return self._col
 
     @property
-    def pos(self):
+    def col_property(self):
         self.run_once()
-        return self._pos
+        return self._col_property
 
     def run_once(self):
         if self._ran_once:
@@ -49,17 +49,17 @@ class Hdf5(SnpReader):
         except IOError, e:
             raise IOError("Missing or unopenable file '{0}' -- Native error message: {1}".format(self.filename,e))
 
-        self._iid = sp.empty(self.h5['iid'].shape,dtype=self.h5['iid'].dtype) #make a 2D deepcopy from h5 (more direct methods, don't seem to work)
+        self._row = sp.empty(self.h5['iid'].shape,dtype=self.h5['iid'].dtype) #make a 2D deepcopy from h5 (more direct methods, don't seem to work)
         for iRow, row in enumerate(self.h5['iid']):
             for iCol, value in enumerate(row):
-                self._iid[iRow,iCol] = value
+                self._row[iRow,iCol] = value
 
-        self._pos = sp.array(self.h5['pos'])
+        self._col_property = sp.array(self.h5['pos']) #!!!cmk should the hdf5 format be changed to use 'col_property' etc instead of pos
         try: #new format
-            self._sid = sp.array(self.h5['sid'])
+            self._col = sp.array(self.h5['sid'])
             self.val_in_file = self.h5['val']
         except: # try old format
-            self._sid = sp.array(self.h5['rs'])
+            self._col = sp.array(self.h5['rs'])
             self.val_in_file = self.h5['snps']
 
         self._assert_iid_sid_pos()
@@ -67,8 +67,8 @@ class Hdf5(SnpReader):
         if "SNP-major" not in self.val_in_file.attrs: raise Exception("In Hdf5 the 'val' matrix must have a Boolean 'SNP-major' attribute")
         self.is_snp_major = self.val_in_file.attrs["SNP-major"]
 
-        S_original = len(self._sid)
-        N_original = len(self._iid)
+        S_original = len(self._col)
+        N_original = len(self._row)
         if self.is_snp_major:
             if not self.val_in_file.shape == (S_original, N_original, ) : raise Exception("In Hdf5, snps matrix dimensions don't match those of 'sid' and 'iid'")
         else:
@@ -105,7 +105,7 @@ class Hdf5(SnpReader):
     #!! much code the same as for Bed
     def create_block(self, blocksize, order, dtype):
 
-        N_original = len(self._iid) #similar code else where -- make a method
+        N_original = len(self._row) #similar code else where -- make a method
         matches_order = self.is_snp_major == (order =="F") #similar code else where -- make a method
         opposite_order = "C" if order == "F" else "F"#similar code else where -- make a method
         if matches_order:

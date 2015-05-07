@@ -6,9 +6,10 @@ import pandas as pd
 import logging
 import time
 import pysnptools.util as pstutil
+from pysnptools.pstreader import PstReader
 
 #!!why do the examples use ../tests/datasets instead of "examples"?
-class SnpReader(object):
+class SnpReader(PstReader):
     """The (abstract) base class for you to specify SNP data and later read it.
 
     A SnpReader is one of three things:
@@ -289,7 +290,7 @@ class SnpReader(object):
          ['POP1' '12']
          ['POP1' '44']]
         """
-        raise NotImplementedError
+        return self.row
 
     @property
     def iid_count(self):
@@ -299,7 +300,7 @@ class SnpReader(object):
 
         This property (to the degree practical) reads only iid and sid data from the disk, not SNP value data. Moreover, the iid and sid data is read from file only once.
         """
-        return len(self.iid)
+        return self.row_count
 
     @property
     def sid(self):
@@ -317,7 +318,7 @@ class SnpReader(object):
         ['1_12' '1_34' '1_10' '1_35' '1_28' '1_25' '1_36' '1_39' '1_4' '1_13']
 
         """
-        raise NotImplementedError
+        return self.col
 
     @property
     def sid_count(self):
@@ -328,7 +329,7 @@ class SnpReader(object):
         This property (to the degree practical) reads only iid and sid data from the disk, not SNP value data. Moreover, the iid and sid data is read from file only once.
 
         """
-        return len(self.sid)
+        return self.col_count
 
     #!!document that chr must not be X,Y,M only numbers (as per the PLINK BED format)
     #!!Also what about telling the ref and alt allele? Also, what about tri and quad alleles, etc?
@@ -349,7 +350,13 @@ class SnpReader(object):
          [ 1.          0.023023    1.        ]
          [ 1.          0.0700701   4.        ]]
         """
-        raise NotImplementedError
+        return self.col_property
+
+    @property
+    def row_property(self):
+        if not hasattr(self,'_row_property'):
+            self._row_property = np.empty((self.row_count,0))
+        return self._row_property
 
     def _read(self, iid_index_or_none, sid_index_or_none, order, dtype, force_python_only, view_ok):
         raise NotImplementedError
@@ -427,14 +434,7 @@ class SnpReader(object):
         >>> print snp_on_disk.iid_to_index([['POP1','44'],['POP1','12']]) #Find the indexes for two iids.
         [2 1]
         """
-        if not hasattr(self, "_iid_to_index"):
-            self._iid_to_index = {}
-            for index, item in enumerate(self.iid):
-                key = (item[0],item[1])
-                if self._iid_to_index.has_key(key) : raise Exception("Expect iid to appear in data only once. ({0})".format(key))
-                self._iid_to_index[key] = index
-        index = np.fromiter((self._iid_to_index[(item1[0],item1[1])] for item1 in list),np.int)
-        return index
+        return self.row_to_index(list)
 
     def sid_to_index(self, list):
         """Takes a list of sids and returns a list of index numbers
@@ -453,13 +453,7 @@ class SnpReader(object):
         >>> print snp_on_disk.sid_to_index(['1_10','1_13']) #Find the indexes for two sids.
         [2 9]
         """
-        if not hasattr(self, "_sid_to_index"):
-            self._sid_to_index = {}
-            for index, item in enumerate(self.sid):
-                if self._sid_to_index.has_key(item) : raise Exception("Expect snp to appear in data only once. ({0})".format(item))
-                self._sid_to_index[item] = index
-        index = np.fromiter((self._sid_to_index[item1] for item1 in list),np.int)
-        return index
+        return self.col_to_index(list)
 
     def __getitem__(self, iid_indexer_and_snp_indexer):
         from _subset import _Subset
@@ -531,97 +525,9 @@ class SnpReader(object):
     def copyinputs(self, copier):
         raise NotImplementedError
 
-    @staticmethod
-    def _is_all_slice(index_or_none):
-        if index_or_none is None:
-            return True
-        return  isinstance(index_or_none,slice) and index_or_none == slice(None)
-
-    @staticmethod
-    def _make_sparray_or_slice(indexer):
-        if indexer is None:
-            return slice(None)
-
-        if isinstance(indexer,np.ndarray):
-            return SnpReader._process_ndarray(indexer)
-
-        if isinstance(indexer, slice):
-            return indexer
-
-        if np.isscalar(indexer):
-            return np.array([indexer])
-
-        return SnpReader._process_ndarray(np.array(indexer))
-
-    @staticmethod
-    def _process_ndarray(indexer):
-        if len(indexer)==0: # If it's very length the type is unrelible and unneeded.
-            return np.zeros((0),dtype=np.integer)
-        if indexer.dtype == bool:
-            return np.arange(len(indexer),dtype=np.integer)[indexer]
-        assert np.issubdtype(indexer.dtype, np.integer), "Indexer of unknown type"
-        return indexer
-
-
-    @staticmethod
-    def _make_sparray_from_sparray_or_slice(count, indexer):
-        if isinstance(indexer,slice):
-            return apply(np.arange, indexer.indices(count))
-        return indexer
-
-    def _assert_iid_sid_pos(self):
-        assert np.issubdtype(self._iid.dtype, str) and len(self._iid.shape)==2 and self._iid.shape[1]==2, "iid should be dtype str, have two dimensions, and the second dimension should be size 2"
-        assert np.issubdtype(self._sid.dtype, str) and len(self._sid.shape)==1, "sid should be of dtype of str and one dimensional"
-        assert np.issubdtype(self._pos.dtype, np.number) and len(self._pos.shape)==2 and self._pos.shape[1]==3, "pos should be dtype number, have two dimensions, and the second dimension should be size 3"
-
-
-    @staticmethod
-    def _array_properties_are_ok(val, order, dtype):
-        if val.dtype != dtype:
-            return False
-        if order is 'F':
-            return val.flags['F_CONTIGUOUS']
-        elif order is 'C':
-            return val.flags['C_CONTIGUOUS']
-
-        return True
-
-    def _apply_sparray_or_slice_to_val(self, val, iid_indexer_or_none, sid_indexer_or_none, order, dtype, force_python_only):
-
-        if (SnpReader._is_all_slice(iid_indexer_or_none) and SnpReader._is_all_slice(sid_indexer_or_none)  and not force_python_only and 
-                (order == 'A' or (order == 'F' and val.flags['F_CONTIGUOUS']) or (order == 'C' and val.flags['C_CONTIGUOUS'])) and
-                (dtype is None or  val.dtype == dtype)):
-            return val, True
-
-        iid_indexer = SnpReader._make_sparray_or_slice(iid_indexer_or_none)
-        sid_indexer = SnpReader._make_sparray_or_slice(sid_indexer_or_none)
-        if not force_python_only:
-            iid_index = SnpReader._make_sparray_from_sparray_or_slice(self.iid_count, iid_indexer)
-            sid_index = SnpReader._make_sparray_from_sparray_or_slice(self.sid_count, sid_indexer)
-            sub_val = pstutil.sub_matrix(val, iid_index, sid_index, order=order, dtype=dtype)
-            return sub_val, False
-
-
-        if SnpReader._is_all_slice(iid_indexer) or SnpReader._is_all_slice(sid_indexer):
-            sub_val = val[iid_indexer, sid_indexer] #!!is this faster than the C++?
-        else: 
-            iid_index = SnpReader._make_sparray_from_sparray_or_slice(self.iid_count, iid_indexer)
-            sid_index = SnpReader._make_sparray_from_sparray_or_slice(self.sid_count, sid_indexer)
-            #See http://stackoverflow.com/questions/21349133/numpy-array-integer-indexing-in-more-than-one-dimension
-            sub_val = val[iid_index.reshape(-1,1), sid_index]
-
-        assert len(sub_val.shape)==2, "Expect result of subsetting to be 2 dimensional"
-
-        if not SnpReader._array_properties_are_ok(sub_val, order, dtype):
-            if order is None:
-                order = "K"
-            if dtype is None:
-                dtype = sub_val.dtype
-            sub_val = sub_val.astype(dtype, order, copy=True)
-
-        shares_memory =  np.may_share_memory(val, sub_val)
-        assert(SnpReader._array_properties_are_ok(sub_val, order, dtype))
-        return sub_val, shares_memory
+    def _assert_iid_sid_pos(self): #!!!cmk where is this used?
+        assert np.issubdtype(self._row.dtype, str) and len(self._row.shape)==2 and self._row.shape[1]==2, "iid should be dtype str, have two dimensions, and the second dimension should be size 2"
+        assert np.issubdtype(self._col.dtype, str) and len(self._col.shape)==1, "sid should be of dtype of str and one dimensional"
 
     @staticmethod
     def _name_of_other_file(filename,remove_suffix,add_suffix):
@@ -677,21 +583,6 @@ class SnpReader(object):
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-
-    #from pysnptools.snpreader import Bed
-
-    #snp_on_disk = Bed('tests/datasets/all_chr.maf0.001.N300') # Specify some data on disk in Bed format
-    #subset_snpreader_1 = snp_on_disk[[3,4],:] #index with an array of indexes
-    #print subset_snpreader_1.iid_count, subset_snpreader_1.sid_count
-    ##2 1015
-    #snpdata1 = subset_snpreader_1.read() # read just the two rows of interest from the disk
-    #subset_snpreader_2 = snp_on_disk[:,:0:-2] #index with a slice
-    #print subset_snpreader_2.iid_count, subset_snpreader_2.sid_count
-    ##300 507
-    #boolindexes = [s.startswith('23_') for s in snp_on_disk.sid] # create a Boolean index of sids that start '23_'
-    #subset_snpreader_3 = snp_on_disk[:,boolindexes] #index with array of Booleans
-    #print subset_snpreader_3.iid_count, subset_snpreader_3.sid_count
-    ##300 24
 
     import doctest
     doctest.testmod()

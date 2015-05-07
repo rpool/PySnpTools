@@ -27,19 +27,19 @@ class Pheno(SnpReader):
 
 
     @property
-    def iid(self):
+    def row(self):
         self.run_once()
-        return self._iid
+        return self._row
 
     @property
-    def sid(self):
+    def col(self):
         self.run_once()
-        return self._sid
+        return self._col
 
     @property
-    def pos(self):
+    def col_property(self):
         self.run_once()
-        return self._pos
+        return self._col_property
 
     def run_once(self):
         if self._ran_once:
@@ -70,14 +70,14 @@ class Pheno(SnpReader):
             'iid' : pheno_input['iid']
             }
 
-        self._iid = pheno_input['iid']
-        self._sid = np.array(pheno_input['header'],dtype='str')
-        self._pos = np.empty((len(self._sid),3))
-        self._pos.fill(np.nan)
+        self._row = pheno_input['iid']
+        self._col = np.array(pheno_input['header'],dtype='str')
+        self._col_property = np.empty((len(self._col),3))
+        self._col_property.fill(np.nan)
         self._val = pheno_input['vals']
 
-        assert len(self._sid) == self._val.shape[1], "Expect # of sids to match number of columns to values"
-        assert len(self._iid) == self._val.shape[0], "Expect # of iids to match number of rows to values"
+        assert len(self._row) == self._val.shape[0], "Expect # of iids to match number of rows to values"
+        assert len(self._col) == self._val.shape[1], "Expect # of sids to match number of columns to values"
 
         return self
 

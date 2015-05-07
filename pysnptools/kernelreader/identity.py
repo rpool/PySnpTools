@@ -14,7 +14,7 @@ class Identity(KernelReader):
     """
     def __init__(self, iid): #!!!autodoc doesn't generate good doc for this constructor
 
-        self._iid = iid if len(iid)>0 else np.array([],dtype=str).reshape(0,2) #!!!cmk are these two lines right?
+        self._row = iid if len(iid)>0 else np.array([],dtype=str).reshape(0,2) #!!!cmk are these two lines right?
 
     """The in-memory SNP data. A numpy.ndarray with dimensions :attr:`.iid_count` x :attr:`.sid_count`.
 
@@ -32,7 +32,7 @@ class Identity(KernelReader):
 
         See :attr:`.SnpReader.iid` for details and examples.
         """
-        return self._iid
+        return self._row
 
     @property
     def iid0(self):
@@ -40,7 +40,7 @@ class Identity(KernelReader):
 
         See :attr:`.SnpReader.iid` for details and examples.
         """
-        return self._iid
+        return self._row
 
     @property
     def iid1(self):
@@ -48,7 +48,7 @@ class Identity(KernelReader):
 
         See :attr:`.SnpReader.iid` for details and examples.
         """
-        return self._iid
+        return self._row
 
     @property
     def row(self):
@@ -56,7 +56,7 @@ class Identity(KernelReader):
 
         See :attr:`.SnpReader.iid` for details and examples.
         """
-        return self._iid
+        return self._row
     #!!!cmk don't we need col_propoerty and row_property, too?
     @property
     def col(self):
@@ -64,7 +64,7 @@ class Identity(KernelReader):
 
         See :attr:`.SnpReader.iid` for details and examples.
         """
-        return self._iid
+        return self._row
 
     #!!!cmk test this
     def _read(self, row_index_or_none, col_index_or_none, order, dtype, force_python_only, view_ok):

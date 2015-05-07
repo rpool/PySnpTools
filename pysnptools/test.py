@@ -486,7 +486,6 @@ class TestDocStrings(unittest.TestCase):
         os.chdir(old_dir)
         assert result.failed == 0, "failed doc test: " + __file__
 
-
     def test_util(self):
         import pysnptools.util
         old_dir = os.getcwd()

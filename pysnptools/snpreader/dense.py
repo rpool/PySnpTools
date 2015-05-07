@@ -38,12 +38,12 @@ class Dense(SnpReader):
     @property
     def sid(self):
         self.run_once()
-        return self._sid
+        return self._col
 
     @property
-    def pos(self):
+    def col_property(self):
         self.run_once()
-        return self._pos
+        return self._col_property
 
     def run_once(self):
         if (self._ran_once):
@@ -63,8 +63,8 @@ class Dense(SnpReader):
                 bim_list.append(self.extract_bim_function(sid_string))
                 assert len(rest) == len(self._original_iid)
 
-        self._sid = np.array([bim[1] for bim in bim_list],dtype='str')
-        self._pos = np.array([[bim[0],bim[2],bim[3]] for bim in bim_list],dtype='int')
+        self._col = np.array([bim[1] for bim in bim_list],dtype='str')
+        self._col_property = np.array([[bim[0],bim[2],bim[3]] for bim in bim_list],dtype='int')
 
         return self
 

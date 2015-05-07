@@ -14,9 +14,9 @@ class SnpData(SnpReader):
     See :class:`.SnpReader` for details and examples.
     """
     def __init__(self, iid, sid, pos, val, parent_string="",copyinputs_function=None): #!!!autodoc doesn't generate good doc for this constructor
-        self._iid = iid if len(iid)>0 else np.array([],dtype=str).reshape(0,2)
-        self._sid = sid if len(sid)>0 else np.array([],dtype=str)
-        self._pos = pos if len(sid)>0 else np.array([],dtype=int).reshape(0,3)
+        self._row = iid if len(iid)>0 else np.array([],dtype=str).reshape(0,2)
+        self._col = sid if len(sid)>0 else np.array([],dtype=str)
+        self._col_property = pos if len(sid)>0 else np.array([],dtype=int).reshape(0,3)
 
         self._assert_iid_sid_pos()
 
@@ -48,28 +48,28 @@ class SnpData(SnpReader):
         pass
 
     @property
-    def iid(self):
+    def row(self):
         """A ndarray of the iids.
 
         See :attr:`.SnpReader.iid` for details and examples.
         """
-        return self._iid
+        return self._row
 
     @property
-    def sid(self):
+    def col(self):
         """A ndarray of the sids.
 
         See :attr:`.SnpReader.sid` for details and examples.
         """
-        return self._sid
+        return self._col
 
     @property
-    def pos(self):
+    def col_property(self):
         """A ndarray of the position information for each sid.
 
         See :attr:`.SnpReader.pos` for details and examples.
         """
-        return self._pos
+        return self._col_property
 
     #!!Seems like we can't short cut the view_OK this because the .val wouldn't necessarily have the right order and dtype
     #def read(self, order='F', dtype=np.float64, force_python_only=False, view_ok=False):
