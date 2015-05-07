@@ -94,12 +94,18 @@ class PstNpz(PstReader):
 
         #!!!cmk is this really done without reading 'data'? could mmap support be used?
         with np.load(self._npz_filename) as data: #!! similar code in epistasis
-            self._row = data['row']
-            self._col = data['col']
-            if np.array_equal(self._row, self._col): #If it's square, mark it so by making the col and row the same object
+            if len(data.keys()) == 2 and  'arr_0' in data.keys(): #for backwards compatibility
+                self._row = data['arr_0']
                 self._col = self._row
-            self._row_property = data['row_property']
-            self._col_property = data['col_property']
+                self._row_property = np.empty((len(self._row),0))
+                self._col_property = np.empty((len(self._col),0))
+            else:
+                self._row = data['row']
+                self._col = data['col']
+                if np.array_equal(self._row, self._col): #If it's square, mark it so by making the col and row the same object
+                    self._col = self._row
+                self._row_property = data['row_property']
+                self._col_property = data['col_property']
         #!!!cmk??? self._assert_iid_sid_pos()
 
         return self
@@ -120,7 +126,8 @@ class PstNpz(PstReader):
         if dtype is None:
             dtype = np.float64
         if force_python_only is None:
-            force_python_only = False
+            force_python_only = False #!!!cmk this is ignore
+        #!!!cmk view_ok is also ignored
 
         #This could be re-factored to not use so many names
         row_count_in = self.row_count
@@ -140,8 +147,14 @@ class PstNpz(PstReader):
             col_count_out = col_count_in
             col_index_out = range(col_count_in)
 
+        #!!!cmk do we really need to load twice?
         with np.load(self._npz_filename) as data: #!! similar code in epistasis
-            val = pstutil.sub_matrix(data['val'], row_index_out, col_index_out, order=order, dtype=dtype)
+            if len(data.keys()) == 2 and  'arr_1' in data.keys(): #for backwards compatibility
+               val = data['arr_1']
+            else:
+               val = data['val']
+
+            val = pstutil.sub_matrix(val, row_index_out, col_index_out, order=order, dtype=dtype) #!!!cmk fix so doesn't make a copy of it doesn't need to
 
         return val
 

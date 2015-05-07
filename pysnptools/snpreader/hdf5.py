@@ -42,7 +42,7 @@ class Hdf5(SnpReader):
         return self._pos
 
     def run_once(self):
-        if (self._ran_once):
+        if self._ran_once:
             return
         try:
             self.h5 = h5py.File(self.filename, "r")

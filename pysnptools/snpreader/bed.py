@@ -50,7 +50,7 @@ class Bed(SnpReader):
         return self._pos
 
     def _run_once(self):
-        if (self._ran_once):
+        if self._ran_once:
             return
         self._ran_once = True
 

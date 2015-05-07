@@ -51,6 +51,7 @@
     <Compile Include="pstreader\_subset.py" />
     <Compile Include="pstreader\__init__.py" />
     <Compile Include="snpreader\bed.py" />
+    <Compile Include="snpreader\pheno.py" />
     <Compile Include="snpreader\dense.py" />
     <Compile Include="snpreader\dat.py" />
     <Compile Include="snpreader\hdf5.py" />
