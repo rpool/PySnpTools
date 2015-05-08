@@ -6,88 +6,25 @@ import logging
 from snpreader import SnpReader
 from pysnptools.standardizer import Unit
 from pysnptools.standardizer import Identity
+from pysnptools.pstreader import PstData
 
-class SnpData(SnpReader):
+class SnpData(PstData,SnpReader):
     """  This is a class hold SNP values in-memory along with related iid and sid information.
     It is created by calling the :meth:`.SnpReader.read` method on another :class:`.SnpReader`, for example, :class:`.Bed`.
 
     See :class:`.SnpReader` for details and examples.
     """
-    def __init__(self, iid, sid, pos, val, parent_string="",copyinputs_function=None): #!!!autodoc doesn't generate good doc for this constructor
-        self._row = iid if len(iid)>0 else np.array([],dtype=str).reshape(0,2)
+    def __init__(self, iid, sid, pos, val, parent_string="",copyinputs_function=None): #!!!autodoc doesn't generate good doc for this constructor #!!!cmk5 should inits call the super inits to be sure everything is set?
+        self._row = iid if len(iid)>0 else np.array([],dtype=str).reshape(0,2) #!!!cmk4
         self._col = sid if len(sid)>0 else np.array([],dtype=str)
-        self._col_property = pos if len(sid)>0 else np.array([],dtype=int).reshape(0,3)
-
+        self._col_property = pos if len(sid)>0 else np.array([],dtype=int).reshape(0,3) #!!!cmk4
+        self._row_property = np.empty((len(iid),0))
         self._assert_iid_sid_pos()
 
         assert type(val) == np.ndarray, "expect SnpData's val to be a ndarray"
         self.val = val
         self._parent_string = parent_string
         self._std_string_list = []
-
-    val = None
-    """The in-memory SNP data. A numpy.ndarray with dimensions :attr:`.iid_count` x :attr:`.sid_count`.
-
-    See :class:`.SnpReader` for details and examples.
-    """
-
-    def __repr__(self):
-        if self._parent_string == "":
-            if len(self._std_string_list) > 0:
-                s = "SnpData({0})".format(",".join(self._std_string_list))
-            else:
-                s = "SnpData()"
-        else:
-            if len(self._std_string_list) > 0:
-                s = "SnpData({0},{1})".format(self._parent_string,",".join(self._std_string_list))
-            else:
-                s = "SnpData({0})".format(self._parent_string)
-        return s
-
-    def copyinputs(self, copier):
-        pass
-
-    @property
-    def row(self):
-        """A ndarray of the iids.
-
-        See :attr:`.SnpReader.iid` for details and examples.
-        """
-        return self._row
-
-    @property
-    def col(self):
-        """A ndarray of the sids.
-
-        See :attr:`.SnpReader.sid` for details and examples.
-        """
-        return self._col
-
-    @property
-    def col_property(self):
-        """A ndarray of the position information for each sid.
-
-        See :attr:`.SnpReader.pos` for details and examples.
-        """
-        return self._col_property
-
-    #!!Seems like we can't short cut the view_OK this because the .val wouldn't necessarily have the right order and dtype
-    #def read(self, order='F', dtype=np.float64, force_python_only=False, view_ok=False):
-    #    """creates an in-memory :class:`.SnpData` with a copy of the genotype data
-    #    """
-    #    if view_ok:
-    #        return self
-    #    else:
-    #        return SnpReader.read(self, order, dtype, force_python_only, view_ok)
-
-
-    # Most _read's support only indexlists or None, but this one supports Slices, too.
-    _read_accepts_slices = None
-    def _read(self, iid_index_or_none, sid_index_or_none, order, dtype, force_python_only, view_ok):
-        val, shares_memory = self._apply_sparray_or_slice_to_val(self.val, iid_index_or_none, sid_index_or_none, order, dtype, force_python_only)
-        if shares_memory and not view_ok:
-            val = val.copy(order='K')
-        return val
 
     #!!! should there be a single warning if Unit() finds and imputes NaNs?
     def standardize(self, standardizer=Unit(), blocksize=None, force_python_only=False):

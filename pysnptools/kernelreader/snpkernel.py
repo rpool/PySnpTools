@@ -50,11 +50,6 @@ class SnpKernel(KernelReader):
         copier.input(self._snpreader)
         copier.input(self.standardizer)
 
-
-    #!!!cmk is this needed?
-    # Most _read's support only indexlists or None, but this one supports Slices, too.
-    _read_accepts_slices = None
-
     @property
     def sid_count(self):
         return self._snpreader.sid_count
@@ -72,12 +67,11 @@ class SnpKernel(KernelReader):
         return snpdata.standardize(self.standardizer)
 
     def _read(self, row_index_or_none, col_index_or_none, order, dtype, force_python_only, view_ok):
-        #!!!cmk this code is not complete - if the row_index is not equal to the colum_index then should read the union of them, then compute the kernel then slice the bit we want
-        assert np.array_equal(row_index_or_none, col_index_or_none), "!!!cmk fix up test and message"
-        snpreader_subset = self._snpreader[row_index_or_none, :]
-        #!!!cmk this doesn't seem right. The standardize (e.g. Unit) won't have the same effect after iids have been removed.
-        val = snpreader_subset.kernel(self.standardizer) #!!!cmk what about order, dtype, and batch rows??
-        return val
+        if row_index_or_none is col_index_or_none or np.array_equal(row_index_or_none,row_index_or_none): #!!!cmk ignoring order, dtype, force_python_only and not making blocksize and allowlowrank accessable
+            return self._snpreader[row_index_or_none,:].kernel(self.standardizer)
+        else:
+            #Need to find the iids that are in either the cols or the rows. Standardize the snps with just those and then turn that square into the rectangle requested
+            raise NotImplementedError("Don't currently support reading non-square kernels from SnpKernels")
 
     #!!!cmk be sure to document that any subsetting applies to the inter snpreader BEFORE standardization.
     def __getitem__(self, iid_indexer_and_snp_indexer):
@@ -88,7 +82,8 @@ class SnpKernel(KernelReader):
             iid0 = iid_indexer_and_snp_indexer
             iid1 = iid0
 
-        assert iid0 is iid1 or np.array_equal(iid0,iid1), "when selecting a subset of snps from a SnpKernel, the two snps lists must be the same" #!!!cmk is this restriction good?
+        #!!!cmk is '==' and array_equal the right way to check for all possible advanced indexing, e.g. slices, etc.
+        assert iid0 == iid1 or np.array_equal(iid0,iid1), "when selecting a subset of snps from a SnpKernel, the two snps lists must be the same" #!!!cmk is this restriction good?
 
         return SnpKernel(self._snpreader[iid0,:],standardizer=self.standardizer)
 

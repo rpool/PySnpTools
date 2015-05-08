@@ -41,10 +41,6 @@ class PstNpz(PstReader):
     def run_once(self):
         PstNpz._static_run_once(self)
 
-    #def __del__(self):
-    #    if self._filepointer != None:  # we need to test this because Python doesn't guarantee that __init__ was fully run
-    #        self._filepointer.close()
-
     def copyinputs(self, copier):
         PstNpz._static_copyinputs(self, copier)
 
@@ -85,7 +81,6 @@ class PstNpz(PstReader):
         self.run_once()
         return self._col_property
 
-
     @staticmethod
     def _static_run_once(self):
         if (self._ran_once):
@@ -109,10 +104,6 @@ class PstNpz(PstReader):
         #!!!cmk??? self._assert_iid_sid_pos()
 
         return self
-
-    #def __del__(self):
-    #    if self._filepointer != None:  # we need to test this because Python doesn't guarantee that __init__ was fully run
-    #        self._filepointer.close()
 
     @staticmethod
     def _static_copyinputs(self, copier):
@@ -157,7 +148,6 @@ class PstNpz(PstReader):
             val = pstutil.sub_matrix(val, row_index_out, col_index_out, order=order, dtype=dtype) #!!!cmk fix so doesn't make a copy of it doesn't need to
 
         return val
-
 
 
 if __name__ == "__main__":

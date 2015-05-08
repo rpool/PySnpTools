@@ -21,34 +21,9 @@ class Identity(KernelReader):
     See :class:`.SnpReader` for details and examples.
     """
 
-    #_parent_string = ""
-    #_std_string_list = []
-    #def standardize(self):
-    #    return self
+    def __repr__(self): 
+        return "{0}()".format(self.__class__.__name__)
 
-    @property
-    def iid(self):
-        """A ndarray of the iids.
-
-        See :attr:`.SnpReader.iid` for details and examples.
-        """
-        return self._row
-
-    @property
-    def iid0(self):
-        """A ndarray of the iid0s.
-
-        See :attr:`.SnpReader.iid` for details and examples.
-        """
-        return self._row
-
-    @property
-    def iid1(self):
-        """A ndarray of the iid0s.
-
-        See :attr:`.SnpReader.iid` for details and examples.
-        """
-        return self._row
 
     @property
     def row(self):
@@ -66,14 +41,16 @@ class Identity(KernelReader):
         """
         return self._row
 
-    #!!!cmk test this
     def _read(self, row_index_or_none, col_index_or_none, order, dtype, force_python_only, view_ok):
-        #!!!cmk this code is not complete - if the row_index is not equal to the colum_index should slice the bit we want
-        assert row_index_or_none == col_index_or_none, "!!!cmk fix up test and message"
-        if row_index_or_none is None:
-            return np.identity(self.row_count)
+        if row_index_or_none is None and col_index_or_none is None:
+            return np.identity(self.row_count,dtype=dtype)
+        elif row_index_or_none is col_index_or_none or np.array_equal(row_index_or_none, col_index_or_none):
+            return np.identity(len(row_index_or_none),dtype=dtype)
         else:
-            return np.identity(len(row_index_or_none))
+            #This is less efficient than it could be because it create a big identity matrix and then slices it.
+            val, shares_memory = self._apply_sparray_or_slice_to_val(np.identity(self.row_count,dtype=dtype), row_index_or_none, col_index_or_none, order, dtype, force_python_only)
+            return val
+
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)

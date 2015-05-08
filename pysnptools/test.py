@@ -501,6 +501,10 @@ def getTestSuite():
     """
     
     test_suite = unittest.TestSuite([])
+
+    from pysnptools.kernelreader.test import TestLoader as KrTestLoader
+    test_suite.addTests(unittest.TestLoader().loadTestsFromTestCase(KrTestLoader))
+
     test_suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestDocStrings))
     test_suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestLoader))
     test_suite.addTests(NaNCNCTestCases.factory_iterator())

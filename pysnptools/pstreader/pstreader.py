@@ -561,60 +561,6 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
 
-    #from pysnptools.pstreader import PstData
-    #from pysnptools.snpreader import Bed
-    #snp_on_disk = Bed('../tests/datasets/all_chr.maf0.001.N300').read()
-    #data1 = PstData(row = snp_on_disk.row, #N x 2
-    #                col = snp_on_disk.col, # S
-    #                row_property = np.zeros([snp_on_disk.row_count,0]),  # N
-    #                col_property = snp_on_disk.pos, # S x 3
-    #                val = snp_on_disk.val # N x S
-    #                )
-    #print type(data1.val) # The val property is an ndarray of values
-    ###<type 'numpy.ndarray'>
-    ##print data1 # prints the specification of the in-memory information
-    ###PstData()
-    ##print data1.row_count #prints the number of rows in this in-memory data
-    ###3
-
-    #from pysnptools.pstreader import PstNpz
-    #pstnpz_filename = '../tests/datasets/all_chr.maf0.001.N300.pst.npz'
-    #PstNpz.write(data1,pstnpz_filename)
-    #reader1 = PstNpz(pstnpz_filename)
-    #data2 = reader1.read()
-
-    #from pysnptools.pstreader import PstNpz
-    #on_disk = PstNpz('../tests/datasets/all_chr.maf0.001.N300.pst.npz')
-    #print on_disk.row[:3] # print the first three rows
-    ##[['POP1' '0']
-    ## ['POP1' '12']
-    ## ['POP1' '44']]
-    #print on_disk.col[:10] # print the first ten columns
-    ##['1_12' '1_34' '1_10' '1_35' '1_28' '1_25' '1_36' '1_39' '1_4' '1_13']
-    #print on_disk.row_to_index([['POP1','44'],['POP1','12']]) #Find the indexes for two rows.
-    ##[2 1]
-
-    #from pysnptools.pstreader import PstNpz
-    #on_disk = PstNpz('../tests/datasets/all_chr.maf0.001.N300.pst.npz')
-    #subset_on_disk = on_disk[[3,4],::2] # specification for a subset of the data on disk. No values are read yet.
-    #print subset_on_disk.col_count # prints the number of columns in this subset (but still doesn't read any values)
-    ##    508
-    #print subset_on_disk #prints a specification of 'subset_on_disk'
-    ##    PstNpz('../tests/datasets/all_chr.maf0.001.N300.pst.npz')[[3,4],::2]
-    #data_subset = subset_on_disk.read() # efficiently reads the specified subset of values from the disk
-    #print data_subset # prints the specification of the in-memory information
-    ##    PstData(PstNpz('../tests/datasets/all_chr.maf0.001.N300.pst.npz')[[3,4],::2])
-    #int(data_subset.val.shape[0]),int(data_subset.val.shape[1]) # The dimensions of the ndarray of values
-    ##    (2, 508)
-
-    #from pysnptools.pstreader import PstNpz
-    #on_disk = PstNpz('../tests/datasets/all_chr.maf0.001.N300.pst.npz')
-    #print on_disk.row_property[:3] # print position information for the first three cols:
-    ##    [[ 1.          0.00800801  0.        ]
-    ##     [ 1.          0.023023    1.        ]
-    ##     [ 1.          0.0700701   4.        ]]
-
-
     #!!!cmk
     import doctest
     doctest.testmod()
