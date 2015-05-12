@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{60f1cb4a-9da3-47c2-9b89-60ac1ce93347}</ProjectGuid>
     <ProjectHome />
-    <StartupFile>kernelreader\test.py</StartupFile>
+    <StartupFile>test.py</StartupFile>
     <SearchPath>..</SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
@@ -40,6 +40,7 @@
     <Compile Include="kernelreader\kerneldata.py" />
     <Compile Include="kernelreader\kernelreader.py" />
     <Compile Include="kernelreader\kernelnpz.py" />
+    <Compile Include="kernelreader\kernelhdf5.py" />
     <Compile Include="kernelreader\snpkernel.py">
       <SubType>Code</SubType>
     </Compile>
@@ -60,7 +61,7 @@
     <Compile Include="snpreader\pheno.py" />
     <Compile Include="snpreader\dense.py" />
     <Compile Include="snpreader\dat.py" />
-    <Compile Include="snpreader\hdf5.py" />
+    <Compile Include="snpreader\snphdf5.py" />
     <Compile Include="snpreader\ped.py" />
     <Compile Include="snpreader\snpdata.py" />
     <Compile Include="snpreader\snpreader.py" />
