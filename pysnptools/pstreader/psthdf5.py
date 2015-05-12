@@ -5,11 +5,11 @@
 
 #import logging
 #import scipy as sp
-#from snpreader import SnpReader
+#from pstreader import PstReader
 
 ##!! document the format
 
-#class Hdf5(SnpReader):
+#class Hdf5(PstReader):
 
 #    _ran_once = False
 #    h5 = None
@@ -37,6 +37,11 @@
 #        return self._col
 
 #    @property
+#    def row_property(self):
+#        self.run_once()
+#        return self._row_property
+
+#    @property
 #    def col_property(self):
 #        self.run_once()
 #        return self._col_property
@@ -49,13 +54,20 @@
 #        except IOError, e:
 #            raise IOError("Missing or unopenable file '{0}' -- Native error message: {1}".format(self.filename,e))
 
+#        vocab_list = [['row','col','val','row_property','col_property'],['iid','sid','val',None,'pos'],['iid','rs','snps',None,'pos']]
+
+#        for vocab in vocab_list:
+#            #Find which keys are in the file and then used them !!!cmk3 -stopped coding here
+
+
+
 #        self._row = sp.empty(self.h5['iid'].shape,dtype=self.h5['iid'].dtype) #make a 2D deepcopy from h5 (more direct methods, don't seem to work)
 #        for iRow, row in enumerate(self.h5['iid']):
 #            for iCol, value in enumerate(row):
 #                self._row[iRow,iCol] = value
 
-#        self._col_property = sp.array(self.h5['pos']) #!!!cmk should the hdf5 format be changed to use 'col_property' etc instead of pos
 #        try: #new format
+#            self._col_property = sp.array(self.h5['pos'])
 #            self._col = sp.array(self.h5['sid'])
 #            self.val_in_file = self.h5['val']
 #        except: # try old format

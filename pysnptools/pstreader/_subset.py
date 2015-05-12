@@ -16,10 +16,6 @@ class _Subset(PstReader):
              a list of integers
              a list of booleans
         '''
-        _Subset.static__init__(self, internal, row_indexer, col_indexer)
-
-    @staticmethod
-    def static__init__(self, internal, row_indexer, col_indexer):
         self._internal = internal
         self._row_indexer = PstReader._make_sparray_or_slice(row_indexer)
         self._col_indexer = PstReader._make_sparray_or_slice(col_indexer)
@@ -28,38 +24,62 @@ class _Subset(PstReader):
 
 
     def __repr__(self):
-        return _Subset.static__repr__(self) #!!!cmk test this
+        s = "{0}[{1},{2}]".format(self._internal,_Subset.static_nice_string(self,self._row_indexer),_Subset.static_nice_string(self,self._col_indexer))
+        return s
 
     def copyinputs(self, copier):
-        _Subset.static_copyinput(self,copier)
+        self._internal.copyinputs(copier)
 
     @property
     def row(self):
-        return _Subset.static_row(self)
+        self.run_once()
+        return self._row
 
     @property
     def col(self):
-        return _Subset.static_col(self)
+        self.run_once()
+        return self._col
 
     @property
     def row_property(self):
-        return _Subset.static_row_property(self)
+        self.run_once()
+        return self._row_property
 
     @property
     def col_property(self):
-        return _Subset.static_col_property(self)
+        self.run_once()
+        return self._col_property
 
+    # Most _read's support only indexlists or None, but this one supports Slices, too.
+    _read_accepts_slices = None
     def _read(self, row_indexer, col_indexer, order, dtype, force_python_only, view_ok):
-        return _Subset.static__read(self, row_indexer, col_indexer, order, dtype, force_python_only, view_ok)
+        self.run_once()
+
+        if hasattr(self._internal,'_read_accepts_slices'):
+            composed_row_index_or_none = _Subset.compose_indexer_with_indexer(self._internal.row_count, self._row_indexer, self.row_count, row_indexer)
+            composed_col_index_or_none = _Subset.compose_indexer_with_indexer(self._internal.col_count, self._col_indexer, self.col_count, col_indexer)
+            val = self._internal._read(composed_row_index_or_none, composed_col_index_or_none, order, dtype, force_python_only, view_ok)
+            return val
+        else:
+            row_index_or_none = PstReader._make_sparray_from_sparray_or_slice(self.row_count, row_indexer)
+            composed_row_index_or_none = _Subset.compose_indexer_with_index_or_none(self._internal.row_count, self._row_indexer, self.row_count, row_index_or_none)
+            col_index_or_none = PstReader._make_sparray_from_sparray_or_slice(self.col_count, col_indexer)
+            composed_col_index_or_none = _Subset.compose_indexer_with_index_or_none(self._internal.col_count, self._col_indexer, self.col_count, col_index_or_none)
+            val = self._internal._read(composed_row_index_or_none, composed_col_index_or_none, order, dtype, force_python_only, view_ok)
+            return val
 
     def run_once(self):
-        return _Subset.static_run_once(self)
+        if self._ran_once:
+            return
 
-
-    @staticmethod
-    def static__repr__(self): #!!Should this be __str__ (and elsewhere) because it uses "nice_string" which uses "..." so may be ambiguous?
-        s = "{0}[{1},{2}]".format(self._internal,_Subset.static_nice_string(self,self._row_indexer),_Subset.static_nice_string(self,self._col_indexer))
-        return s
+        self._ran_once = True
+        self._row = self._internal.row[self._row_indexer]
+        self._col = self._internal.col[self._col_indexer]
+        if np.array_equal(self._row,self._col): #When an object is square, keep the row and col the same object.
+            self._col = self._row
+        self._row_property = self._internal.row_property[self._row_indexer]
+        self._col_property = self._internal.col_property[self._col_indexer]
+        #self._assert_row_col_pos()
 
     _slice_format = {(False,False,False):":",
                      (False,False,True):"::{2}",
@@ -81,29 +101,6 @@ class _Subset(PstReader):
         else:
             return "[{0},...]".format(",".join([str(i) for i in some_slice[:10]]))
 
-    @staticmethod
-    def static_copyinputs(self, copier):
-        self._internal.copyinputs(copier)
-
-    @staticmethod
-    def static_row(self):
-        self.run_once()
-        return self._row
-
-    @staticmethod
-    def static_col(self):
-        self.run_once()
-        return self._col
-
-    @staticmethod
-    def static_row_property(self):
-        self.run_once()
-        return self._row_property
-
-    @staticmethod
-    def static_col_property(self):
-        self.run_once()
-        return self._col_property
 
     #!!commented out because doesn't guarantee that the shortcut will return with the dtype and order requested.
     #                  Also, didn't handle stacked do-nothing subsets
@@ -113,39 +110,6 @@ class _Subset(PstReader):
     #    else:
     #        return PstReader.read(self, order, dtype, force_python_only, view_ok)
 
-
-    # Most _read's support only indexlists or None, but this one supports Slices, too.
-    _read_accepts_slices = None
-    @staticmethod
-    def static__read(self, row_indexer, col_indexer, order, dtype, force_python_only, view_ok):
-        self.run_once()
-
-        if hasattr(self._internal,'_read_accepts_slices'):
-            composed_row_index_or_none = _Subset.compose_indexer_with_indexer(self._internal.row_count, self._row_indexer, self.row_count, row_indexer)
-            composed_col_index_or_none = _Subset.compose_indexer_with_indexer(self._internal.col_count, self._col_indexer, self.col_count, col_indexer)
-            val = self._internal._read(composed_row_index_or_none, composed_col_index_or_none, order, dtype, force_python_only, view_ok)
-            return val
-        else:
-            row_index_or_none = PstReader._make_sparray_from_sparray_or_slice(self.row_count, row_indexer)
-            composed_row_index_or_none = _Subset.compose_indexer_with_index_or_none(self._internal.row_count, self._row_indexer, self.row_count, row_index_or_none)
-            col_index_or_none = PstReader._make_sparray_from_sparray_or_slice(self.col_count, col_indexer)
-            composed_col_index_or_none = _Subset.compose_indexer_with_index_or_none(self._internal.col_count, self._col_indexer, self.col_count, col_index_or_none)
-            val = self._internal._read(composed_row_index_or_none, composed_col_index_or_none, order, dtype, force_python_only, view_ok)
-            return val
-
-    @staticmethod
-    def static_run_once(self):
-        if self._ran_once:
-            return
-
-        self._ran_once = True
-        self._row = self._internal.row[self._row_indexer]
-        self._col = self._internal.col[self._col_indexer]
-        if np.array_equal(self._row,self._col): #When an object is square, keep the row and col the same object.
-            self._col = self._row
-        self._row_property = self._internal.row_property[self._row_indexer]
-        self._col_property = self._internal.col_property[self._col_indexer]
-        #self._assert_row_col_pos()
 
     @staticmethod
     def compose_indexer_with_index_or_none(countA, indexerA, countB, index_or_noneB):

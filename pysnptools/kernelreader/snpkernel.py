@@ -82,8 +82,8 @@ class SnpKernel(KernelReader):
             iid0 = iid_indexer_and_snp_indexer
             iid1 = iid0
 
-        #!!!cmk is '==' and array_equal the right way to check for all possible advanced indexing, e.g. slices, etc.
-        assert iid0 == iid1 or np.array_equal(iid0,iid1), "when selecting a subset of snps from a SnpKernel, the two snps lists must be the same" #!!!cmk is this restriction good?
+        #!!!cmk is '==' and array_equal the right way to check for all possible advanced indexing, e.g. slices, etc. #!!!cmk3 (and look for similar code)
+        assert iid0 is iid1 or np.array_equal(iid0,iid1), "when selecting a subset of snps from a SnpKernel, the two snps lists must be the same" #!!!cmk is this restriction good?
 
         return SnpKernel(self._snpreader[iid0,:],standardizer=self.standardizer)
 

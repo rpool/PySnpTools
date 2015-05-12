@@ -17,72 +17,33 @@ class PstNpz(PstReader):
         '''
         filename    : string of the name of the npz file.
         '''
-        PstNpz._static__init__(self,pstnpz_filename)
+        self._npz_filename = pstnpz_filename
 
     def __repr__(self): 
-        return PstNpz._static__repr__(self)
+        return "{0}('{1}')".format(self.__class__.__name__,self._npz_filename)
 
     @property
     def row(self):
-        return PstNpz._static_row(self)
-
-    @property
-    def col(self):
-        return PstNpz._static_col(self)
-
-    @property
-    def row_property(self):
-        return PstNpz._static_row_property(self)
-
-    @property
-    def col_property(self):
-        return PstNpz._static_col_property(self)
-
-    def run_once(self):
-        PstNpz._static_run_once(self)
-
-    def copyinputs(self, copier):
-        PstNpz._static_copyinputs(self, copier)
-
-    def _read(self, row_index_or_none, col_index_or_none, order, dtype, force_python_only, view_ok):
-        return PstNpz._static_read(self, row_index_or_none, col_index_or_none, order, dtype, force_python_only, view_ok)
-
-    @staticmethod
-    def write(data, npz_filename):
-        logging.info("Start writing " + npz_filename)
-        np.savez(npz_filename, row=data.row, col=data.col, row_property=data.row_property, col_property=data.col_property,val=data.val)
-        logging.info("Done writing " + npz_filename)
-
-    @staticmethod
-    def _static__init__(self, pstnpz_filename):
-        self._npz_filename = pstnpz_filename
-
-    @staticmethod
-    def _static__repr__(self): 
-        return "{0}('{1}')".format(self.__class__.__name__,self._npz_filename)
-
-    @staticmethod
-    def _static_row(self):
         self.run_once()
         return self._row
 
-    @staticmethod
-    def _static_col(self):
+
+    @property
+    def col(self):
         self.run_once()
         return self._col
 
-    @staticmethod
-    def _static_row_property(self):
+    @property
+    def row_property(self):
         self.run_once()
         return self._row_property
 
-    @staticmethod
-    def _static_col_property(self):
+    @property
+    def col_property(self):
         self.run_once()
         return self._col_property
 
-    @staticmethod
-    def _static_run_once(self):
+    def run_once(self):
         if (self._ran_once):
             return
         self._ran_once = True
@@ -105,13 +66,11 @@ class PstNpz(PstReader):
 
         return self
 
-    @staticmethod
-    def _static_copyinputs(self, copier):
+    def copyinputs(self, copier):
         # doesn't need to self.run_once()
         copier.input(self._npz_filename)
 
-    @staticmethod
-    def _static_read(self, row_index_or_none, col_index_or_none, order, dtype, force_python_only, view_ok):
+    def _read(self, row_index_or_none, col_index_or_none, order, dtype, force_python_only, view_ok):
         if order is None:
             order = "F"
         if dtype is None:
@@ -148,6 +107,15 @@ class PstNpz(PstReader):
             val = pstutil.sub_matrix(val, row_index_out, col_index_out, order=order, dtype=dtype) #!!!cmk fix so doesn't make a copy of it doesn't need to
 
         return val
+
+    @staticmethod
+    def write(data, npz_filename):
+        logging.info("Start writing " + npz_filename)
+        np.savez(npz_filename, row=data.row, col=data.col, row_property=data.row_property, col_property=data.col_property,val=data.val)
+        logging.info("Done writing " + npz_filename)
+
+
+
 
 
 if __name__ == "__main__":

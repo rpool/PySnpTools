@@ -87,7 +87,7 @@ class Pheno(SnpReader):
 
     def copyinputs(self, copier):
         # doesn't need to self.run_once()
-        copier.input(SnpReader.input) #!!!cmk test that this works when input is an inmemory dictionary
+        copier.input(self.input) #!!!cmk test that this works when input is an inmemory dictionary
 
     def _read(self, iid_index_or_none, sid_index_or_none, order, dtype, force_python_only, view_ok):
         '''
