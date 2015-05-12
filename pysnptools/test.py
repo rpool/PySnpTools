@@ -38,7 +38,7 @@ class TestLoader(unittest.TestCase):
         snpDataBed = snpreader_bed[:,snp_index_list0].read()
         tt1 = time.time()
         logging.info("Read bed %.2f seconds" % (tt1 - tt0))
-        SnpHdf5.write(snpDataBed, hdf5FileName)
+        SnpHdf5.write(hdf5FileName, snpDataBed)
         tt2 = time.time()
         logging.info("write SnpHdf5 bed %.2f seconds" % (tt2 - tt1))
 
@@ -72,7 +72,7 @@ class TestLoader(unittest.TestCase):
         self.snps = snpreader.read(order='F',force_python_only=True).val
 
 
-    def xcmktest_diagKtoN(self):
+    def test_diagKtoN(self):
         """
         make sure standardization on SNPs results in sum(diag(K))=N
         """
@@ -88,11 +88,11 @@ class TestLoader(unittest.TestCase):
         np.testing.assert_almost_equal(100, sum_diag)
         
         
-    def xcmktest_c_reader_bed(self):
+    def test_c_reader_bed(self):
         snpreader = Bed(self.currentFolder + "/examples/toydata")
         self.c_reader(snpreader)
 
-    def xcmktest_scalar_index(self):
+    def test_scalar_index(self):
         snpreader = Bed(self.currentFolder + "/examples/toydata")
         arr=np.int64(1)
         snpreader[arr,arr]
@@ -106,7 +106,7 @@ class TestLoader(unittest.TestCase):
         snpreader2 = Bed(self.currentFolder + "/examples/toydata")[::2,:]
         self.assertTrue(np.allclose(snpreader1.read().val, snpreader2.read().val, rtol=1e-05, atol=1e-05))
 
-    def xcmktest_c_reader_dat(self):
+    def test_c_reader_dat(self):
         snpreader = Dat(self.currentFolder + "/examples/toydata.dat")
         self.c_reader(snpreader)
 
@@ -119,7 +119,7 @@ class TestLoader(unittest.TestCase):
         self.assertEqual(np.float64, snp_c.dtype)
         self.assertTrue(np.allclose(self.snps, snp_c, rtol=1e-05, atol=1e-05))
 
-    def xcmktest_standardize_bed(self):
+    def test_standardize_bed(self):
         snpreader = Bed(self.currentFolder + "/examples/toydata")
         self.standardize(snpreader)
 
@@ -127,11 +127,11 @@ class TestLoader(unittest.TestCase):
         snpreader = SnpHdf5(self.currentFolder + "/examples/toydata.iidmajor.hdf5")
         self.standardize(snpreader)
 
-    def xcmktest_standardize_dat(self):
+    def test_standardize_dat(self):
         snpreader = Dat(self.currentFolder + "/examples/toydata.dat")
         self.standardize(snpreader)
 
-    def xcmktest_standardize_ped(self):
+    def test_standardize_ped(self):
         snpreader = Ped(self.currentFolder + "/examples/toydata")
         self.standardize(snpreader)
 
@@ -180,7 +180,7 @@ class TestLoader(unittest.TestCase):
             self.assertTrue(np.allclose(snp_beta1, snp_beta2, rtol=1e-05, atol=1e-05))
             self.assertTrue(np.allclose(snp_beta1, snp_beta3, rtol=1e-05, atol=1e-05))
 
-    def xcmktest_load_and_standardize_bed(self):
+    def test_load_and_standardize_bed(self):
         snpreader2 = Bed(self.currentFolder + "/examples/toydata")
         self.load_and_standardize(snpreader2, snpreader2)
 
@@ -208,11 +208,11 @@ class TestLoader(unittest.TestCase):
         snpdata = SnpData(iid,sid,pos,np.zeros((iid_count,sid_count))) #random.choice((0.0,1.0,2.0,float("nan")),size=(iid_count,sid_count)))
         output = "tempdir/bedbig.{0}.{1}".format(iid_count,sid_count)
         create_directory_if_necessary(output)
-        Bed.write(snpdata, output)
+        Bed.write(output, snpdata)
         snpdata2 = Bed(output).read()
         assert TestLoader.is_same(snpdata, snpdata2) #!!!define an equality method on snpdata?
 
-    def xcmktest_write_bed_f64cpp_0(self):
+    def test_write_bed_f64cpp_0(self):
         snpreader = Bed(self.currentFolder + "/examples/toydata")
         iid_index = 0
         logging.info("iid={0}".format(iid_index))
@@ -224,11 +224,11 @@ class TestLoader(unittest.TestCase):
             snpdata.val[-1,0] = float("NAN")
         output = "tempdir/toydata.F64cpp.{0}".format(iid_index)
         create_directory_if_necessary(output)
-        Bed.write(snpdata, output)
+        Bed.write(output, snpdata)
         snpdata2 = Bed(output).read()
         assert TestLoader.is_same(snpdata, snpdata2) #!!!define an equality method on snpdata?
 
-    def xcmktest_write_bed_f64cpp_1(self):
+    def test_write_bed_f64cpp_1(self):
         snpreader = Bed(self.currentFolder + "/examples/toydata")
         iid_index = 1
         logging.info("iid={0}".format(iid_index))
@@ -240,11 +240,11 @@ class TestLoader(unittest.TestCase):
             snpdata.val[-1,0] = float("NAN")
         output = "tempdir/toydata.F64cpp.{0}".format(iid_index)
         create_directory_if_necessary(output)
-        Bed.write(snpdata, output)
+        Bed.write(output, snpdata)
         snpdata2 = Bed(output).read()
         assert TestLoader.is_same(snpdata, snpdata2) #!!!define an equality method on snpdata?
 
-    def xcmktest_write_bed_f64cpp_5(self):
+    def test_write_bed_f64cpp_5(self):
         snpreader = Bed(self.currentFolder + "/examples/toydata")
         iid_index = 5
         logging.info("iid={0}".format(iid_index))
@@ -256,11 +256,11 @@ class TestLoader(unittest.TestCase):
             snpdata.val[-1,0] = float("NAN")
         output = "tempdir/toydata.F64cpp.{0}".format(iid_index)
         create_directory_if_necessary(output)
-        Bed.write(snpdata, output) #,force_python_only=True)
+        Bed.write(output, snpdata) #,force_python_only=True)
         snpdata2 = Bed(output).read()
         assert TestLoader.is_same(snpdata, snpdata2) #!!!define an equality method on snpdata?
 
-    def xcmktest_write_bed_f64cpp_5_python(self):
+    def test_write_bed_f64cpp_5_python(self):
         snpreader = Bed(self.currentFolder + "/examples/toydata")
         iid_index = 5
         logging.info("iid={0}".format(iid_index))
@@ -277,7 +277,7 @@ class TestLoader(unittest.TestCase):
         assert TestLoader.is_same(snpdata, snpdata2) #!!!define an equality method on snpdata?
 
 
-    def xcmktest_write_x_x_cpp(self):
+    def test_write_x_x_cpp(self):
         snpreader = Bed(self.currentFolder + "/examples/toydata")
         for order in ['C','F']:
             for dtype in [np.float32,np.float64]:
@@ -285,11 +285,11 @@ class TestLoader(unittest.TestCase):
                 snpdata.val[-1,0] = float("NAN")
                 output = "tempdir/toydata.{0}{1}.cpp".format(order,"32" if dtype==np.float32 else "64")
                 create_directory_if_necessary(output)
-                Bed.write(snpdata, output)
+                Bed.write(output, snpdata)
                 snpdata2 = Bed(output).read()
                 assert TestLoader.is_same(snpdata, snpdata2) #!!!define an equality method on snpdata?
 
-    def xcmktest_subset_view(self):
+    def test_subset_view(self):
         snpreader2 = Bed(self.currentFolder + "/examples/toydata")[:,:]
         result = snpreader2.read(view_ok=True)
         self.assertFalse(snpreader2 is result)
@@ -312,13 +312,13 @@ class TestLoader(unittest.TestCase):
 
 
 
-    def xcmktest_load_and_standardize_dat(self):
+    def test_load_and_standardize_dat(self):
         snpreader2 = Dat(self.currentFolder + "/examples/toydata.dat")
         self.load_and_standardize(snpreader2, snpreader2)
         #snpreaderref = Bed(self.currentFolder + "/examples/toydata")
         #self.load_and_standardize(snpreader2, snpreaderref)
 
-    def xcmktest_load_and_standardize_ped(self):
+    def test_load_and_standardize_ped(self):
 
         #!!Ped columns can be ambiguous
         ###Creating Ped data ...
@@ -469,7 +469,7 @@ class NaNCNCTestCases(unittest.TestCase):
 # We do it this way instead of using doctest.DocTestSuite because doctest.DocTestSuite requires modules to be pickled, which python doesn't allow.
 # We need tests to be pickleable so that they can be run on a cluster.
 class TestDocStrings(unittest.TestCase):
-    def xcmktest_snpreader(self):
+    def test_snpreader(self):
         import pysnptools.snpreader.snpreader
         old_dir = os.getcwd()
         os.chdir(os.path.dirname(os.path.realpath(__file__)))
@@ -477,7 +477,7 @@ class TestDocStrings(unittest.TestCase):
         os.chdir(old_dir)
         assert result.failed == 0, "failed doc test: " + __file__
 
-    def xcmktest_bed(self):
+    def test_bed(self):
         import pysnptools.snpreader.bed
         old_dir = os.getcwd()
         os.chdir(os.path.dirname(os.path.realpath(__file__)))
@@ -485,7 +485,7 @@ class TestDocStrings(unittest.TestCase):
         os.chdir(old_dir)
         assert result.failed == 0, "failed doc test: " + __file__
 
-    def xcmktest_snpdata(self):
+    def test_snpdata(self):
         import pysnptools.snpreader.snpdata
         old_dir = os.getcwd()
         os.chdir(os.path.dirname(os.path.realpath(__file__)))
@@ -493,7 +493,7 @@ class TestDocStrings(unittest.TestCase):
         os.chdir(old_dir)
         assert result.failed == 0, "failed doc test: " + __file__
 
-    def xcmktest_util(self):
+    def test_util(self):
         import pysnptools.util
         old_dir = os.getcwd()
         os.chdir(os.path.dirname(os.path.realpath(__file__))+"/util")

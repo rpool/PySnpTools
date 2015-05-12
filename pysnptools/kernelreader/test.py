@@ -23,7 +23,7 @@ class TestLoader(unittest.TestCase):
         kerneldata1 = snpkernel.read()
         output = "tempdir/kernelreader/toydata.kernel.npz"
         create_directory_if_necessary(output)
-        KernelNpz.write(kerneldata1,output) #!!!cmk are all these writes backwards compare to the python usual way?
+        KernelNpz.write(output,kerneldata1)
         kernelreader2 = KernelNpz(output)
         kerneldata2 = kernelreader2.read()
         np.testing.assert_array_almost_equal(kerneldata1.val, kerneldata2.val, decimal=10)

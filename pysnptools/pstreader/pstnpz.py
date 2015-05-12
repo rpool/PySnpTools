@@ -4,7 +4,9 @@ from itertools import *
 import pandas as pd
 import logging
 from pstreader import PstReader
+from pstdata import PstData
 import pysnptools.util as pstutil
+import warnings
 
 class PstNpz(PstReader):
     '''
@@ -109,13 +111,12 @@ class PstNpz(PstReader):
         return val
 
     @staticmethod
-    def write(data, npz_filename):
-        logging.info("Start writing " + npz_filename)
-        np.savez(npz_filename, row=data.row, col=data.col, row_property=data.row_property, col_property=data.col_property,val=data.val)
-        logging.info("Done writing " + npz_filename)
-
-
-
+    def write(filename, pstdata):
+        if isinstance(filename,PstData) and isinstance(pstdata,str): #For backwards compatibility, reverse inputs if necessary
+            warnings.warn("write statement should have filename before data to write", DeprecationWarning)
+            filename, pstdata = pstdata, filename 
+        np.savez(filename, row=pstdata.row, col=pstdata.col, row_property=pstdata.row_property, col_property=pstdata.col_property,val=pstdata.val)
+        logging.info("Done writing " + filename)
 
 
 if __name__ == "__main__":

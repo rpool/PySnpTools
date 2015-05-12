@@ -174,7 +174,7 @@
 #        snpdata = SnpData(iid,sid,pos,np.zeros((iid_count,sid_count))) #random.choice((0.0,1.0,2.0,float("nan")),size=(iid_count,sid_count)))
 #        output = "tempdir/bedbig.{0}.{1}".format(iid_count,sid_count)
 #        create_directory_if_necessary(output)
-#        Bed.write(snpdata, output)
+#        Bed.write(output, snpdata)
 #        snpdata2 = Bed(output).read()
 #        assert TestLoader.is_same(snpdata, snpdata2) #!!!define an equality method on snpdata?
 
@@ -190,7 +190,7 @@
 #            snpdata.val[-1,0] = float("NAN")
 #        output = "tempdir/toydata.F64cpp.{0}".format(iid_index)
 #        create_directory_if_necessary(output)
-#        Bed.write(snpdata, output)
+#        Bed.write(output, snpdata)
 #        snpdata2 = Bed(output).read()
 #        assert TestLoader.is_same(snpdata, snpdata2) #!!!define an equality method on snpdata?
 
@@ -206,7 +206,7 @@
 #            snpdata.val[-1,0] = float("NAN")
 #        output = "tempdir/toydata.F64cpp.{0}".format(iid_index)
 #        create_directory_if_necessary(output)
-#        Bed.write(snpdata, output)
+#        Bed.write(output, snpdata)
 #        snpdata2 = Bed(output).read()
 #        assert TestLoader.is_same(snpdata, snpdata2) #!!!define an equality method on snpdata?
 
@@ -222,7 +222,7 @@
 #            snpdata.val[-1,0] = float("NAN")
 #        output = "tempdir/toydata.F64cpp.{0}".format(iid_index)
 #        create_directory_if_necessary(output)
-#        Bed.write(snpdata, output) #,force_python_only=True)
+#        Bed.write(output, snpdata) #,force_python_only=True)
 #        snpdata2 = Bed(output).read()
 #        assert TestLoader.is_same(snpdata, snpdata2) #!!!define an equality method on snpdata?
 
@@ -251,7 +251,7 @@
 #                snpdata.val[-1,0] = float("NAN")
 #                output = "tempdir/toydata.{0}{1}.cpp".format(order,"32" if dtype==np.float32 else "64")
 #                create_directory_if_necessary(output)
-#                Bed.write(snpdata, output)
+#                Bed.write(output, snpdata)
 #                snpdata2 = Bed(output).read()
 #                assert TestLoader.is_same(snpdata, snpdata2) #!!!define an equality method on snpdata?
 

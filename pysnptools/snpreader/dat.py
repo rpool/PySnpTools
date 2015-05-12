@@ -4,6 +4,8 @@ from itertools import *
 import pandas as pd
 import logging
 from snpreader import SnpReader
+from snpdata import SnpData
+import warnings
 
 class Dat(SnpReader):
     '''
@@ -115,7 +117,12 @@ class Dat(SnpReader):
 
 
     @staticmethod
-    def write(snpdata, basefilename):
+    def write(basefilename, snpdata):
+
+        if isinstance(basefilename,SnpData) and isinstance(snpdata,str): #For backwards compatibility, reverse inputs if necessary
+            warnings.warn("write statement should have filename before data to write", DeprecationWarning)
+            basefilename, snpdata = snpdata, basefilename 
+
         SnpReader._write_fam(snpdata, basefilename, remove_suffix="dat")
         SnpReader._write_map_or_bim(snpdata, basefilename, remove_suffix="dat", add_suffix="map")
 

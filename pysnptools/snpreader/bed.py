@@ -6,6 +6,7 @@ import logging
 from snpreader import SnpReader
 from snpdata import SnpData
 import math
+import warnings
 
 #!!LATER fix bug in Hadoop whereas it won't use data two levels down
 
@@ -78,12 +79,17 @@ class Bed(SnpReader):
 
 
     @staticmethod
-    def write(snpdata, basefilename,force_python_only=False):
+    def write(basefilename, snpdata, force_python_only=False):
+
+        if isinstance(basefilename,SnpData) and isinstance(snpdata,str): #For backwards compatibility, reverse inputs if necessary
+            warnings.warn("write statement should have filename before data to write", DeprecationWarning)
+            basefilename, snpdata = snpdata, basefilename 
+
+
         SnpReader._write_fam(snpdata, basefilename, remove_suffix="bed")
         SnpReader._write_map_or_bim(snpdata, basefilename, remove_suffix="bed", add_suffix="bim")
 
         bedfile = SnpReader._name_of_other_file(basefilename,remove_suffix="bed", add_suffix="bed")
-
 
         if not force_python_only:
             from pysnptools.snpreader import wrap_plink_parser

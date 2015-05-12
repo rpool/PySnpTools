@@ -1,6 +1,8 @@
 import numpy as np
 import logging
 from snpreader import SnpReader
+from snpdata import SnpData
+import warnings
 
 class Dense(SnpReader):
     '''!!!cmk add test cases and source example and .write method
@@ -124,7 +126,12 @@ class Dense(SnpReader):
         return val
 
     @staticmethod
-    def write(snpdata, filename, join_iid_function=lambda iid_pair:iid_pair[1]):
+    def write(filename, snpdata, join_iid_function=lambda iid_pair:iid_pair[1]):
+
+        if isinstance(filename,SnpData) and isinstance(snpdata,str): #For backwards compatibility, reverse inputs if necessary
+            warnings.warn("write statement should have filename before data to write", DeprecationWarning)
+            filename, snpdata = snpdata, filename 
+
         snpsarray = snpdata.val
         with open(filename,"w") as filepointer:
             filepointer.write("var"+"\t")

@@ -6,6 +6,8 @@ except:
 import logging
 import scipy as sp
 from pstreader import PstReader
+from pstdata import PstData
+import warnings
 
 #!! document the format
 
@@ -194,7 +196,7 @@ class PstHdf5(PstReader):
                 col_index_list_sorted = col_index_list
 
             for start in xrange(0, S, blocksize):
-                print start
+                #print start
                 end = min(start+blocksize,S)
                 if end-start < blocksize:  #On the last loop, the buffer might be too big, so make it smaller
                     block = self.create_block(end-start, order, dtype)
@@ -212,14 +214,20 @@ class PstHdf5(PstReader):
 
 
     @staticmethod
-    def write(data, hdf5file, dtype='f8',col_major=True):
+    def write(filename, pstdata, dtype='f8',col_major=True):
+
+        if isinstance(filename,PstData) and isinstance(pstdata,str): #For backwards compatibility, reverse inputs if necessary
+            warnings.warn("write statement should have filename before data to write", DeprecationWarning)
+            filename, pstdata = pstdata, filename 
+
         if not isinstance(dtype, str) or len(dtype) != 2 or dtype[0] != 'f' : raise Exception("Expect dtype to start with 'f', e.g. 'f4' for single, 'f8' for double")
-        val = (data.val.T) if col_major else data.val
-        with h5py.File(hdf5file, "w") as h5:
-            h5.create_dataset('row', data=data.row)
-            h5.create_dataset('col', data=data.col)
-            h5.create_dataset('row_property', data=data.row_property)
-            h5.create_dataset('col_property', data=data.col_property)
+        val = (pstdata.val.T) if col_major else pstdata.val
+
+        with h5py.File(filename, "w") as h5:
+            h5.create_dataset('row', data=pstdata.row)
+            h5.create_dataset('col', data=pstdata.col)
+            h5.create_dataset('row_property', data=pstdata.row_property)
+            h5.create_dataset('col_property', data=pstdata.col_property)
             h5.create_dataset('val', data=val,dtype=dtype,shuffle=True)#compression="gzip", doesn't seem to work with Anaconda
             h5['val'].attrs["col-major"] = col_major
 

@@ -4,7 +4,9 @@ from itertools import *
 import pandas as pd
 import logging
 from snpreader import SnpReader
+from snpdata import SnpData
 import numpy as np
+import warnings
 
 #!!Make Ped and/or Dat reader not be all in memory
 class Ped(SnpReader):
@@ -91,6 +93,11 @@ class Ped(SnpReader):
 
     @staticmethod
     def write(snpdata, basefilename):
+
+        if isinstance(basefilename,SnpData) and isinstance(snpdata,str): #For backwards compatibility, reverse inputs if necessary
+            warnings.warn("write statement should have filename before data to write", DeprecationWarning)
+            basefilename, snpdata = snpdata, basefilename 
+
         SnpReader._write_map_or_bim(snpdata, basefilename, remove_suffix="ped", add_suffix="map")
 
         # The PED file is a white-space (space or tab) delimited file: the first six columns are mandatory:
