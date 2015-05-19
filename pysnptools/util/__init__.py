@@ -131,9 +131,8 @@ def _all_same(iids_list):
     for i in xrange(len(iids_list)-1):
         iidA = iids_list[i]
         iidB = iids_list[i+1]
-        if iidA is not None and iidB is not None:
-            if len(iidA) != len(iidB) or not sp.all(iidA == iidB):
-                return False
+        if not np.array_equal(iidA,iidB):
+            return False
     return True
 
 def intersect_ids(idslist):

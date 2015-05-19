@@ -14,9 +14,11 @@ class SnpData(PstData,SnpReader):
 
     See :class:`.SnpReader` for details and examples.
     """
-    def __init__(self, iid, sid, pos, val, parent_string="",copyinputs_function=None): #!!!autodoc doesn't generate good doc for this constructor #!!!cmk5 should inits call the super inits to be sure everything is set?
+    def __init__(self, iid, sid, pos=None, val=None, parent_string="",copyinputs_function=None): #!!!autodoc doesn't generate good doc for this constructor #!!!cmk5 should inits call the super inits to be sure everything is set?
         self._row = iid if len(iid)>0 else np.array([],dtype=str).reshape(0,2) #!!!cmk4
         self._col = sid if len(sid)>0 else np.array([],dtype=str)
+        if pos is None:
+            pos = np.array([[np.nan, np.nan, np.nan]]*len(iid))
         self._col_property = pos if len(sid)>0 else np.array([],dtype=int).reshape(0,3) #!!!cmk4
         self._row_property = np.empty((len(iid),0))
         self._assert_iid_sid_pos()

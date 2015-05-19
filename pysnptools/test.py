@@ -11,6 +11,8 @@ from pysnptools.standardizer import Unit
 from pysnptools.standardizer import Beta
 from pysnptools.util import create_directory_if_necessary
 from pysnptools.kernelreader.test import TestLoader as KrTestLoader
+from pysnptools.pstreader.test import TestLoader as PstTestLoader
+from pysnptools.pstreader.test import TestDocStrings as PstDocStrings
 
 
 import unittest
@@ -509,6 +511,8 @@ def getTestSuite():
     
     test_suite = unittest.TestSuite([])
 
+    test_suite.addTests(unittest.TestLoader().loadTestsFromTestCase(PstTestLoader))
+    test_suite.addTests(unittest.TestLoader().loadTestsFromTestCase(PstDocStrings))
     test_suite.addTests(unittest.TestLoader().loadTestsFromTestCase(KrTestLoader))
     test_suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestDocStrings))
     test_suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestLoader))

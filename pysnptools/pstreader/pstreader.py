@@ -445,16 +445,20 @@ class PstReader(object):
         [2 9]
         """
         if not hasattr(self, "_col_to_index"):
+            logging.debug("Creating _col_to_index")
             self._col_to_index = {}
             for index, item in enumerate(self.col):
                 key = PstReader._makekey(item)
-                if self._col_to_index.has_key(key) : raise Exception("Expect snp to appear in data only once. ({0})".format(key))
-                self._col_to_index[item] = index
+                assert key not in self._col_to_index, "Expect col to appear in data only once. ({0})".format(key)
+                self._col_to_index[key] = index
+            logging.debug("Finished creating _col_to_index")
         index = np.fromiter((self._col_to_index[PstReader._makekey(item1)] for item1 in list),np.int)
         return index
 
     @staticmethod
     def _makekey(item):
+        if isinstance(item,(str,int,long,float)): #return quickly from known items
+            return item
         try:
             hash(item)
             return item

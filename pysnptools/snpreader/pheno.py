@@ -60,8 +60,6 @@ class Pheno(SnpReader):
         else:
             pheno_input = self.input
 
-        if len(pheno_input['header']) > 0 and pheno_input['header'][0] is None:
-            pheno_input['header'] = ["pheno{0}".format(i) for i in xrange(len(pheno_input['header']))] #!!!cmk move to reader?
 
         if len(pheno_input['vals'].shape) == 1:
             pheno_input = {
@@ -69,6 +67,11 @@ class Pheno(SnpReader):
             'vals' : np.reshape(pheno_input['vals'],(-1,1)),
             'iid' : pheno_input['iid']
             }
+
+        if len(pheno_input['header']) > 0 and pheno_input['header'][0] is None:
+            pheno_input['header'] = ["pheno{0}".format(i) for i in xrange(len(pheno_input['header']))] #!!!cmk move to reader?
+        elif len(pheno_input['header']) == 0:
+            pheno_input['header'] = ["pheno{0}".format(i) for i in xrange(pheno_input['vals'].shape[1])]
 
         self._row = pheno_input['iid']
         self._col = np.array(pheno_input['header'],dtype='str')
