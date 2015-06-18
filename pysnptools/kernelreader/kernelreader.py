@@ -469,7 +469,6 @@ class KernelReader(PstReader):
         [2 9]
         """
         return self.row_to_index(list)
-    #!!!need to add checks that iid's are N x 2 strings, etc.
 
     def __getitem__(self, iid_indexer_and_snp_indexer):
         from _subset import _Subset
@@ -480,6 +479,10 @@ class KernelReader(PstReader):
             iid1_indexer = iid0_indexer
 
         return _Subset(self, iid0_indexer, iid1_indexer)
+
+    def _assert_iid0_iid1(self):
+        assert np.issubdtype(self._row.dtype, str) and len(self._row.shape)==2 and self._row.shape[1]==2, "iid0 should be dtype str, have two dimensions, and the second dimension should be size 2"
+        assert np.issubdtype(self._col.dtype, str) and len(self._col.shape)==2 and self._col.shape[1]==2, "iid1 should be dtype str, have two dimensions, and the second dimension should be size 2"
 
 
 if __name__ == "__main__":

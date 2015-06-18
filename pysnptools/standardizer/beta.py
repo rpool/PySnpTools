@@ -8,28 +8,28 @@ class Beta(object): #IStandardizer
         self.a = a
         self.b = b
 
-    def standardize(self, snps, blocksize=None, force_python_only=False):
-        l = self._lambda_factory(snps, blocksize=blocksize, force_python_only=force_python_only)
+    def standardize(self, snps, block_size=None, force_python_only=False):
+        l = self._lambda_factory(snps, block_size=block_size, force_python_only=force_python_only)
         import pysnptools.standardizer as stdizer
-        return stdizer._standardize_with_lambda(snps, l, blocksize)
+        return stdizer._standardize_with_lambda(snps, l, block_size)
 
     def __repr__(self): 
         return "{0}()".format(self.__class__.__name__)
 
-    def _lambda_factory(self, snps, blocksize=None, force_python_only=False):
+    def _lambda_factory(self, snps, block_size=None, force_python_only=False):
         from pysnptools.snpreader import wrap_plink_parser
         if not force_python_only:
             if snps.dtype == np.float64:
                 if snps.flags['F_CONTIGUOUS'] and (snps.flags["OWNDATA"] or snps.base.nbytes == snps.nbytes): #!!create a method called is_single_segment
                     return lambda s, a=self.a, b=self.b : wrap_plink_parser.standardizedoubleFAAA(s,True,a,b)
-                elif snps.flags['C_CONTIGUOUS']  and (snps.flags["OWNDATA"] or snps.base.nbytes == snps.nbytes) and blocksize is None:
+                elif snps.flags['C_CONTIGUOUS']  and (snps.flags["OWNDATA"] or snps.base.nbytes == snps.nbytes) and block_size is None:
                     return lambda s, a=self.a, b=self.b  : wrap_plink_parser.standardizedoubleCAAA(s,True,a,b)
                 else:
                     logging.info("Array is not contiguous, so will standardize with python only instead of C++")
             elif snps.dtype == np.float32:
                 if snps.flags['F_CONTIGUOUS'] and (snps.flags["OWNDATA"] or snps.base.nbytes == snps.nbytes):
                     return lambda s, a=self.a, b=self.b : wrap_plink_parser.standardizefloatFAAA(s,True,a,b)
-                elif snps.flags['C_CONTIGUOUS'] and (snps.flags["OWNDATA"] or snps.base.nbytes == snps.nbytes) and blocksize is None:
+                elif snps.flags['C_CONTIGUOUS'] and (snps.flags["OWNDATA"] or snps.base.nbytes == snps.nbytes) and block_size is None:
                     return lambda s, a=self.a, b=self.b : wrap_plink_parser.standardizefloatCAAA(s,True,a,b)
                 else:
                     logging.info("Array is not contiguous, so will standardize with python only instead of C++")

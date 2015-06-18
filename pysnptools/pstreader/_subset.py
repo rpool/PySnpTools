@@ -51,11 +51,12 @@ class _Subset(PstReader):
         return self._col_property
 
     # Most _read's support only indexlists or None, but this one supports Slices, too.
-    _read_accepts_slices = None
+    _read_accepts_slices = True
     def _read(self, row_indexer, col_indexer, order, dtype, force_python_only, view_ok):
         self.run_once()
 
         if hasattr(self._internal,'_read_accepts_slices'):
+            assert self._internal._read_accepts_slices, "If an object has the _read_accepts_slices attribute, it must have value 'True'"
             composed_row_index_or_none = _Subset.compose_indexer_with_indexer(self._internal.row_count, self._row_indexer, self.row_count, row_indexer)
             composed_col_index_or_none = _Subset.compose_indexer_with_indexer(self._internal.col_count, self._col_indexer, self.col_count, col_indexer)
             val = self._internal._read(composed_row_index_or_none, composed_col_index_or_none, order, dtype, force_python_only, view_ok)
@@ -79,7 +80,6 @@ class _Subset(PstReader):
             self._col = self._row
         self._row_property = self._internal.row_property[self._row_indexer]
         self._col_property = self._internal.col_property[self._col_indexer]
-        #self._assert_row_col_pos()
 
     _slice_format = {(False,False,False):":",
                      (False,False,True):"::{2}",

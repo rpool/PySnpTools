@@ -6,14 +6,17 @@ PySnpTools: A library for reading and manipulating genetic data.
 
 :synopsis:
 
-* :mod:`.snpreader`: Efficiently read genetic PLINK formats including \*.bed/bim/fam files. Also, efficiently read *parts* of files and standardize data.
+* :mod:`.snpreader`: Efficiently read genetic PLINK formats including \*.bed/bim/fam and phenotype files. Also, efficiently read *parts* of files and standardize data.
 
-* :mod:`.util`: In one line, intersect and re-order IIDs from :mod:`.snpreader` and other sources. Also, efficiently extract a submatrix from an ndarray.
+* :mod:`.kernelreader`: Efficiently read and manipulate kernel data.
+
+* :mod:`.util`: In one line, intersect and re-order IIDs from :mod:`.snpreader`, :mod:`.kernelreader` and other sources. Also, efficiently extract a submatrix from an ndarray.
 
 * :class:`.util.IntRangeSet`: Efficiently manipulate ranges of integers -- for example, genetic position -- with set operators including
   union, intersection, and set difference. 
 
-* :mod:`.util.pheno`: Read the PLINK pheno type file format.
+* :mod:`.pstreader`: Generalizes :mod:`.snpreader` and :mod:`.kernelreader` (provides the efficiency of numpy arrays with some of the flexibility of pandas)
+
 
 .. automodule:: pysnptools
     :members:
@@ -52,6 +55,15 @@ PySnpTools: A library for reading and manipulating genetic data.
 	:special-members:
     :exclude-members: copyinputs
 
+:class:`snpreader.Pheno`
+++++++++++++++++++++++++
+.. autoclass:: pysnptools.snpreader.Pheno
+    :members:
+    :inherited-members:
+    :undoc-members:
+	:show-inheritance:
+	:special-members:
+    :exclude-members: copyinputs
 
 :class:`snpreader.SnpData`
 ++++++++++++++++++++++++++
@@ -62,7 +74,6 @@ PySnpTools: A library for reading and manipulating genetic data.
 	:show-inheritance:
 	:special-members:
     :exclude-members: copyinputs
-
 
 :class:`snpreader.Ped`
 +++++++++++++++++++++++++
@@ -84,9 +95,9 @@ PySnpTools: A library for reading and manipulating genetic data.
 	:special-members:
     :exclude-members: copyinputs
 
-:class:`snpreader.Hdf5`
+:class:`snpreader.SnpHdf5`
 +++++++++++++++++++++++++
-.. autoclass:: pysnptools.snpreader.Hdf5
+.. autoclass:: pysnptools.snpreader.SnpHdf5
     :members:
     :inherited-members:
     :undoc-members:
@@ -94,6 +105,77 @@ PySnpTools: A library for reading and manipulating genetic data.
 	:special-members:
     :exclude-members: copyinputs
 
+:class:`snpreader.SnpNpz`
++++++++++++++++++++++++++
+.. autoclass:: pysnptools.snpreader.SnpNpz
+    :members:
+    :inherited-members:
+    :undoc-members:
+	:show-inheritance:
+	:special-members:
+    :exclude-members: copyinputs
+
+***********************
+:mod:`kernelreader` Module
+***********************
+
+.. automodule:: pysnptools.kernelreader
+    :members:
+    :undoc-members:
+	:show-inheritance:
+	:special-members:
+
+
+:class:`kernelreader.KernelReader`
++++++++++++++++++++++++++++++
+.. autoclass:: pysnptools.kernelreader.KernelReader
+    :members:
+    :undoc-members:
+	:show-inheritance:
+	:special-members: __getitem__
+    :exclude-members: copyinputs
+
+
+:class:`kernelreader.KernelData`
+++++++++++++++++++++++++++
+.. autoclass:: pysnptools.kernelreader.KernelData
+    :members:
+    :inherited-members:
+    :undoc-members:
+	:show-inheritance:
+	:special-members:
+    :exclude-members: copyinputs
+
+:class:`kernelreader.Identity`
++++++++++++++++++++++++++
+.. autoclass:: pysnptools.kernelreader.Ped
+    :members:
+    :inherited-members:
+    :undoc-members:
+	:show-inheritance:
+	:special-members:
+    :exclude-members: copyinputs
+
+
+:class:`kernelreader.KernelHdf5`
++++++++++++++++++++++++++
+.. autoclass:: pysnptools.kernelreader.KernelHdf5
+    :members:
+    :inherited-members:
+    :undoc-members:
+	:show-inheritance:
+	:special-members:
+    :exclude-members: copyinputs
+
+:class:`kernelreader.KernelNpz`
++++++++++++++++++++++++++
+.. autoclass:: pysnptools.kernelreader.KernelNpz
+    :members:
+    :inherited-members:
+    :undoc-members:
+	:show-inheritance:
+	:special-members:
+    :exclude-members: copyinputs
 
 ***********************
 :mod:`util` Module
@@ -112,7 +194,6 @@ PySnpTools: A library for reading and manipulating genetic data.
   :show-inheritance:
   :special-members:
   :exclude-members: __and__, __weakref__,__module__,__dict__, __add__
-
 
 :mod:`util.pheno`
 ++++++++++++++++++++++++++
@@ -187,6 +268,59 @@ PySnpTools: A library for reading and manipulating genetic data.
 	:show-inheritance:
 	:special-members: __getitem__
     :exclude-members: copyinputs
+
+
+***********************
+:mod:`pstreader` Module
+***********************
+
+.. automodule:: pysnptools.pstreader
+    :members:
+    :undoc-members:
+	:show-inheritance:
+	:special-members:
+
+
+:class:`pstreader.PstReader`
++++++++++++++++++++++++++++++
+.. autoclass:: pysnptools.pstreader.PstReader
+    :members:
+    :undoc-members:
+	:show-inheritance:
+	:special-members: __getitem__
+    :exclude-members: copyinputs
+
+
+:class:`pstreader.PstData`
+++++++++++++++++++++++++++
+.. autoclass:: pysnptools.pstreader.PstData
+    :members:
+    :inherited-members:
+    :undoc-members:
+	:show-inheritance:
+	:special-members:
+    :exclude-members: copyinputs
+
+:class:`pstreader.PstHdf5`
++++++++++++++++++++++++++
+.. autoclass:: pysnptools.pstreader.PstHdf5
+    :members:
+    :inherited-members:
+    :undoc-members:
+	:show-inheritance:
+	:special-members:
+    :exclude-members: copyinputs
+
+:class:`pstreader.PstNpz`
++++++++++++++++++++++++++
+.. autoclass:: pysnptools.pstreader.PstNpz
+    :members:
+    :inherited-members:
+    :undoc-members:
+	:show-inheritance:
+	:special-members:
+    :exclude-members: copyinputs
+
 
 .. only:: html 
 

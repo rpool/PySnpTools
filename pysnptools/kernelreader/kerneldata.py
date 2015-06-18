@@ -13,26 +13,24 @@ class KernelData(KernelReader,PstData):
     See :class:`.SnpReader` for details and examples.
     """
     def __init__(self, iid=None, iid0=None, iid1=None, val=None, parent_string=""): #!!!autodoc doesn't generate good doc for this constructor
-        assert val is not None, "'val' must not be None"
         assert (iid is None) != (iid0 is None and iid1 is None), "Either 'iid' or both 'iid0' 'iid1' must be provided."
+
         if iid is not None:
-            iid0 = iid
-            iid1 = iid
+            self._row = PstData._fixup_input(iid,empty_creator=lambda ignore:np.empty([0,2],dtype=str))
+            self._col = self._row
+        else:
+            self._row = PstData._fixup_input(iid0,empty_creator=lambda ignore:np.empty([0,2],dtype=str))
+            self._col = PstData._fixup_input(iid1,empty_creator=lambda ignore:np.empty([0,2],dtype=str))
+        self._row_property = PstData._fixup_input(None,count=len(self._row),empty_creator=lambda count:np.empty([count,0],dtype=str))
+        self._col_property = PstData._fixup_input(None,count=len(self._col),empty_creator=lambda count:np.empty([count,0],dtype=str))
+        self.val = PstData._fixup_input_val(val,row_count=len(self._row),col_count=len(self._col),empty_creator=lambda row_count,col_count:np.empty([row_count,col_count],dtype=np.float64))
 
-        self._row = iid0 if len(iid0)>0 else np.array([],dtype=str).reshape(0,2) #!!!cmk are these two lines right? !!!cmk4
-        self._col = iid1 if len(iid1)>0 else np.array([],dtype=str)#!!!cmk are these two lines right? If empty, shouldn't they point to the SAME empty thing?
-
-        assert type(val) == np.ndarray, "expect SnpData's val to be a ndarray"
-        self.val = val
+        self._assert_iid0_iid1()
         self._parent_string = parent_string
         self._std_string_list = []
 
-    #!!!cmk does __repr__ do the right thing?
-    #!!!cmk does copyinputs do the right thing?
-
-
     def standardize(self):
-        factor = self.iid_count / np.diag(self.val).sum()
+        factor = float(self.iid_count) / np.diag(self.val).sum()
         if abs(factor-1.0)>1e-15:
             self.val *= factor
         return self

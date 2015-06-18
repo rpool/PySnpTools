@@ -59,20 +59,20 @@ def loadPhen(filename, missing ='-9',famid='FID', sampid='ID'):
 
     The output dictionary looks like:
 
-    * 'header' : [1] array phenotype names (only if header line is specified in file), #!!!cmk is [1], etc right?
+    * 'header' : [1] array phenotype names (only if header line is specified in file),
     * 'vals'   : [N*1] array of phenotype-data,
     * 'iid'    : [N*2] array of family IDs and individual IDs
     '''
     if missing == '-9':
         logging.warning("loadPhen is using default missing value of '-9'.")
 
-    data = sp.loadtxt(filename,dtype = 'str',comments=None) #delimiter defaults to any whitespace #!!!cmk look for other loadtxt's were the delimiter should be left to default
+    data = sp.loadtxt(filename, dtype='str', comments=None)
     if data[0,0] == sampid: #One column of ids - use the single id as both the family id and the iid
         header = data[0,1::].tolist()
         iid = data[1:,[0,0]]
         valsStr = data[1:,1:]
     elif data[0,0] == famid:
-        header = data[0,2::].tolist() #!!!cmk add test cases for this method
+        header = data[0,2::].tolist()
         iid = data[1:,0:2]
         valsStr = data[1:,2:]
     else:
@@ -81,7 +81,8 @@ def loadPhen(filename, missing ='-9',famid='FID', sampid='ID'):
         valsStr = data[:,2:]
 
     
-    valsStr[valsStr==missing] = "NaN"
+    if missing is not None:
+        valsStr[valsStr==missing] = "NaN"
     vals = sp.array(valsStr,dtype = 'float')
 
     ret = {

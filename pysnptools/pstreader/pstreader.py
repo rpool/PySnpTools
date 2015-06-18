@@ -398,7 +398,7 @@ class PstReader(object):
         """
         val = self._read(None, None, order, dtype, force_python_only, view_ok)
         from pstdata import PstData
-        ret = PstData(self.row,self.col,self.row_property,self.col_property, val, str(self))
+        ret = PstData(self.row, self.col, val, row_property=self.row_property, col_property=self.col_property, parent_string=str(self))
         return ret
 
     def row_to_index(self, list):
@@ -565,7 +565,6 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
 
-    #!!!cmk
     import doctest
     doctest.testmod()
     # There is also a unit test case in 'pysnptools\test.py' that calls this doc test

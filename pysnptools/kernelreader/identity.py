@@ -14,7 +14,10 @@ class Identity(KernelReader):
     """
     def __init__(self, iid): #!!!autodoc doesn't generate good doc for this constructor
 
-        self._row = iid if len(iid)>0 else np.array([],dtype=str).reshape(0,2) #!!!cmk are these two lines right?
+        if len(iid)>0:
+            self._row = iid
+        else:
+            self._row = np.empty([0,2],dtype=str)
 
     """The in-memory SNP data. A numpy.ndarray with dimensions :attr:`.iid_count` x :attr:`.sid_count`.
 
@@ -32,7 +35,7 @@ class Identity(KernelReader):
         See :attr:`.SnpReader.iid` for details and examples.
         """
         return self._row
-    #!!!cmk don't we need col_propoerty and row_property, too?
+
     @property
     def col(self):
         """A ndarray of the iid0s.

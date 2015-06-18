@@ -7,98 +7,51 @@ from snpreader import SnpReader
 from snpdata import SnpData
 import numpy as np
 import warnings
+from pysnptools.pstreader import _OneShot
 
-#!!Make Ped and/or Dat reader not be all in memory
-class Ped(SnpReader):
+class Ped(_OneShot,SnpReader):
     '''
     This is a class that does a Ped file. For examples of its use see its 'read' method. #!!LATER update comments
+    #!!!cmk mention that 012 may become 210
     '''
 
-    _ran_once = False
-    _filepointer = None
-
-    def __init__(self, basefilename, missing = '0'):
+    def __init__(self, filename, missing = '0'):
         '''
-            basefilename    : string of the basename of [basename].ped and [basename].map
+            filename    : string of the filename of the ped file
             missing         : string indicating a missing genotype (default '0')
         '''
 
-        self.basefilename = basefilename
+        self.filename = SnpReader._name_of_other_file(filename,remove_suffix="ped", add_suffix="ped")
         self.missing = missing
 
-    def __repr__(self): 
-        missing_string = "" if self.missing == '0' else ",missing='{0}'".format(self.missing)
-        return "{0}('{1}'{2})".format(self.__class__.__name__,self.basefilename,missing_string)
-
-    @property
-    def row(self):
-        self.run_once()
-        return self._row
-
-    @property
-    def col(self):
-        self.run_once()
-        return self._col
-
-    @property
-    def col_property(self):
-        self.run_once()
-        return self._col_property
-
-    def run_once(self):
-        if (self._ran_once):
-            return
-        self._ran_once = True
-
-        self._col, self._col_property = SnpReader._read_map_or_bim(self.basefilename,remove_suffix="bed", add_suffix="map")
-
-
-        pedfile = SnpReader._name_of_other_file(self.basefilename,remove_suffix="ped", add_suffix="ped")
-        ped = np.loadtxt(pedfile,dtype = 'str',comments=None)
-        self._row = ped[:,0:2]
-
-        self._assert_iid_sid_pos()
-
+    def _read_pstdata(self):
+        col, col_property = SnpReader._read_map_or_bim(self.filename,remove_suffix="ped", add_suffix="map")
+        ped = np.loadtxt(self.filename, dtype='str', comments=None)
+        row = ped[:,0:2]
         snpsstr = ped[:,6::]
         inan=snpsstr==self.missing
-        self._snps = np.zeros((snpsstr.shape[0],snpsstr.shape[1]/2))
+        snps = np.zeros((snpsstr.shape[0],snpsstr.shape[1]/2))
         for i in xrange(snpsstr.shape[1]/2):
-            self._snps[inan[:,2*i],i]=np.nan
+            snps[inan[:,2*i],i]=np.nan
             vals=snpsstr[~inan[:,2*i],2*i:2*(i+1)]
-            self._snps[~inan[:,2*i],i]+=(vals==vals[0,0]).sum(1)
+            snps[~inan[:,2*i],i]+=(vals==vals[0,0]).sum(1)
+        snpdata = SnpData(iid=row,sid=col,pos=col_property,val=snps)
+        return snpdata
 
     def copyinputs(self, copier):
         # doesn't need to self.run_once() because only uses original inputs
-        copier.input(SnpReader._name_of_other_file(self.basefilename,remove_suffix="ped", add_suffix="ped"))
-        copier.input(SnpReader._name_of_other_file(self.basefilename,remove_suffix="ped", add_suffix="map"))
+        copier.input(self.filename)
+        copier.input(SnpReader._name_of_other_file(self.filename,remove_suffix="ped", add_suffix="map"))
 
-
-    def _read(self, iid_index_or_none, sid_index_or_none, order, dtype, force_python_only, view_ok):
-        '''
-        '''
-        self.run_once()
-        assert not hasattr(self, 'ind_used'), "A SnpReader should not have a 'ind_used' attribute"
-
-        if order is None:
-            order = "F"
-        if dtype is None:
-            dtype = np.float64
-        if force_python_only is None:
-            force_python_only = False
-
-        val, shares_memory = self._apply_sparray_or_slice_to_val(self._snps, iid_index_or_none, sid_index_or_none, order, dtype, force_python_only)
-        if shares_memory:
-            val = val.copy(order='K')
-        return val
 
     @staticmethod
-    def write(snpdata, basefilename):
+    def write(filename, snpdata):
 
-        if isinstance(basefilename,SnpData) and isinstance(snpdata,str): #For backwards compatibility, reverse inputs if necessary
+        if isinstance(filename,SnpData) and isinstance(snpdata,str): #For backwards compatibility, reverse inputs if necessary
             warnings.warn("write statement should have filename before data to write", DeprecationWarning)
-            basefilename, snpdata = snpdata, basefilename 
+            filename, snpdata = snpdata, filename 
 
-        SnpReader._write_map_or_bim(snpdata, basefilename, remove_suffix="ped", add_suffix="map")
+        SnpReader._write_map_or_bim(snpdata, filename, remove_suffix="ped", add_suffix="map")
 
         # The PED file is a white-space (space or tab) delimited file: the first six columns are mandatory:
         # Family ID
@@ -108,7 +61,7 @@ class Ped(SnpReader):
         # Sex (1=male; 2=female; other=unknown)
         # Phenotype
 
-        pedfile = SnpReader._name_of_other_file(basefilename,remove_suffix="ped", add_suffix="ped")
+        pedfile = SnpReader._name_of_other_file(filename, remove_suffix="ped", add_suffix="ped")
         with open(pedfile,"w") as ped_filepointer:
             for iid_index, iid_row in enumerate(snpdata.iid):
                 ped_filepointer.write("{0} {1} 0 0 0 0".format(iid_row[0],iid_row[1]))
@@ -120,68 +73,9 @@ class Ped(SnpReader):
                         s = "A G"
                     elif val == 2:
                         s = "G G"
-                    elif val == np.nan:
+                    elif np.isnan(val):
                         s = "0 0"
                     else:
                         raise Exception("Expect values for ped file to be 0,1,2, or NAN. Instead, saw '{0}'".format(val))
                     ped_filepointer.write("\t"+s)
                 ped_filepointer.write("\n")
-
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
-
-    #snpreader = Ped(r'../tests/datasets/all_chr.maf0.001.N300')
-    #snp_matrix = snpreader.read()
-
-    ##from snpreader.hdf5 import Hdf5
-    ##Hdf5.write(snp_matrix, r'../tests/datasets/all_chr.maf0.001.N300.hdf5')
-
-    ##from snpreader.dat import Dat
-    ##Dat.write(snp_matrix, r'../tests/datasets/all_chr.maf0.001.N300.dat')
-
-
-    #print len(snp_matrix['sid'])
-    #snp_matrix = snpreader[:,:].read()
-    #print len(snp_matrix['sid'])
-    #sid_index_list = snpreader.sid_to_index(['23_9','23_2'])
-    #snp_matrix = snpreader[:,sid_index_list].read()
-    #print ",".join(snp_matrix['sid'])
-    #snp_matrix = snpreader[:,0:10].read()
-    #print ",".join(snp_matrix['sid'])
-
-    #print snpreader.iid_count
-    #print snpreader.sid_count
-    #print len(snpreader.pos)
-
-    #snpreader2 = snpreader[::-1,4]
-    #print snpreader.iid_count
-    #print snpreader2.sid_count
-    #print len(snpreader2.pos)
-
-    #snp_matrix = snpreader2.read()
-    #print len(snp_matrix['iid'])
-    #print len(snp_matrix['sid'])
-
-    #snp_matrix = snpreader2[5,:].read()
-    #print len(snp_matrix['iid'])
-    #print len(snp_matrix['sid'])
-
-    #iid_index_list = snpreader2.iid_to_index(snpreader2.iid[::2])
-    #snp_matrix = snpreader2[iid_index_list,::3].read()
-    #print len(snp_matrix['iid'])
-    #print len(snp_matrix['sid'])
-
-    #snp_matrix = snpreader[[4,5],:].read()
-    #print len(snp_matrix['iid'])
-    #print len(snp_matrix['sid'])
-
-    #print snpreader2
-    #print snpreader[::-1,4]
-    #print snpreader2[iid_index_list,::3]
-    #print snpreader[:,sid_index_list]
-    #print snpreader2[5,:]
-    #print snpreader[[4,5],:]
-
-
-    import doctest
-    doctest.testmod()

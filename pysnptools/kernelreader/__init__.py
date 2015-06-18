@@ -9,4 +9,3 @@ from pysnptools.kernelreader.snpkernel import SnpKernel
 from pysnptools.kernelreader.identity import Identity
 from pysnptools.kernelreader.kernelnpz import KernelNpz
 from pysnptools.kernelreader.kernelhdf5 import KernelHdf5
-

@@ -50,9 +50,8 @@ class PstNpz(PstReader):
             return
         self._ran_once = True
 
-        #!!!cmk is this really done without reading 'data'? could mmap support be used?
         with np.load(self._npz_filename) as data: #!! similar code in epistasis
-            if len(data.keys()) == 2 and  'arr_0' in data.keys(): #for backwards compatibility
+            if len(data.keys()) == 2 and 'arr_0' in data.keys(): #for backwards compatibility
                 self._row = data['arr_0']
                 self._col = self._row
                 self._row_property = np.empty((len(self._row),0))
@@ -64,7 +63,6 @@ class PstNpz(PstReader):
                     self._col = self._row
                 self._row_property = data['row_property']
                 self._col_property = data['col_property']
-        #!!!cmk??? self._assert_iid_sid_pos()
 
         return self
 
@@ -72,42 +70,21 @@ class PstNpz(PstReader):
         # doesn't need to self.run_once()
         copier.input(self._npz_filename)
 
+    # Most _read's support only indexlists or None, but this one supports Slices, too.
+    _read_accepts_slices = True
     def _read(self, row_index_or_none, col_index_or_none, order, dtype, force_python_only, view_ok):
-        if order is None:
-            order = "F"
-        if dtype is None:
-            dtype = np.float64
-        if force_python_only is None:
-            force_python_only = False #!!!cmk this is ignore
-        #!!!cmk view_ok is also ignored
+        # 'view_ok' doesn't mean anything here because we are always ready fresh from disk.
+        #!! could use mmap so only rows of interest are loaded.
+        self.run_once()
 
-        #This could be re-factored to not use so many names
-        row_count_in = self.row_count
-        col_count_in = self.col_count
-
-        if row_index_or_none is not None:
-            row_count_out = len(row_index_or_none)
-            row_index_out = row_index_or_none
-        else:
-            row_count_out = row_count_in
-            row_index_out = range(row_count_in)
-
-        if col_index_or_none is not None:
-            col_count_out = len(col_index_or_none)
-            col_index_out = col_index_or_none
-        else:
-            col_count_out = col_count_in
-            col_index_out = range(col_count_in)
-
-        #!!!cmk do we really need to load twice?
+        #np.load does the right thing and doesn't load 'val' into memory until accessed here.
         with np.load(self._npz_filename) as data: #!! similar code in epistasis
             if len(data.keys()) == 2 and  'arr_1' in data.keys(): #for backwards compatibility
                val = data['arr_1']
             else:
                val = data['val']
 
-            val = pstutil.sub_matrix(val, row_index_out, col_index_out, order=order, dtype=dtype) #!!!cmk fix so doesn't make a copy of it doesn't need to
-
+        val, _ = self._apply_sparray_or_slice_to_val(val, row_index_or_none, col_index_or_none, order, dtype, force_python_only)
         return val
 
     @staticmethod
@@ -115,8 +92,9 @@ class PstNpz(PstReader):
         if isinstance(filename,PstData) and isinstance(pstdata,str): #For backwards compatibility, reverse inputs if necessary
             warnings.warn("write statement should have filename before data to write", DeprecationWarning)
             filename, pstdata = pstdata, filename 
+
         np.savez(filename, row=pstdata.row, col=pstdata.col, row_property=pstdata.row_property, col_property=pstdata.col_property,val=pstdata.val)
-        logging.info("Done writing " + filename)
+        logging.debug("Done writing " + filename)
 
 
 if __name__ == "__main__":

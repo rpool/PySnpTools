@@ -13,19 +13,19 @@ from pysnptools.standardizer.bysidcount import BySidCount
 from pysnptools.standardizer.bysqrtsidcount import BySqrtSidCount
 from pysnptools.standardizer.diag_K_to_N import DiagKtoN
 
-def _standardize_with_lambda(snps, lambdax, blocksize = None):
-    if blocksize is None:
+def _standardize_with_lambda(snps, lambdax, block_size = None):
+    if block_size is None:
        return lambdax(snps)
 
     idx_start = 0
-    idx_stop = blocksize
+    idx_stop = block_size
 
     while idx_start<snps.shape[1]:
         #print idx_start
         lambdax(snps[:,idx_start:idx_stop])
 
         idx_start = idx_stop
-        idx_stop += blocksize
+        idx_stop += block_size
         if idx_stop>snps.shape[1]:
             idx_stop = snps.shape[1]
 
@@ -35,6 +35,7 @@ def _standardize_unit_python(snps, returnStats=False):
     '''
     standardize snps to zero-mean and unit variance
     '''
+    assert snps.dtype in [np.float64,np.float32], "snps must be a float in order to standardize in place."
 
     N = snps.shape[0]
     S = snps.shape[1]
@@ -63,6 +64,7 @@ def _standardize_beta_python(snps, betaA, betaB):
     '''
     standardize snps with Beta prior
     '''
+    assert snps.dtype in [np.float64,np.float32], "snps must be a float in order to standardize in place."
 
     N = snps.shape[0]
     S = snps.shape[1]

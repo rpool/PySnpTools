@@ -151,16 +151,6 @@ class Bed(SnpReader):
         self._run_once()
         assert not hasattr(self, 'ind_used'), "A SnpReader should not have a 'ind_used' attribute"
 
-
-        if order is None:
-            order = "F"
-        if dtype is None:
-            dtype = np.float64
-        if force_python_only is None:
-            force_python_only = False
-
-
-        #!! this could be re-factored to not use so many names
         iid_count_in = self.iid_count
         sid_count_in = self.sid_count
 

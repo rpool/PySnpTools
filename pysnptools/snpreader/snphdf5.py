@@ -9,7 +9,7 @@ import warnings
 class SnpHdf5(PstHdf5,SnpReader):
     pass
 
-class Hdf5(SnpHdf5): #!!!cmk mark this a deprecated
+class Hdf5(SnpHdf5):
     warnings.warn("class 'Hdf5' is deprecated. Use the standard class 'SnpHdf5' instead", DeprecationWarning)
     pass
 

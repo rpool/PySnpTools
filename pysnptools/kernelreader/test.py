@@ -11,16 +11,71 @@ from pysnptools.snpreader import Bed
 from pysnptools.util import create_directory_if_necessary
 import pysnptools.standardizer as std
 
+class _fortesting_JustCheckExists(object): #Implements ICopier
+
+    def __init__(self,doPrintOutputNames=False):
+        self.doPrintOutputNames = doPrintOutputNames
+    
+    def input(self,item):
+        if isinstance(item, str):
+            if not os.path.exists(item): raise Exception("Missing input file '{0}'".format(item))
+        elif hasattr(item,"copyinputs"):
+            item.copyinputs(self)
+        # else -- do nothing
+
+    def output(self,item):
+        if isinstance(item, str):
+            if not os.path.exists(item): raise Exception("Missing output file '{0}'".format(item))
+            if self.doPrintOutputNames:
+                print item
+        elif hasattr(item,"copyoutputs"):
+            item.copyoutputs(self)
+        # else -- do nothing
+
+
+
+
 class TestLoader(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         self.currentFolder = os.path.dirname(os.path.realpath(__file__))
 
+    def test_fail(self):
+        did_fail = True
+        try:
+            kd = KernelData(iid=[["0"],["1"],["2"]],val=[[1,2,3],[4,5,6],[7,8,9]]) #Wrong iid shape
+            did_fail = False
+        except:
+            pass
+        assert did_fail, "The constructor should fail because the iid is the wrong shape"
+
+    def test_kernel2(self):
+        logging.info("in kernel2")
+        kd = KernelData(iid=[["0","0"],["1","1"],["2","2"]],val=[[1,2,3],[4,5,6],[7,8,9]])
+        assert np.array_equal(kd.iid_to_index([["1","1"],["2","2"]]),np.array([1,2]))
+        assert np.array_equal(kd.iid0_to_index([["1","1"],["2","2"]]),np.array([1,2]))
+        kd = kd.standardize()
+        assert np.abs(np.diag(kd.val).sum()-3)<1e-7
+        assert kd.iid1_count == 3
+
+    def test_snp_kernel2(self):
+        logging.info("in test_snp_kernel2")
+        snpreader = Bed(self.currentFolder + "/../examples/toydata")
+        snpkernel = SnpKernel(snpreader,standardizer=std.Beta())
+        s  = str(snpkernel)
+        _fortesting_JustCheckExists().input(snpkernel)
+        assert snpkernel.sid_count == snpreader.sid_count
+        assert np.array_equal(snpkernel.sid, snpreader.sid)
+        assert np.array_equal(snpkernel.pos, snpreader.pos)
+        assert np.array_equal(snpkernel.read_snpdata().val,snpreader.read().standardize(std.Beta()).val)
+        
+
+        
     def test_npz(self):
         logging.info("in test_npz")
         snpreader = Bed(self.currentFolder + "/../examples/toydata")
-        snpkernel = SnpKernel(snpreader)
-        kerneldata1 = snpkernel.read()
+        kerneldata1 = snpreader.read_kernel(std.Unit())
+        s = str(kerneldata1)
         output = "tempdir/kernelreader/toydata.kernel.npz"
         create_directory_if_necessary(output)
         KernelNpz.write(output,kerneldata1)
@@ -32,7 +87,7 @@ class TestLoader(unittest.TestCase):
     def test_subset(self):
         logging.info("in test_subset")
         snpreader = Bed(self.currentFolder + "/../examples/toydata")
-        snpkernel = SnpKernel(snpreader)
+        snpkernel = SnpKernel(snpreader,std.Unit())
         krsub = snpkernel[::2,::2]
         kerneldata1 = krsub.read()
         expected = snpreader[::2,:].kernel(std.Unit())

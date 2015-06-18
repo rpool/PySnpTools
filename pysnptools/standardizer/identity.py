@@ -8,7 +8,7 @@ class Identity(object):  #IStandardizer #!!LATER make an abstract object
     def __init__(self):
         pass
 
-    def standardize(self, snps, blocksize=None, force_python_only=False):
+    def standardize(self, snps, block_size=None, force_python_only=False):
         return snps
 
     def __repr__(self): 

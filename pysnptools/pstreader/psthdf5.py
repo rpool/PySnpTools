@@ -16,10 +16,10 @@ class PstHdf5(PstReader):
     _ran_once = False
     h5 = None
 
-    def __init__(self, filename, blocksize=5000):
-        #!! copy relevent comments from Bed reader
+    def __init__(self, filename, block_size=5000):
+        #!! copy relevant comments from Bed reader
         self.filename=filename
-        self.blocksize = blocksize
+        self.block_size = block_size
 
     def __repr__(self): 
         return "{0}('{1}')".format(self.__class__.__name__,self.filename) #!!LATER print non-default values, too
@@ -66,20 +66,11 @@ class PstHdf5(PstReader):
 
         row_key,col_key,val_key,row_property_key,col_property_key = self._find_vocab()
 
-        self._row = sp.empty(self.h5[row_key].shape,dtype=self.h5[row_key].dtype) #make a 2D deepcopy from h5 (more direct methods, don't seem to work)
-        for iRow, row in enumerate(self.h5[row_key]):
-            for iCol, value in enumerate(row):
-                self._row[iRow,iCol] = value
-
-        self._col = sp.array(self.h5[col_key]) #!!!cmk what if col is 2D like row? Does it need the trick from above
-        self._col_property = sp.array(self.h5[col_property_key])
-        if row_property_key:
-            self._row_property = sp.array(self.h5[row_property_key])
-        else:
-            self._row_property = sp.empty((len(self._col),0))
+        self._row = PstData._fixup_input(self.h5[row_key])
+        self._col = PstData._fixup_input(self.h5[col_key])
+        self._row_property = PstData._fixup_input(self.h5[row_property_key] if row_property_key else None,count=len(self._row))  #Extra "if ... else" for backwards compatibility.
+        self._col_property = PstData._fixup_input(self.h5[col_property_key],count=len(self._col))
         self.val_in_file = self.h5[val_key]
-
-        #self._assert_iid_sid_pos()!!!cmk
 
         self.is_col_major = None
         if "col-major" in self.val_in_file.attrs:
@@ -98,7 +89,6 @@ class PstHdf5(PstReader):
         self._ran_once = True
 
 
-    #should move into utils #!!!cmk
     @staticmethod
     def _is_sorted_without_repeats(list):
         if len(list) < 2:
@@ -122,83 +112,74 @@ class PstHdf5(PstReader):
         else:
             self.val_in_file.read_direct(val,selection)
 
-    #!!!cmk much code the same as for Bed
-    def create_block(self, blocksize, order, dtype):
-        N_original = len(self._row) #similar code else where -- make a method
-        matches_order = self.is_col_major == (order =="F") #similar code else where -- make a method
-        opposite_order = "C" if order == "F" else "F"#similar code else where -- make a method
+    def create_block(self, block_size, order, dtype):
+        matches_order = self.is_col_major == (order =="F")
+        opposite_order = "C" if order == "F" else "F"
         if matches_order:
-            return sp.empty([N_original,blocksize], dtype=dtype, order=order)
+            return sp.empty([len(self._row),block_size], dtype=dtype, order=order)
         else:
-            return sp.empty([N_original,blocksize], dtype=dtype, order=opposite_order)
+            return sp.empty([len(self._row),block_size], dtype=dtype, order=opposite_order)
 
     def _read(self, row_index_or_none, col_index_or_none, order, dtype, force_python_only, view_ok):
         self.run_once()
 
-        if order is None:
-            order = "F"
-        if dtype is None:
-            dtype = sp.float64
-        if force_python_only is None:
-            force_python_only = False
-
-
         opposite_order = "C" if order == "F" else "F"
 
-        N_original = self.row_count
-        S_original = self.col_count
-
         if row_index_or_none is not None:
-            N = len(row_index_or_none)
+            row_index_count = len(row_index_or_none)
             row_index_list = row_index_or_none
             row_is_sorted = PstHdf5._is_sorted_without_repeats(row_index_list)
         else:
-            N = N_original
-            row_index_list = range(N_original)
+            row_index_count = self.row_count
+            row_index_list = range(self.row_count)
             row_is_sorted = True
 
         if col_index_or_none is not None:
-            S = len(col_index_or_none)
+            col_index_count = len(col_index_or_none)
             col_index_list = col_index_or_none
         else:
-            S = S_original
-            col_index_list = range(S_original)
+            col_index_count = self.col_count
+            col_index_list = range(self.col_count)
         #Check if snps and iids indexes are in order and in range
         col_are_sorted = PstHdf5._is_sorted_without_repeats(col_index_list)
 
-        val = sp.empty([N, S], dtype=dtype, order=order)
+        val = sp.empty([row_index_count, col_index_count], dtype=dtype, order=order)
 
         matches_order = self.is_col_major == (order=="F")
         is_simple = not force_python_only and row_is_sorted and col_are_sorted and matches_order #If 'is_simple' may be able to use a faster reader
 
+        # case 0 -- zero elements in val
+        if row_index_count == 0 or col_index_count == 0:
+            pass
+
         # case 1 - all snps & all ids requested
-        if is_simple and S == S_original and N == N_original:
+        elif is_simple and col_index_count == self.col_count and row_index_count == self.row_count:
             self.read_direct(val)
 
         # case 2 - some snps and all ids
-        elif is_simple and N == N_original:
+        elif is_simple and row_index_count == self.row_count:
             self.read_direct(val, sp.s_[:,col_index_list])
 
         # case 3 all snps and some ids
-        elif is_simple and S == S_original:
+        elif is_simple and col_index_count == self.col_count:
             self.read_direct(val, sp.s_[row_index_list,:])
 
         # case 4 some snps and some ids -- use blocks
         else:
-            blocksize = min(self.blocksize, S)
-            block = self.create_block(blocksize, order, dtype)
+            block_size = min(self.block_size, col_index_count)
+            block = self.create_block(block_size, order, dtype)
 
             if not col_are_sorted:
                 col_index_index_list = sp.argsort(col_index_list)
                 col_index_list_sorted = col_index_list[col_index_index_list]
             else:
-                col_index_index_list = sp.arange(S)
+                col_index_index_list = sp.arange(col_index_count)
                 col_index_list_sorted = col_index_list
 
-            for start in xrange(0, S, blocksize):
+            for start in xrange(0, col_index_count, block_size):
                 #print start
-                end = min(start+blocksize,S)
-                if end-start < blocksize:  #On the last loop, the buffer might be too big, so make it smaller
+                end = min(start+block_size,col_index_count)
+                if end-start < block_size:  #On the last loop, the buffer might be too big, so make it smaller
                     block = self.create_block(end-start, order, dtype)
                 col_index_list_forblock = col_index_list_sorted[start:end]
                 col_index_index_list_forblock = col_index_index_list[start:end]
@@ -207,7 +188,7 @@ class PstHdf5(PstReader):
 
         #!!LATER does this test work when the size is 1 x 1 and order if F? iid_index_or_none=[0], sid_index_or_none=[1000] (based on test_blocking_hdf5)
         has_right_order = (order=="C" and val.flags["C_CONTIGUOUS"]) or (order=="F" and val.flags["F_CONTIGUOUS"])
-        assert val.shape == (N, S) and val.dtype == dtype and has_right_order
+        assert val.shape == (row_index_count, col_index_count) and val.dtype == dtype and has_right_order
         return val
 
 
