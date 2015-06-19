@@ -64,12 +64,6 @@ class TestLoader(unittest.TestCase):
         snpkernel = SnpKernel(snpreader,standardizer=std.Beta())
         s  = str(snpkernel)
         _fortesting_JustCheckExists().input(snpkernel)
-        assert snpkernel.sid_count == snpreader.sid_count
-        assert np.array_equal(snpkernel.sid, snpreader.sid)
-        assert np.array_equal(snpkernel.pos, snpreader.pos)
-        assert np.array_equal(snpkernel.read_snpdata().val,snpreader.read().standardize(std.Beta()).val)
-        
-
         
     def test_npz(self):
         logging.info("in test_npz")

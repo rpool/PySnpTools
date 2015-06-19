@@ -46,8 +46,7 @@ class SnpReader(PstReader):
         >>> print snpdata_subset # prints the specification of the in-memory SNP information
         SnpData(Bed('../tests/datasets/all_chr.maf0.001.N300')[[3,4],::2])
         >>> print snpdata_subset.val.shape # The dimensions of the ndarray of SNP values
-        2L, 508L
-
+        (2L, 508L)
   
     Methods & Properties:
 
@@ -459,7 +458,7 @@ class SnpReader(PstReader):
 
     def read_kernel(self, standardizer, block_size=None, order='F', dtype=np.float64, force_python_only=False, view_ok=False):
         from pysnptools.kernelreader import SnpKernel
-        snpkernel = SnpKernel(this,standardizer=standardizer,block_size=block_size)
+        snpkernel = SnpKernel(self,standardizer=standardizer,block_size=block_size)
         kerneldata = snpkernel.read(order, dtype, force_python_only, view_ok)
         return kerneldata
 

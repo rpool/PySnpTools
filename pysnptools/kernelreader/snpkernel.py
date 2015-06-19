@@ -37,12 +37,12 @@ class SnpKernel(KernelReader):
 
     def __repr__(self):
         if isinstance(self.standardizer,Unit): #!!!cmk0
-            if block_size is None:
+            if self.block_size is None:
                 s = "SnpKernel({0})".format(self.snpreader)
             else:
                 s = "SnpKernel({0},block_size={1})".format(self.snpreader,self.block_size)
         else:
-            if block_size is None:
+            if self.block_size is None:
                 s = "SnpKernel({0},standardizer={1})".format(self.snpreader,self.standardizer)
             else:
                 s = "SnpKernel({0},standardizer={1},block_size={2})".format(self.snpreader,self.standardizer,self.block_size)
@@ -55,7 +55,7 @@ class SnpKernel(KernelReader):
 
     def _read(self, row_index_or_none, col_index_or_none, order, dtype, force_python_only, view_ok):
         if row_index_or_none is col_index_or_none or np.array_equal(row_index_or_none,row_index_or_none):
-            return self._snpreader[row_index_or_none,:]._read_kernel(self.standardizer,self.block_size,order, dtype, force_python_only, view_ok)
+            return self.snpreader[row_index_or_none,:]._read_kernel(self.standardizer,self.block_size,order, dtype, force_python_only, view_ok)
         else:
             #!!!cmk0: Need to find the iids that are in either the cols or the rows. Standardize the snps with just those and then turn that square into the rectangle requested
             raise NotImplementedError("Don't currently support reading non-square kernels from SnpKernels")
@@ -72,7 +72,7 @@ class SnpKernel(KernelReader):
         #LATER is '==' and array_equal the right way to check for all possible advanced indexing, e.g. slices, etc.
         assert iid0 is iid1 or np.array_equal(iid0,iid1), "when selecting a subset of snps from a SnpKernel, the two snps lists must be the same" #LATER is this restriction good?
 
-        return SnpKernel(self._snpreader[iid0,:],standardizer=self.standardizer)
+        return SnpKernel(self.snpreader[iid0,:],standardizer=self.standardizer)
 
 
 
