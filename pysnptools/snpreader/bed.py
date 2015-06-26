@@ -149,6 +149,10 @@ class Bed(SnpReader):
         
     def _read(self, iid_index_or_none, sid_index_or_none, order, dtype, force_python_only, view_ok):
         self._run_once()
+        
+        if order=='A':
+            order='F'
+
         assert not hasattr(self, 'ind_used'), "A SnpReader should not have a 'ind_used' attribute"
 
         iid_count_in = self.iid_count

@@ -19,12 +19,18 @@ class SnpData(PstData,SnpReader):
         self._row = PstData._fixup_input(iid,empty_creator=lambda ignore:np.empty([0,2],dtype=str))
         self._col = PstData._fixup_input(sid,empty_creator=lambda ignore:np.empty([0],dtype=str))
         self._row_property = PstData._fixup_input(None,count=len(self._row),empty_creator=lambda count:np.empty([count,0],dtype=str))
-        self._col_property = PstData._fixup_input(pos,count=len(self._col),empty_creator=lambda count:np.array([[np.nan, np.nan, np.nan]]*len(count)))
+        self._col_property = PstData._fixup_input(pos,count=len(self._col),empty_creator=lambda count:np.array([[np.nan, np.nan, np.nan]]*count))
         self.val = PstData._fixup_input_val(val,row_count=len(self._row),col_count=len(self._col),empty_creator=lambda row_count,col_count:np.empty([row_count,col_count],dtype=np.float64))
 
         self._assert_iid_sid_pos()
         self._parent_string = parent_string
         self._std_string_list = []
+
+    def train_standardizer(self, apply_in_place, standardizer=Unit(), block_size=None, force_python_only=False):
+        if apply_in_place:
+            self._std_string_list.append(str(standardizer))
+        trained_standardizer = standardizer._train_standardizer(self, apply_in_place=apply_in_place, force_python_only=force_python_only)
+        return trained_standardizer
 
     #LATER should there be a single warning if Unit() finds and imputes NaNs?
     def standardize(self, standardizer=Unit(), block_size=None, force_python_only=False):
@@ -59,19 +65,26 @@ class SnpData(PstData,SnpReader):
         >>> print snpdata2.val[0,0]
         0.229415733871
         """
-        self.val = standardizer.standardize(self.val, block_size=block_size, force_python_only=force_python_only)
         self._std_string_list.append(str(standardizer))
+        _ = standardizer._train_standardizer(self, apply_in_place=True, force_python_only=force_python_only)
         return self
 
-    def _read_kernel(self, standardizer, block_size=None, order='F', dtype=np.float64, force_python_only=False, view_ok=False):#!!!cmk0 respect all these inputs
+    def _read_kernel(train, standardizer, test=None, block_size=None, order='A', dtype=np.float64, force_python_only=False, view_ok=False):
         """
         See :meth:`.SnpReader.kernel` for details and examples.
         """
-        if type(standardizer) is Identity:
-            K = self.val.dot(self.val.T)
+        from pysnptools.pstreader import PstReader
+
+        #Just do a 'python' dot, if no standardization is needed and everything is the right type
+        if type(standardizer) is Identity and train.val.dtype == dtype and type(test) is SnpData and test.val.dtype == dtype:
+            if order == 'F': #numpy's 'dot' always returns 'C' order
+                K = (test.val.dot(train.val.T)).T
+            else:
+                K = train.val.dot(test.val.T)
+            assert PstReader._array_properties_are_ok(K,order,dtype), "internal error: K is not of the expected order or dtype"
             return K
-        else:
-            K = SnpReader._read_kernel(self, standardizer, block_size=block_size, order=order, dtype=dtype, force_python_only=force_python_only,view_ok=view_ok)
+        else: #Do things the more general SnpReader way.
+            K = SnpReader._read_kernel(train, standardizer, test, block_size=block_size, order=order, dtype=dtype, force_python_only=force_python_only,view_ok=view_ok)
             return K
 
     def __repr__(self):

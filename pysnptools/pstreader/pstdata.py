@@ -64,7 +64,13 @@ class PstData(PstReader):
         elif not isinstance(input,np.ndarray or (input.dtype not in [np.float32,np.float64])):
             input = np.array(input,dtype=np.float64)
 
-        assert len(input.shape)==2 and input.shape[0] == row_count and input.shape[1] == col_count, "Expect val input to have two dimensions of size {0}x{1}".format(row_count,col_count)
+        try: #!!!cmk0
+            assert len(input.shape)==2, "Expect val to be two dimensional."
+            assert input.shape[0] == row_count, "Expect number of rows ({0}) in val to match the number of row names given ({1})".format(input.shape[0], row_count)
+            assert input.shape[1] == col_count, "Expect number of columns ({0}) in val to match the number of column names given ({1})".format(input.shape[1], col_count)
+        except:
+            print "!!!cmk0"
+            raise Exception()
 
         return input
 

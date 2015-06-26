@@ -106,8 +106,8 @@ also be used to re-order the values.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">snpdata_subset</span> <span class="o">=</span> <span class="n">subset_on_disk</span><span class="o">.</span><span class="n">read</span><span class="p">()</span> <span class="c"># efficiently reads the specified subset of values from the disk</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">snpdata_subset</span> <span class="c"># prints the specification of the in-memory SNP information</span>
 <span class="go">SnpData(Bed(&#39;../tests/datasets/all_chr.maf0.001.N300&#39;)[[3,4],::2])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">int</span><span class="p">(</span><span class="n">snpdata_subset</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span><span class="nb">int</span><span class="p">(</span><span class="n">snpdata_subset</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="c"># The dimensions of the ndarray of SNP values</span>
-<span class="go">(2, 508)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">snpdata_subset</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">shape</span> <span class="c"># The dimensions of the ndarray of SNP values</span>
+<span class="go">(2L, 508L)</span>
 </pre></div>
 </div>
 </li>
@@ -115,7 +115,7 @@ also be used to re-order the values.</p>
 <p>Methods &amp; Properties:</p>
 <blockquote>
 <div><p>Every SnpReader, such as <a class="reference internal" href="#pysnptools.snpreader.Bed" title="pysnptools.snpreader.Bed"><tt class="xref py py-class docutils literal"><span class="pre">Bed</span></tt></a> and <a class="reference internal" href="#pysnptools.snpreader.SnpData" title="pysnptools.snpreader.SnpData"><tt class="xref py py-class docutils literal"><span class="pre">SnpData</span></tt></a>, has these properties: <a class="reference internal" href="#pysnptools.snpreader.SnpReader.iid" title="pysnptools.snpreader.SnpReader.iid"><tt class="xref py py-attr docutils literal"><span class="pre">iid</span></tt></a>, <a class="reference internal" href="#pysnptools.snpreader.SnpReader.iid_count" title="pysnptools.snpreader.SnpReader.iid_count"><tt class="xref py py-attr docutils literal"><span class="pre">iid_count</span></tt></a>, <a class="reference internal" href="#pysnptools.snpreader.SnpReader.sid" title="pysnptools.snpreader.SnpReader.sid"><tt class="xref py py-attr docutils literal"><span class="pre">sid</span></tt></a>, <a class="reference internal" href="#pysnptools.snpreader.SnpReader.sid_count" title="pysnptools.snpreader.SnpReader.sid_count"><tt class="xref py py-attr docutils literal"><span class="pre">sid_count</span></tt></a>,
-<a class="reference internal" href="#pysnptools.snpreader.SnpReader.pos" title="pysnptools.snpreader.SnpReader.pos"><tt class="xref py py-attr docutils literal"><span class="pre">pos</span></tt></a> and these methods: <a class="reference internal" href="#pysnptools.snpreader.SnpReader.read" title="pysnptools.snpreader.SnpReader.read"><tt class="xref py py-meth docutils literal"><span class="pre">read()</span></tt></a>, <a class="reference internal" href="#pysnptools.snpreader.SnpReader.iid_to_index" title="pysnptools.snpreader.SnpReader.iid_to_index"><tt class="xref py py-meth docutils literal"><span class="pre">iid_to_index()</span></tt></a>, <a class="reference internal" href="#pysnptools.snpreader.SnpReader.sid_to_index" title="pysnptools.snpreader.SnpReader.sid_to_index"><tt class="xref py py-meth docutils literal"><span class="pre">sid_to_index()</span></tt></a>, <a class="reference internal" href="#pysnptools.snpreader.SnpReader.kernel" title="pysnptools.snpreader.SnpReader.kernel"><tt class="xref py py-meth docutils literal"><span class="pre">kernel()</span></tt></a>. See below for details.</p>
+<a class="reference internal" href="#pysnptools.snpreader.SnpReader.pos" title="pysnptools.snpreader.SnpReader.pos"><tt class="xref py py-attr docutils literal"><span class="pre">pos</span></tt></a> and these methods: <a class="reference internal" href="#pysnptools.snpreader.SnpReader.read" title="pysnptools.snpreader.SnpReader.read"><tt class="xref py py-meth docutils literal"><span class="pre">read()</span></tt></a>, <a class="reference internal" href="#pysnptools.snpreader.SnpReader.iid_to_index" title="pysnptools.snpreader.SnpReader.iid_to_index"><tt class="xref py py-meth docutils literal"><span class="pre">iid_to_index()</span></tt></a>, <a class="reference internal" href="#pysnptools.snpreader.SnpReader.sid_to_index" title="pysnptools.snpreader.SnpReader.sid_to_index"><tt class="xref py py-meth docutils literal"><span class="pre">sid_to_index()</span></tt></a>, <tt class="xref py py-meth docutils literal"><span class="pre">kernelreader()</span></tt>. See below for details.</p>
 <p><a class="reference internal" href="#pysnptools.snpreader.SnpData" title="pysnptools.snpreader.SnpData"><tt class="xref py py-class docutils literal"><span class="pre">SnpData</span></tt></a> is a SnpReader so it supports the above properties and methods. In addition, it supports property <a class="reference internal" href="#pysnptools.snpreader.SnpData.val" title="pysnptools.snpreader.SnpData.val"><tt class="xref py py-attr docutils literal"><span class="pre">SnpData.val</span></tt></a> and method <a class="reference internal" href="#pysnptools.snpreader.SnpData.standardize" title="pysnptools.snpreader.SnpData.standardize"><tt class="xref py py-meth docutils literal"><span class="pre">SnpData.standardize()</span></tt></a>.
 See below for details.</p>
 </div></blockquote>
@@ -159,7 +159,7 @@ not SNP value data. Moreover, the iid and sid data is read from file only once. 
 </pre></div>
 </div>
 </li>
-<li><p class="first">The only methods that read SNP values from file are <a class="reference internal" href="#pysnptools.snpreader.SnpReader.read" title="pysnptools.snpreader.SnpReader.read"><tt class="xref py py-meth docutils literal"><span class="pre">read()</span></tt></a> and <a class="reference internal" href="#pysnptools.snpreader.SnpReader.kernel" title="pysnptools.snpreader.SnpReader.kernel"><tt class="xref py py-meth docutils literal"><span class="pre">kernel()</span></tt></a> (to the degree practical). For example:</p>
+<li><p class="first">The only methods that read SNP values from file are <a class="reference internal" href="#pysnptools.snpreader.SnpReader.read" title="pysnptools.snpreader.SnpReader.read"><tt class="xref py py-meth docutils literal"><span class="pre">read()</span></tt></a> and <a class="reference internal" href="#pysnptools.snpreader.SnpReader.read_kernel" title="pysnptools.snpreader.SnpReader.read_kernel"><tt class="xref py py-meth docutils literal"><span class="pre">read_kernel()</span></tt></a> (to the degree practical). For example:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">snp_on_disk</span> <span class="o">=</span> <span class="n">Bed</span><span class="p">(</span><span class="s">&#39;../tests/datasets/all_chr.maf0.001.N300&#39;</span><span class="p">)</span> <span class="c"># Construct a Bed SnpReader. No data is read.</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">snpdata1</span> <span class="o">=</span> <span class="n">snp_on_disk</span><span class="o">.</span><span class="n">read</span><span class="p">()</span> <span class="c">#read all the SNP values from disk, creating a new SnpData instance that keeps these values in memory</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">snpdata1</span><span class="o">.</span><span class="n">val</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="c"># print the SNP value for the iid with index 0 and the sid with index 2. (No data is read from disk.)</span>
@@ -185,7 +185,7 @@ for example:</p>
 the data and returns a new kernel ndarray.</p>
 <p>Here is an example of what not to do, because it causes all the SNP value data to be read twice.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">snp_on_disk</span> <span class="o">=</span> <span class="n">Bed</span><span class="p">(</span><span class="s">&#39;../tests/datasets/all_chr.maf0.001.N300&#39;</span><span class="p">)</span> <span class="c"># Construct a Bed SnpReader. No data is read.</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c"># Not recommended because it inefficiently reads all the SNP values twice.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># The following is not recommended because it inefficiently reads all the SNP values twice.</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">snp_on_disk</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">val</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="c"># read all values into a new SnpData, print a SNP value</span>
 <span class="go">1.0</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">snp_on_disk</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">val</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span> <span class="c"># read all values (again) into a second new SnpData, print a SNP value</span>
@@ -333,11 +333,11 @@ it also returns itself. See <a class="reference internal" href="#pysnptools.snpr
 </div>
 </dd>
 </dl>
-<p>The <a class="reference internal" href="#pysnptools.snpreader.SnpReader.kernel" title="pysnptools.snpreader.SnpReader.kernel"><tt class="xref py py-meth docutils literal"><span class="pre">kernel()</span></tt></a> Method</p>
+<p>The <a class="reference internal" href="#pysnptools.snpreader.SnpReader.read_kernel" title="pysnptools.snpreader.SnpReader.read_kernel"><tt class="xref py py-meth docutils literal"><span class="pre">read_kernel()</span></tt></a> Method !!!cmk0</p>
 <blockquote>
-<div>The <a class="reference internal" href="#pysnptools.snpreader.SnpReader.kernel" title="pysnptools.snpreader.SnpReader.kernel"><tt class="xref py py-meth docutils literal"><span class="pre">kernel()</span></tt></a> method, available on any SnpReader, returns a ndarray of size iid_count x iid_count. The returned array has the value
-of the (optionally standardized) SNP values transposed and then multiplied with themselves. When applied to an read-from-disk SnpReader, such as <a class="reference internal" href="#pysnptools.snpreader.Bed" title="pysnptools.snpreader.Bed"><tt class="xref py py-class docutils literal"><span class="pre">Bed</span></tt></a>,
-the method can save memory by reading (and standardizing) the data in blocks. See <a class="reference internal" href="#pysnptools.snpreader.SnpReader.kernel" title="pysnptools.snpreader.SnpReader.kernel"><tt class="xref py py-meth docutils literal"><span class="pre">kernel()</span></tt></a> for details.</div></blockquote>
+<div>The <a class="reference internal" href="#pysnptools.snpreader.SnpReader.read_kernel" title="pysnptools.snpreader.SnpReader.read_kernel"><tt class="xref py py-meth docutils literal"><span class="pre">read_kernel()</span></tt></a> method, available on any SnpReader, returns a <tt class="xref py py-class docutils literal"><span class="pre">KernelData</span></tt>. The <tt class="xref py py-meth docutils literal"><span class="pre">val()</span></tt> property of the <tt class="xref py py-class docutils literal"><span class="pre">KernelData</span></tt> is
+an ndarray of the (optionally standardized) SNP values transposed and then multiplied with themselves. When applied to an read-from-disk SnpReader, such as <a class="reference internal" href="#pysnptools.snpreader.Bed" title="pysnptools.snpreader.Bed"><tt class="xref py py-class docutils literal"><span class="pre">Bed</span></tt></a>,
+the method can save memory by reading (and standardizing) the data in blocks. See <a class="reference internal" href="#pysnptools.snpreader.SnpReader.read_kernel" title="pysnptools.snpreader.SnpReader.read_kernel"><tt class="xref py py-meth docutils literal"><span class="pre">read_kernel()</span></tt></a> for details.</div></blockquote>
 <dl class="attribute">
 <dt id="pysnptools.snpreader.SnpReader.iid">
 <tt class="descname">iid</tt><a class="headerlink" href="#pysnptools.snpreader.SnpReader.iid" title="Permalink to this definition">¶</a></dt>
@@ -543,6 +543,11 @@ share memory and so it may ignore your suggestion and allocate a new ndarray any
 </pre></div>
 </div>
 </dd></dl>
+
+<dl class="method">
+<dt id="pysnptools.snpreader.SnpReader.read_kernel">
+<tt class="descname">read_kernel</tt><big>(</big><em>standardizer</em>, <em>block_size=None</em>, <em>order='F'</em>, <em>dtype=&lt;type 'numpy.float64'&gt;</em>, <em>force_python_only=False</em>, <em>view_ok=False</em><big>)</big><a class="headerlink" href="#pysnptools.snpreader.SnpReader.read_kernel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="attribute">
 <dt id="pysnptools.snpreader.SnpReader.row_property">
@@ -905,6 +910,11 @@ share memory and so it may ignore your suggestion and allocate a new ndarray any
 </pre></div>
 </div>
 </dd></dl>
+
+<dl class="method">
+<dt id="pysnptools.snpreader.Bed.read_kernel">
+<tt class="descname">read_kernel</tt><big>(</big><em>standardizer</em>, <em>block_size=None</em>, <em>order='F'</em>, <em>dtype=&lt;type 'numpy.float64'&gt;</em>, <em>force_python_only=False</em>, <em>view_ok=False</em><big>)</big><a class="headerlink" href="#pysnptools.snpreader.Bed.read_kernel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="attribute">
 <dt id="pysnptools.snpreader.Bed.row">
@@ -1314,6 +1324,11 @@ share memory and so it may ignore your suggestion and allocate a new ndarray any
 </div>
 </dd></dl>
 
+<dl class="method">
+<dt id="pysnptools.snpreader.Pheno.read_kernel">
+<tt class="descname">read_kernel</tt><big>(</big><em>standardizer</em>, <em>block_size=None</em>, <em>order='F'</em>, <em>dtype=&lt;type 'numpy.float64'&gt;</em>, <em>force_python_only=False</em>, <em>view_ok=False</em><big>)</big><a class="headerlink" href="#pysnptools.snpreader.Pheno.read_kernel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="attribute">
 <dt id="pysnptools.snpreader.Pheno.row">
 <tt class="descname">row</tt><a class="headerlink" href="#pysnptools.snpreader.Pheno.row" title="Permalink to this definition">¶</a></dt>
@@ -1606,8 +1621,43 @@ It is created by calling the <a class="reference internal" href="#pysnptools.snp
 
 <dl class="method">
 <dt id="pysnptools.snpreader.SnpData.kernel">
-<tt class="descname">kernel</tt><big>(</big><em>standardizer</em>, <em>blocksize=10000</em>, <em>allowlowrank=False</em><big>)</big><a class="headerlink" href="#pysnptools.snpreader.SnpData.kernel" title="Permalink to this definition">¶</a></dt>
-<dd><p>See <a class="reference internal" href="#pysnptools.snpreader.SnpReader.kernel" title="pysnptools.snpreader.SnpReader.kernel"><tt class="xref py py-meth docutils literal"><span class="pre">SnpReader.kernel()</span></tt></a> for details and examples.</p>
+<tt class="descname">kernel</tt><big>(</big><em>standardizer</em>, <em>allowlowrank=False</em>, <em>blocksize=10000</em><big>)</big><a class="headerlink" href="#pysnptools.snpreader.SnpData.kernel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a ndarray of size iid_count x iid_count. The returned array has the value of the standardized SNP values transposed and then multiplied with themselves.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>standardizer</strong> &#8211; &#8211; Specify standardization to be applied before the matrix multiply. Any class from <a class="reference internal" href="#module-pysnptools.standardizer" title="pysnptools.standardizer"><tt class="xref py py-mod docutils literal"><span class="pre">pysnptools.standardizer</span></tt></a> may be used. Some choices include <a class="reference internal" href="#pysnptools.standardizer.Identity" title="pysnptools.standardizer.Identity"><tt class="xref py py-class docutils literal"><span class="pre">Identity</span></tt></a> 
+(do nothing), <a class="reference internal" href="#pysnptools.standardizer.Unit" title="pysnptools.standardizer.Unit"><tt class="xref py py-class docutils literal"><span class="pre">Unit</span></tt></a> (make values for each SNP have mean zero and standard deviation 1.0), <tt class="xref py py-class docutils literal"><span class="pre">Beta</span></tt>, <tt class="xref py py-class docutils literal"><span class="pre">BySidCount</span></tt>, <tt class="xref py py-class docutils literal"><span class="pre">BySqrtSidCount</span></tt>.</li>
+<li><strong>blocksize</strong> (<em>int or None</em>) &#8211; optional &#8211; Default of 10000. None means to load all. Suggested number of sids to read into memory at a time.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray of size <a class="reference internal" href="#pysnptools.snpreader.SnpData.iid_count" title="pysnptools.snpreader.SnpData.iid_count"><tt class="xref py py-attr docutils literal"><span class="pre">iid_count</span></tt></a> x <a class="reference internal" href="#pysnptools.snpreader.SnpData.iid_count" title="pysnptools.snpreader.SnpData.iid_count"><tt class="xref py py-attr docutils literal"><span class="pre">iid_count</span></tt></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Calling the method again causes the SNP values to be re-read and allocates a new ndarray.</p>
+<p>When applied to an read-from-disk SnpReader, such as <a class="reference internal" href="#pysnptools.snpreader.Bed" title="pysnptools.snpreader.Bed"><tt class="xref py py-class docutils literal"><span class="pre">Bed</span></tt></a>, the method can save memory by reading (and standardizing) the data in blocks.</p>
+<p>If you request the values for only a subset of the sids or iids, (to the degree practical) only that subset will be read from disk.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pysnptools.snpreader</span> <span class="kn">import</span> <span class="n">Bed</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pysnptools.standardizer</span> <span class="kn">import</span> <span class="n">Unit</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">snp_on_disk</span> <span class="o">=</span> <span class="n">Bed</span><span class="p">(</span><span class="s">&#39;../tests/datasets/all_chr.maf0.001.N300&#39;</span><span class="p">)</span> <span class="c"># Specify SNP data on disk</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">kernel</span> <span class="o">=</span> <span class="n">snp_on_disk</span><span class="o">.</span><span class="n">kernel</span><span class="p">(</span><span class="n">Unit</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">kernel</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span><span class="nb">int</span><span class="p">(</span><span class="n">kernel</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])),</span> <span class="n">kernel</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+<span class="go">(300, 300) 901.421835903</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="attribute">
@@ -1697,6 +1747,11 @@ share memory and so it may ignore your suggestion and allocate a new ndarray any
 </pre></div>
 </div>
 </dd></dl>
+
+<dl class="method">
+<dt id="pysnptools.snpreader.SnpData.read_kernel">
+<tt class="descname">read_kernel</tt><big>(</big><em>standardizer</em>, <em>block_size=None</em>, <em>order='F'</em>, <em>dtype=&lt;type 'numpy.float64'&gt;</em>, <em>force_python_only=False</em>, <em>view_ok=False</em><big>)</big><a class="headerlink" href="#pysnptools.snpreader.SnpData.read_kernel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="attribute">
 <dt id="pysnptools.snpreader.SnpData.row">
@@ -1835,7 +1890,7 @@ share memory and so it may ignore your suggestion and allocate a new ndarray any
 
 <dl class="method">
 <dt id="pysnptools.snpreader.SnpData.standardize">
-<tt class="descname">standardize</tt><big>(</big><em>standardizer=Unit()</em>, <em>blocksize=None</em>, <em>force_python_only=False</em><big>)</big><a class="headerlink" href="#pysnptools.snpreader.SnpData.standardize" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">standardize</tt><big>(</big><em>standardizer=Unit()</em>, <em>block_size=None</em>, <em>force_python_only=False</em><big>)</big><a class="headerlink" href="#pysnptools.snpreader.SnpData.standardize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Does in-place standardization of the in-memory
 SNP data. By default, it applies &#8216;Unit&#8217; standardization, that is: the values for each SNP will have mean zero and standard deviation 1.0.
 NaN values are then filled with zero, the mean (consequently, if there are NaN values, the final standard deviation will not be zero.
@@ -1849,7 +1904,7 @@ it also returns itself.</p>
 <li><strong>standardizer</strong> &#8211; optional &#8211; Specify standardization to be applied before the matrix multiply. 
 Any class from <a class="reference internal" href="#module-pysnptools.standardizer" title="pysnptools.standardizer"><tt class="xref py py-mod docutils literal"><span class="pre">pysnptools.standardizer</span></tt></a> may be used. Some choices include <a class="reference internal" href="#pysnptools.standardizer.Unit" title="pysnptools.standardizer.Unit"><tt class="xref py py-class docutils literal"><span class="pre">Unit</span></tt></a> (default, makes values for each SNP have mean zero and
 standard deviation 1.0)and <a class="reference internal" href="#pysnptools.standardizer.Beta" title="pysnptools.standardizer.Beta"><tt class="xref py py-class docutils literal"><span class="pre">Beta</span></tt></a>.</li>
-<li><strong>blocksize</strong> (<em>int or None</em>) &#8211; optional &#8211; Default of None. None means to load all. Suggested number of sids to read into memory at a time.</li>
+<li><strong>block_size</strong> (<em>int or None</em>) &#8211; optional &#8211; Default of None. None means to load all. Suggested number of sids to read into memory at a time.</li>
 </ul>
 </td>
 </tr>
@@ -2152,6 +2207,11 @@ share memory and so it may ignore your suggestion and allocate a new ndarray any
 </pre></div>
 </div>
 </dd></dl>
+
+<dl class="method">
+<dt id="pysnptools.snpreader.Ped.read_kernel">
+<tt class="descname">read_kernel</tt><big>(</big><em>standardizer</em>, <em>block_size=None</em>, <em>order='F'</em>, <em>dtype=&lt;type 'numpy.float64'&gt;</em>, <em>force_python_only=False</em>, <em>view_ok=False</em><big>)</big><a class="headerlink" href="#pysnptools.snpreader.Ped.read_kernel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="attribute">
 <dt id="pysnptools.snpreader.Ped.row">
@@ -2565,6 +2625,11 @@ share memory and so it may ignore your suggestion and allocate a new ndarray any
 </div>
 </dd></dl>
 
+<dl class="method">
+<dt id="pysnptools.snpreader.Dat.read_kernel">
+<tt class="descname">read_kernel</tt><big>(</big><em>standardizer</em>, <em>block_size=None</em>, <em>order='F'</em>, <em>dtype=&lt;type 'numpy.float64'&gt;</em>, <em>force_python_only=False</em>, <em>view_ok=False</em><big>)</big><a class="headerlink" href="#pysnptools.snpreader.Dat.read_kernel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="attribute">
 <dt id="pysnptools.snpreader.Dat.row">
 <tt class="descname">row</tt><a class="headerlink" href="#pysnptools.snpreader.Dat.row" title="Permalink to this definition">¶</a></dt>
@@ -2713,7 +2778,7 @@ share memory and so it may ignore your suggestion and allocate a new ndarray any
 <h3><tt class="xref py py-class docutils literal"><span class="pre">snpreader.SnpHdf5</span></tt><a class="headerlink" href="#snpreader-snphdf5" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="pysnptools.snpreader.SnpHdf5">
-<em class="property">class </em><tt class="descclassname">pysnptools.snpreader.</tt><tt class="descname">SnpHdf5</tt><big>(</big><em>filename</em>, <em>blocksize=5000</em><big>)</big><a class="headerlink" href="#pysnptools.snpreader.SnpHdf5" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">pysnptools.snpreader.</tt><tt class="descname">SnpHdf5</tt><big>(</big><em>filename</em>, <em>block_size=5000</em><big>)</big><a class="headerlink" href="#pysnptools.snpreader.SnpHdf5" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="attribute">
 <dt id="pysnptools.snpreader.SnpHdf5.col">
 <tt class="descname">col</tt><a class="headerlink" href="#pysnptools.snpreader.SnpHdf5.col" title="Permalink to this definition">¶</a></dt>
@@ -2772,7 +2837,7 @@ share memory and so it may ignore your suggestion and allocate a new ndarray any
 
 <dl class="method">
 <dt id="pysnptools.snpreader.SnpHdf5.create_block">
-<tt class="descname">create_block</tt><big>(</big><em>blocksize</em>, <em>order</em>, <em>dtype</em><big>)</big><a class="headerlink" href="#pysnptools.snpreader.SnpHdf5.create_block" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">create_block</tt><big>(</big><em>block_size</em>, <em>order</em>, <em>dtype</em><big>)</big><a class="headerlink" href="#pysnptools.snpreader.SnpHdf5.create_block" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -2989,6 +3054,11 @@ share memory and so it may ignore your suggestion and allocate a new ndarray any
 <dl class="method">
 <dt id="pysnptools.snpreader.SnpHdf5.read_direct">
 <tt class="descname">read_direct</tt><big>(</big><em>val</em>, <em>selection=(slice(None</em>, <em>None</em>, <em>None)</em>, <em>slice(None</em>, <em>None</em>, <em>None))</em><big>)</big><a class="headerlink" href="#pysnptools.snpreader.SnpHdf5.read_direct" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pysnptools.snpreader.SnpHdf5.read_kernel">
+<tt class="descname">read_kernel</tt><big>(</big><em>standardizer</em>, <em>block_size=None</em>, <em>order='F'</em>, <em>dtype=&lt;type 'numpy.float64'&gt;</em>, <em>force_python_only=False</em>, <em>view_ok=False</em><big>)</big><a class="headerlink" href="#pysnptools.snpreader.SnpHdf5.read_kernel" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -3401,6 +3471,11 @@ share memory and so it may ignore your suggestion and allocate a new ndarray any
 </pre></div>
 </div>
 </dd></dl>
+
+<dl class="method">
+<dt id="pysnptools.snpreader.SnpNpz.read_kernel">
+<tt class="descname">read_kernel</tt><big>(</big><em>standardizer</em>, <em>block_size=None</em>, <em>order='F'</em>, <em>dtype=&lt;type 'numpy.float64'&gt;</em>, <em>force_python_only=False</em>, <em>view_ok=False</em><big>)</big><a class="headerlink" href="#pysnptools.snpreader.SnpNpz.read_kernel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="attribute">
 <dt id="pysnptools.snpreader.SnpNpz.row">
@@ -4493,7 +4568,7 @@ share memory and so it may ignore your suggestion and allocate a new ndarray any
 <h3><tt class="xref py py-class docutils literal"><span class="pre">kernelreader.KernelHdf5</span></tt><a class="headerlink" href="#kernelreader-kernelhdf5" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="pysnptools.kernelreader.KernelHdf5">
-<em class="property">class </em><tt class="descclassname">pysnptools.kernelreader.</tt><tt class="descname">KernelHdf5</tt><big>(</big><em>filename</em>, <em>blocksize=5000</em><big>)</big><a class="headerlink" href="#pysnptools.kernelreader.KernelHdf5" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">pysnptools.kernelreader.</tt><tt class="descname">KernelHdf5</tt><big>(</big><em>filename</em>, <em>block_size=5000</em><big>)</big><a class="headerlink" href="#pysnptools.kernelreader.KernelHdf5" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="attribute">
 <dt id="pysnptools.kernelreader.KernelHdf5.col">
 <tt class="descname">col</tt><a class="headerlink" href="#pysnptools.kernelreader.KernelHdf5.col" title="Permalink to this definition">¶</a></dt>
@@ -4552,7 +4627,7 @@ share memory and so it may ignore your suggestion and allocate a new ndarray any
 
 <dl class="method">
 <dt id="pysnptools.kernelreader.KernelHdf5.create_block">
-<tt class="descname">create_block</tt><big>(</big><em>blocksize</em>, <em>order</em>, <em>dtype</em><big>)</big><a class="headerlink" href="#pysnptools.kernelreader.KernelHdf5.create_block" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">create_block</tt><big>(</big><em>block_size</em>, <em>order</em>, <em>dtype</em><big>)</big><a class="headerlink" href="#pysnptools.kernelreader.KernelHdf5.create_block" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -6926,7 +7001,7 @@ in time linear in the number of ranges, rather than integer elements.</p>
 NaN values are then filled with zero, the mean (consequently, if there are NaN values, the final standard deviation will not be zero.</p>
 <dl class="method">
 <dt id="pysnptools.standardizer.Unit.standardize">
-<tt class="descname">standardize</tt><big>(</big><em>snps</em>, <em>blocksize=None</em>, <em>force_python_only=False</em><big>)</big><a class="headerlink" href="#pysnptools.standardizer.Unit.standardize" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">standardize</tt><big>(</big><em>snps</em>, <em>block_size=None</em>, <em>force_python_only=False</em><big>)</big><a class="headerlink" href="#pysnptools.standardizer.Unit.standardize" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -6940,7 +7015,7 @@ NaN values are then filled with zero, the mean (consequently, if there are NaN v
 <dd><p>Do nothing to the data</p>
 <dl class="method">
 <dt id="pysnptools.standardizer.Identity.standardize">
-<tt class="descname">standardize</tt><big>(</big><em>snps</em>, <em>blocksize=None</em>, <em>force_python_only=False</em><big>)</big><a class="headerlink" href="#pysnptools.standardizer.Identity.standardize" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">standardize</tt><big>(</big><em>snps</em>, <em>block_size=None</em>, <em>force_python_only=False</em><big>)</big><a class="headerlink" href="#pysnptools.standardizer.Identity.standardize" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -6954,7 +7029,7 @@ NaN values are then filled with zero, the mean (consequently, if there are NaN v
 <dd><p>Beta standardize the data</p>
 <dl class="method">
 <dt id="pysnptools.standardizer.Beta.standardize">
-<tt class="descname">standardize</tt><big>(</big><em>snps</em>, <em>blocksize=None</em>, <em>force_python_only=False</em><big>)</big><a class="headerlink" href="#pysnptools.standardizer.Beta.standardize" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">standardize</tt><big>(</big><em>snps</em>, <em>block_size=None</em>, <em>force_python_only=False</em><big>)</big><a class="headerlink" href="#pysnptools.standardizer.Beta.standardize" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -6968,7 +7043,7 @@ NaN values are then filled with zero, the mean (consequently, if there are NaN v
 <dd><p>Standardize data by dividing every value by the number of SNPs</p>
 <dl class="method">
 <dt id="pysnptools.standardizer.BySidCount.standardize">
-<tt class="descname">standardize</tt><big>(</big><em>snps</em>, <em>blocksize=None</em>, <em>force_python_only=False</em><big>)</big><a class="headerlink" href="#pysnptools.standardizer.BySidCount.standardize" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">standardize</tt><big>(</big><em>snps</em>, <em>block_size=None</em>, <em>force_python_only=False</em><big>)</big><a class="headerlink" href="#pysnptools.standardizer.BySidCount.standardize" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -6982,7 +7057,7 @@ NaN values are then filled with zero, the mean (consequently, if there are NaN v
 <dd><p>Standardize data by dividing every value by the square root of the number of SNPs</p>
 <dl class="method">
 <dt id="pysnptools.standardizer.BySqrtSidCount.standardize">
-<tt class="descname">standardize</tt><big>(</big><em>snps</em>, <em>blocksize=None</em>, <em>force_python_only=False</em><big>)</big><a class="headerlink" href="#pysnptools.standardizer.BySqrtSidCount.standardize" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">standardize</tt><big>(</big><em>snps</em>, <em>block_size=None</em>, <em>force_python_only=False</em><big>)</big><a class="headerlink" href="#pysnptools.standardizer.BySqrtSidCount.standardize" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -6996,7 +7071,7 @@ NaN values are then filled with zero, the mean (consequently, if there are NaN v
 <dd><p>diag(K)=N standardization of the data</p>
 <dl class="method">
 <dt id="pysnptools.standardizer.DiagKtoN.standardize">
-<tt class="descname">standardize</tt><big>(</big><em>snps</em>, <em>blocksize=None</em>, <em>force_python_only=False</em><big>)</big><a class="headerlink" href="#pysnptools.standardizer.DiagKtoN.standardize" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">standardize</tt><big>(</big><em>snps</em>, <em>block_size=None</em>, <em>force_python_only=False</em><big>)</big><a class="headerlink" href="#pysnptools.standardizer.DiagKtoN.standardize" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -7720,7 +7795,7 @@ share memory and so it may ignore your suggestion and allocate a new ndarray any
 <h3><tt class="xref py py-class docutils literal"><span class="pre">pstreader.PstHdf5</span></tt><a class="headerlink" href="#pstreader-psthdf5" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="pysnptools.pstreader.PstHdf5">
-<em class="property">class </em><tt class="descclassname">pysnptools.pstreader.</tt><tt class="descname">PstHdf5</tt><big>(</big><em>filename</em>, <em>blocksize=5000</em><big>)</big><a class="headerlink" href="#pysnptools.pstreader.PstHdf5" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">pysnptools.pstreader.</tt><tt class="descname">PstHdf5</tt><big>(</big><em>filename</em>, <em>block_size=5000</em><big>)</big><a class="headerlink" href="#pysnptools.pstreader.PstHdf5" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="attribute">
 <dt id="pysnptools.pstreader.PstHdf5.col">
 <tt class="descname">col</tt><a class="headerlink" href="#pysnptools.pstreader.PstHdf5.col" title="Permalink to this definition">¶</a></dt>
@@ -7779,7 +7854,7 @@ share memory and so it may ignore your suggestion and allocate a new ndarray any
 
 <dl class="method">
 <dt id="pysnptools.pstreader.PstHdf5.create_block">
-<tt class="descname">create_block</tt><big>(</big><em>blocksize</em>, <em>order</em>, <em>dtype</em><big>)</big><a class="headerlink" href="#pysnptools.pstreader.PstHdf5.create_block" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">create_block</tt><big>(</big><em>block_size</em>, <em>order</em>, <em>dtype</em><big>)</big><a class="headerlink" href="#pysnptools.pstreader.PstHdf5.create_block" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">

@@ -1,11 +1,14 @@
 import numpy as np
+from pysnptools.standardizer import Standardizer
 
-class DiagKtoN(object):
+class DiagKtoN(Standardizer):
     """diag(K)=N standardization of the data"""
     def __init__(self, N):
         self._N = N
 
-    def standardize(self, snps, block_size=None, force_python_only=False):
+    def standardize(self, snps, block_size=None, force_python_only=False):#!!!cmk0
+        if block_size is not None:
+            warnings.warn("block_size is deprecated (and not needed, since standardization is in-place", DeprecationWarning)
 
         vec = snps.reshape(-1, order="A")
         

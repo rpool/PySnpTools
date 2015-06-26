@@ -14,10 +14,13 @@ class SnpKernel(KernelReader):
 
     See :class:`.SnpReader` for details and examples.
     """
-    def __init__(self, snpreader, standardizer, block_size=None): #!!!autodoc doesn't generate good doc for this constructor #!!!cmk0 what standardize should be the default, if any?
+    def __init__(self, snpreader, standardizer=None, test=None, block_size=None): #!!!autodoc doesn't generate good doc for this constructor
+        assert standardizer is not None, "'standardizer' must be provided"
+
         self.snpreader = snpreader
-        self.standardizer = standardizer #!!!cmk0 should it be _standardizer
-        self.block_size = block_size #!!!cmk0 should it be _block_size
+        self.standardizer = standardizer
+        self.test = test or snpreader
+        self.block_size = block_size
 
     @property
     def row(self):
@@ -33,33 +36,42 @@ class SnpKernel(KernelReader):
 
         See :attr:`.SnpReader.iid` for details and examples.
         """
-        return self.snpreader.iid
+        return self.test.iid
 
     def __repr__(self):
-        if isinstance(self.standardizer,Unit): #!!!cmk0
-            if self.block_size is None:
-                s = "SnpKernel({0})".format(self.snpreader)
-            else:
-                s = "SnpKernel({0},block_size={1})".format(self.snpreader,self.block_size)
-        else:
+        if self.snpreader is self.test:
             if self.block_size is None:
                 s = "SnpKernel({0},standardizer={1})".format(self.snpreader,self.standardizer)
             else:
                 s = "SnpKernel({0},standardizer={1},block_size={2})".format(self.snpreader,self.standardizer,self.block_size)
+        else:
+            if self.block_size is None:
+                s = "SnpKernel({0},standardizer={1},test={2})".format(self.snpreader,self.standardizer,self.test)
+            else:
+                s = "SnpKernel({0},standardizer={1},test={2},block_size={3})".format(self.snpreader,self.standardizer,self.test,self.block_size)
         return s
 
     def copyinputs(self, copier):
         #Doesn't need run_once
         copier.input(self.snpreader)
         copier.input(self.standardizer)
+        if self.snpreader is not self.test:
+            copier.input(self.test)
 
+    #!!!cmk0
     def _read(self, row_index_or_none, col_index_or_none, order, dtype, force_python_only, view_ok):
         if row_index_or_none is col_index_or_none or np.array_equal(row_index_or_none,row_index_or_none):
-            return self.snpreader[row_index_or_none,:]._read_kernel(self.standardizer,self.block_size,order, dtype, force_python_only, view_ok)
+            if row_index_or_none is None:
+                return self.snpreader._read_kernel(self.standardizer,self.test,self.block_size,order, dtype, force_python_only, view_ok)
+            else:
+                #!!!CMK0
+                raise NotImplementedError("Don't currently support reading non-square kernels from SnpKernels")
+                return self.snpreader[row_index_or_none,:]._read_kernel(self.standardizer,self.test,self.block_size,order, dtype, force_python_only, view_ok)
         else:
             #!!!cmk0: Need to find the iids that are in either the cols or the rows. Standardize the snps with just those and then turn that square into the rectangle requested
             raise NotImplementedError("Don't currently support reading non-square kernels from SnpKernels")
 
+    #!!!cmk0
     #!!!cmk be sure to document that any subsetting applies to the inter snpreader BEFORE standardization.
     def __getitem__(self, iid_indexer_and_snp_indexer):
         assert not isinstance(iid_indexer_and_snp_indexer, str), "Don't expect SnpKernel to be subsetted with a string" #LATER is this the best place for this test?

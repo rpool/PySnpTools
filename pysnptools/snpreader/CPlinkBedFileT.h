@@ -124,12 +124,15 @@ private:
 
 
 void SUFFIX(ImputeAndZeroMeanSNPs)( 
-   REAL *SNPs, 
-   const size_t nIndividuals, 
-   const size_t nSNPs, 
+	REAL *SNPs, 
+	const size_t nIndividuals, 
+	const size_t nSNPs, 
 	const bool betaNotUnitVariance,
 	const REAL betaA,
-	const REAL betaB
+	const REAL betaB,
+	const bool apply_in_place,
+	const bool use_stats,
+	REAL *stats
    );
 
 // to be used by cython wrapper

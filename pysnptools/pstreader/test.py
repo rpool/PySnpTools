@@ -11,7 +11,7 @@ from pysnptools.kernelreader.test import _fortesting_JustCheckExists
 
 class TestLoader(unittest.TestCase):     
 
-    def xcmktest_big_npz(self):
+    def test_big_npz(self):
         logging.info("in test_big_npz")
         n = 1000
         pstdata = PstData(row=xrange(n-1),col=xrange(n+1),val=np.zeros([n-1,n+1]))
@@ -31,7 +31,7 @@ class TestLoader(unittest.TestCase):
 
         print "done"
 
-    def xcmktest_writes(self):
+    def test_writes(self):
         #===================================
         #    Defining sub functions
         #===================================
@@ -76,7 +76,7 @@ class TestLoader(unittest.TestCase):
                             the_class.write(filename,pstdata)
                             for subsetter in [None, sp.s_[::2,::3]]:
                                 if the_class is PstHdf5 and i % 3 == 0:
-                                    reader = the_class(filename,block_size=3) #!!!cmk0 should it be "block_size"? should it be part of reader? Is it accessible in kernel and snp?
+                                    reader = the_class(filename,block_size=3)#!!!cmk find all old apis with blocksize and offer both
                                 else:
                                     reader = the_class(filename)
                                     _fortesting_JustCheckExists().input(reader)
@@ -88,10 +88,13 @@ class TestLoader(unittest.TestCase):
                                 assert np.array_equal(readdata.col,expected.col)
                                 assert np.array_equal(readdata.row_property,expected.row_property)
                                 assert np.array_equal(readdata.col_property,expected.col_property)
-                            os.remove(filename)
+                            try:
+                                os.remove(filename)
+                            except:
+                                pass
         logging.info("done with 'test_writes'")
 
-    def xcmktest_repr_test(self):
+    def test_repr_test(self):
         np.random.seed(0)
         row_property=np.array([[1.0,2,2.5],[3,4,4.5],[5,6,6.5]])
         col_property=np.array([[1.0,2,2.5,1],[3,4,4.5,3]])
@@ -103,7 +106,7 @@ class TestLoader(unittest.TestCase):
         assert pstdata.col_to_index([("B","b")])[0] == 1
         s = str(pstdata)
 
-    def xcmktest_read(self):
+    def test_read(self):
         np.random.seed(0)
         row_property=np.array([[1.0,2,2.5],[3,4,4.5],[5,6,6.5]])
         col_property=np.array([[1.0,2,2.5,1],[3,4,4.5,3]])
@@ -150,7 +153,7 @@ class TestLoader(unittest.TestCase):
         logging.info("done with test")
 
 
-    def xcmktest_inputs(self):
+    def test_inputs(self):
         from pysnptools.pstreader import PstData
         np.random.seed(0)
         row_property=np.array([1.0,2,2.5])
@@ -169,7 +172,7 @@ class TestLoader(unittest.TestCase):
         logging.info("done with test")
 
 
-    def xcmktest_inputs2(self):
+    def test_inputs2(self):
         from pysnptools.pstreader import PstData
         np.random.seed(0)
         row_property=None
@@ -187,7 +190,7 @@ class TestLoader(unittest.TestCase):
         assert np.array_equal(pstdata[1:,:2].col_property,pstdata.col_property[:2])
         logging.info("done with test")
 
-    def xcmktest_inputs3(self):
+    def test_inputs3(self):
         from pysnptools.pstreader import PstData
         np.random.seed(0)
         row_property=None
@@ -204,7 +207,7 @@ class TestLoader(unittest.TestCase):
         assert np.array_equal(pstdata[1:,:2].col_property,pstdata.col_property[:2])
         logging.info("done with test")
 
-    def xcmktest_inputs4(self):
+    def test_inputs4(self):
         from pysnptools.pstreader import PstData
         pstdata = PstData(row=None,
                           col=None,
@@ -221,7 +224,7 @@ class TestLoader(unittest.TestCase):
 class TestDocStrings(unittest.TestCase):
     pass
 
-    #def xcmktest_snpreader(self):
+    #def test_snpreader(self):
     #    import pysnptools.snpreader.snpreader
     #    old_dir = os.getcwd()
     #    os.chdir(os.path.dirname(os.path.realpath(__file__)))
@@ -229,7 +232,7 @@ class TestDocStrings(unittest.TestCase):
     #    os.chdir(old_dir)
     #    assert result.failed == 0, "failed doc test: " + __file__
 
-    #def xcmktest_bed(self):
+    #def test_bed(self):
     #    import pysnptools.snpreader.bed
     #    old_dir = os.getcwd()
     #    os.chdir(os.path.dirname(os.path.realpath(__file__)))
@@ -237,7 +240,7 @@ class TestDocStrings(unittest.TestCase):
     #    os.chdir(old_dir)
     #    assert result.failed == 0, "failed doc test: " + __file__
 
-    #def xcmktest_snpdata(self):
+    #def test_snpdata(self):
     #    import pysnptools.snpreader.snpdata
     #    old_dir = os.getcwd()
     #    os.chdir(os.path.dirname(os.path.realpath(__file__)))
@@ -245,7 +248,7 @@ class TestDocStrings(unittest.TestCase):
     #    os.chdir(old_dir)
     #    assert result.failed == 0, "failed doc test: " + __file__
 
-    #def xcmktest_util(self):
+    #def test_util(self):
     #    import pysnptools.util
     #    old_dir = os.getcwd()
     #    os.chdir(os.path.dirname(os.path.realpath(__file__))+"/util")

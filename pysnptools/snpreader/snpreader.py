@@ -8,6 +8,8 @@ import time
 import pysnptools.util as pstutil
 from pysnptools.pstreader import PstReader
 import warnings
+import pysnptools.standardizer as stdizer
+        
 
 #!!why do the examples use ../tests/datasets instead of "examples"?
 class SnpReader(PstReader):
@@ -51,7 +53,7 @@ class SnpReader(PstReader):
     Methods & Properties:
 
         Every SnpReader, such as :class:`.Bed` and :class:`.SnpData`, has these properties: :attr:`iid`, :attr:`iid_count`, :attr:`sid`, :attr:`sid_count`,
-        :attr:`pos` and these methods: :meth:`read`, :meth:`iid_to_index`, :meth:`sid_to_index`, :meth:`kernelreader`. See below for details.
+        :attr:`pos` and these methods: :meth:`read`, :meth:`iid_to_index`, :meth:`sid_to_index`, :meth:`read_kernel`. See below for details.
 
         :class:`.SnpData` is a SnpReader so it supports the above properties and methods. In addition, it supports property :attr:`.SnpData.val` and method :meth:`.SnpData.standardize`.
         See below for details.
@@ -456,14 +458,16 @@ class SnpReader(PstReader):
         iid_indexer, snp_indexer = iid_indexer_and_snp_indexer
         return _Subset(self, iid_indexer, snp_indexer)
 
-    def read_kernel(self, standardizer, block_size=None, order='F', dtype=np.float64, force_python_only=False, view_ok=False):
+    def read_kernel(self, standardizer=None, test=None, block_size=None, order='A', dtype=np.float64, force_python_only=False, view_ok=False):
+        assert standardizer is not None, "'standardizer' must be provided"
+
         from pysnptools.kernelreader import SnpKernel
-        snpkernel = SnpKernel(self,standardizer=standardizer,block_size=block_size)
+        snpkernel = SnpKernel(self,standardizer=standardizer,test=test,block_size=block_size)
         kerneldata = snpkernel.read(order, dtype, force_python_only, view_ok)
         return kerneldata
 
     #!!Get links to Beta, etc working.
-    def kernel(self, standardizer, allowlowrank=False, blocksize=10000):
+    def kernel(self, standardizer, allowlowrank=False, block_size=10000):
         """Returns a ndarray of size iid_count x iid_count. The returned array has the value of the standardized SNP values transposed and then multiplied with themselves.
 
         :param standardizer: -- Specify standardization to be applied before the matrix multiply. Any class from :mod:`pysnptools.standardizer` may be used. Some choices include :class:`.Identity` 
@@ -490,27 +494,58 @@ class SnpReader(PstReader):
         >>> print (int(kernel.shape[0]),int(kernel.shape[1])), kernel[0,0]
         (300, 300) 901.421835903
         """        #print "entering kernel with {0},{1},{2}".format(self, standardizer, blocksize)
-        warnings.warn(".kernel is deprecated. UseUse the standard logging.info() instead", DeprecationWarning) #!!!cmk0
-        return self._read_kernel(standardizer, block_size=blocksize) #!!!cmk0
+        warnings.warn(".kernel(...) is deprecated. Use '.read_kernel(...).val", DeprecationWarning)
+        return self._read_kernel(standardizer, block_size=block_size)
 
-    def _read_kernel(self, standardizer, block_size=None, order='F', dtype=np.float64, force_python_only=False, view_ok=False):#!!!cmk0 respect all these inputs
-        import pysnptools.standardizer as stdizer
-        if block_size is None or self.sid_count <= block_size:
-            snpdata = self.read(order="F").standardize(standardizer)
-            return snpdata._read_kernel(stdizer.Identity(),block_size=self.sid_count,order=order,dtype=dtype,force_python_only=force_python_only,view_ok=view_ok)
+    @staticmethod
+    def _as_snpdata(snpreader,standardizer, force_python_only, dtype):
+        from pysnptools.snpreader import SnpData
+        if type(snpreader) is SnpData and snpreader.val.dtype==dtype and type(standardizer) is stdizer.Identity:
+            return snpreader, stdizer.Identity()
         else:
-            t0 = time.time()
-            K = np.zeros([self.iid_count,self.iid_count])
+            if snpreader is None:
+                print "!!!cmk"
+                raise Exception()
+            snpdata = snpreader.read(order='A',dtype=dtype)
+            trained_standardizer = snpdata.train_standardizer(apply_in_place=True,standardizer=standardizer,force_python_only=force_python_only)
+            return snpdata, trained_standardizer
+    
+    def _read_kernel(train, standardizer, test=None, block_size=None, order='A', dtype=np.float64, force_python_only=False, view_ok=False):
 
-            logging.info("reading {0} SNPs in blocks of {1} and adding up kernels (for {2} individuals)".format(self.sid_count, block_size, self.iid_count))
+        #Do all-at-once (not in blocks) if 1. No block size is given or 2. The #ofSNPs < Min(block_size,iid_count)
+        if block_size is None or (
+                        (train.sid_count <= block_size or train.sid_count <= train.iid_count)
+                    and (test is None or test.sid_count <= block_size or test.sid_count <= test.iid_count)):
+
+            train_data,trained_standardizer  = SnpReader._as_snpdata(train,standardizer=standardizer,dtype=dtype,force_python_only=force_python_only)
+            if test is None or test is train:
+                test_data = train_data
+            else:
+                test_data,_ = SnpReader._as_snpdata(test,standardizer=trained_standardizer,dtype=dtype,force_python_only=force_python_only)
+
+            return train_data._read_kernel(stdizer.Identity(),test_data,block_size=None,order=order,dtype=dtype,force_python_only=force_python_only,view_ok=False)
+        else: #Do in blocks
+            assert train is test or np.array_equal(train.sid,test.sid), "To create a kernel between two snpreader, they must have the same snps (in the same order)"
+
+            #Set the default order to 'C' because with kernels any order is fine and the Python .dot method likes 'C' best.
+            if order=='A':
+                order = 'C'
+            t0 = time.time()
+            K = np.zeros([train.iid_count,test.iid_count],dtype=dtype,order=order)
+
+            logging.info("reading {0} SNPs in blocks of {1} and adding up kernels (for {2}x{3} individuals)".format(train.sid_count, block_size, train.iid_count,test.iid_count))
 
             ct = 0
             ts = time.time()
 
-            for start in xrange(0, self.sid_count, block_size):
+            for start in xrange(0, train.sid_count, block_size):
                 ct += block_size
-                snpdata = self[:,start:start+block_size].read(order="F").standardize(standardizer)
-                K += snpdata._read_kernel(stdizer.Identity(),block_size=block_size,order=order,dtype=dtype,force_python_only=force_python_only,view_ok=view_ok)
+                train_data,trained_standardizer = SnpReader._as_snpdata(train[:,start:start+block_size],standardizer=standardizer,dtype=dtype,force_python_only=force_python_only)
+                if train is test:
+                    test_data = train_data
+                else:
+                    test_data,_ = SnpReader._as_snpdata(test[:,start:start+block_size],standardizer=trained_standardizer,dtype=dtype,force_python_only=force_python_only)
+                K += train_data._read_kernel(stdizer.Identity(),test_data,block_size=None,order=order,dtype=dtype,force_python_only=force_python_only,view_ok=False)
                 if ct % block_size==0:
                     logging.info("read %s SNPs in %.2f seconds" % (ct, time.time()-ts))
 
