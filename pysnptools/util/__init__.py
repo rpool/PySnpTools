@@ -9,6 +9,7 @@ import numpy as np
 def _testtest(data, iididx):
     return (data[0][iididx],data[1][iididx])
 
+#!!!cmk intersect_before_standardize isn't documented
 def intersect_apply(data_list, sort_by_dataset=True, intersect_before_standardize=True):
     """Intersects and sorts the iids from a list of datasets, returning new version of the datasets with all the same iids in the same order.
 
@@ -89,9 +90,12 @@ def intersect_apply(data_list, sort_by_dataset=True, intersect_before_standardiz
             except:
                 try:
                     iid = data.iid
-                    if iid is data.col: #If the 'iid' shares memory with the 'col', then it's a square-kernel-like thing and should be processed with just once index
-                        reindex = lambda data, iididx : data[iididx]
-                    else:
+                    try:
+                        if iid is data.col: #If the 'iid' shares memory with the 'col', then it's a square-kernel-like thing and should be processed with just once index
+                            reindex = lambda data, iididx : data[iididx]
+                        else:
+                            reindex = lambda data, iididx : data[iididx,:]
+                    except:
                         reindex = lambda data, iididx : data[iididx,:]
                 except AttributeError: #tuple of (val,iid)
                     iid = data[1]

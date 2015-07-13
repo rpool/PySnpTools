@@ -1,6 +1,7 @@
 import numpy as np
 from pysnptools.standardizer import Standardizer
 import logging
+import warnings
 
 class DiagKtoN(Standardizer):
     '''
@@ -19,7 +20,9 @@ class DiagKtoN(Standardizer):
     300.0
     '''
     """diag(K)=N standardization of the data"""
-    def __init__(self):
+    def __init__(self,deprecated_iid_count=None):
+        if deprecated_iid_count is not None:
+            warnings.warn("'iid_count' is deprecated (and not needed, since can get iid_count from SNPs val's first dimension", DeprecationWarning)
         pass
 
     def standardize(self, snps, block_size=None, force_python_only=False):

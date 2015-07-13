@@ -71,6 +71,10 @@
     <Compile Include="snpreader\_subset.py" />
     <Compile Include="snpreader\__init__.py" />
     <Compile Include="standardizer\beta.py" />
+    <Compile Include="standardizer\bysidcount.py" />
+    <Compile Include="standardizer\bysqrtsidcount.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="standardizer\_cannotbetrained.py" />
     <Compile Include="standardizer\betatrained.py" />
     <Compile Include="standardizer\unittrained.py">

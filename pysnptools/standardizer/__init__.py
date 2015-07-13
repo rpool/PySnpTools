@@ -9,3 +9,6 @@ from pysnptools.standardizer.diag_K_to_N import DiagKtoN
 from pysnptools.standardizer.betatrained import BetaTrained
 from pysnptools.standardizer.unittrained import UnitTrained
 
+#Deprecated
+from pysnptools.standardizer.bysqrtsidcount import BySqrtSidCount
+from pysnptools.standardizer.bysidcount import BySidCount

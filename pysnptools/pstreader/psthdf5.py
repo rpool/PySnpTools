@@ -142,7 +142,13 @@ class PstHdf5(PstReader):
     def _read(self, row_index_or_none, col_index_or_none, order, dtype, force_python_only, view_ok):
         self._run_once()
 
+        assert order in ['F','C','A'], "Expect order to be 'F', 'C' or 'A'"
+
+        if order == "A":
+            order = "F" if self.is_col_major else "C"
+
         opposite_order = "C" if order == "F" else "F"
+
 
         if row_index_or_none is not None:
             row_index_count = len(row_index_or_none)

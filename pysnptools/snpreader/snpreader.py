@@ -535,7 +535,7 @@ class SnpReader(PstReader):
         kerneldata = snpkernel.read(order, dtype, force_python_only, view_ok)
         return kerneldata
 
-    def kernel(self, standardizer, allowlowrank=False, block_size=10000):
+    def kernel(self, standardizer, allowlowrank=False, block_size=10000, blocksize=None):
         """ .. Warning:: Deprecated. Use :meth:`read_kernel` instead.
 
         Returns a ndarray of size iid_count x iid_count. The returned array has the value of the standardized SNP values multiplied with their transposed selves.
@@ -565,6 +565,9 @@ class SnpReader(PstReader):
         (300, 300) 901.421835903
         """        #print "entering kernel with {0},{1},{2}".format(self, standardizer, blocksize)
         warnings.warn(".kernel(...) is deprecated. Use '.read_kernel(...).val", DeprecationWarning)
+        if blocksize is not None:
+            warnings.warn(".kernel(...blocksize...) is deprecated. Use '.kernel(...block_size=...)", DeprecationWarning)
+            block_size = blocksize
         return self._read_kernel(standardizer, block_size=block_size)
 
     @staticmethod
