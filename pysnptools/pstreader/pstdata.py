@@ -13,12 +13,31 @@ def _default_empty_creator_val(row_count,col_count):
     return np.empty([row_count,col_count],dtype=str)
 
 class PstData(PstReader):
-    """  This is a class hold SNP values in-memory along with related iid and sid information.
-    It is created by calling the :meth:`.SnpReader.read` method on another :class:`.SnpReader`, for example, :class:`.Bed`.
+    '''A :class:`.PstReader` for holding values in-memory, along with related row and col information.
+    It is usually created by calling the :meth:`.PstReader.read` method on another :class:`.PstReader`, for example, :class:`.PstNpz`. It can also be constructed.
 
-    See :class:`.SnpReader` for details and examples.
-    """
-    def __init__(self, row, col, val, row_property=None, col_property=None, parent_string="",copyinputs_function=None): #!!!autodoc doesn't generate good doc for this constructor
+    See :class:`.PstReader` for details and examples.
+
+    **Constructor:**
+        :Parameters: * **row** (an array of anything) -- The :attr:`.row` information
+                     * **col** (an array of anything) -- The :attr:`.col` information
+                     * **val** (a 2-D array of floats) -- The values
+                     * **row_property** (optional, an array of anything) -- Additional information associated with each row.
+                     * **col_property** (optional, an array of strings) -- Additional information associated with each col.
+                     * **parent_string** (optional, string) -- Information to be display about the origin of this data
+                     * **copyinputs_function** (optional, function) -- *Used internally by optional clustering code*
+
+        :Example:
+
+        >>> from pysnptools.pstreader import PstData
+        >>> pstdata = PstData(row=[['fam0','iid0'],['fam0','iid1']], col=['snp334','snp349','snp921'], val=[[0.,2.,0.],[0.,1.,2.]])
+        >>> print pstdata.val[0,1], pstdata.row_count, pstdata.col_count
+        2.0 2 3
+
+
+    **Methods beyond** :class:`.PstReader`
+    '''
+    def __init__(self, row, col, val, row_property=None, col_property=None, parent_string="",copyinputs_function=None):
         self._row = PstData._fixup_input(row)
         self._col = PstData._fixup_input(col)
         self._row_property = PstData._fixup_input(row_property,count=len(self._row))
@@ -27,9 +46,12 @@ class PstData(PstReader):
         self._parent_string = parent_string
 
     val = None
-    """The in-memory data. A numpy.ndarray with dimensions :attr:`.row_count` x :attr:`.col_count`.
+    """The 2D NumPy array of floats that represents the values.
 
-    See :class:`.PstReader` for details and examples.
+    >>> from pysnptools.pstreader import PstNpz
+    >>> pstdata = PstNpz('../examples/toydata.pst.npz')[:5,:].read() #read data for first 5 rows
+    >>> print pstdata.val[4,100] #print one of the values
+    2.0
     """
 
     def __eq__(a,b):
@@ -64,13 +86,9 @@ class PstData(PstReader):
         elif not isinstance(input,np.ndarray or (input.dtype not in [np.float32,np.float64])):
             input = np.array(input,dtype=np.float64)
 
-        try: #!!!cmk0
-            assert len(input.shape)==2, "Expect val to be two dimensional."
-            assert input.shape[0] == row_count, "Expect number of rows ({0}) in val to match the number of row names given ({1})".format(input.shape[0], row_count)
-            assert input.shape[1] == col_count, "Expect number of columns ({0}) in val to match the number of column names given ({1})".format(input.shape[1], col_count)
-        except:
-            print "!!!cmk0"
-            raise Exception()
+        assert len(input.shape)==2, "Expect val to be two dimensional."
+        assert input.shape[0] == row_count, "Expect number of rows ({0}) in val to match the number of row names given ({1})".format(input.shape[0], row_count)
+        assert input.shape[1] == col_count, "Expect number of columns ({0}) in val to match the number of column names given ({1})".format(input.shape[1], col_count)
 
         return input
 
@@ -87,44 +105,19 @@ class PstData(PstReader):
 
     @property
     def row(self):
-        """A ndarray of the iids.
-
-        See :attr:`.SnpReader.iid` for details and examples.
-        """
         return self._row
 
     @property
     def col(self):
-        """A ndarray of the sids.
-
-        See :attr:`.SnpReader.sid` for details and examples.
-        """
         return self._col
 
     @property
     def row_property(self):
-        """A ndarray of the position information for each sid.
-
-        See :attr:`.SnpReader.pos` for details and examples.
-        """
         return self._row_property
+    
     @property
     def col_property(self):
-        """A ndarray of the position information for each sid.
-
-        See :attr:`.SnpReader.pos` for details and examples.
-        """
         return self._col_property
-
-    #!!Seems like we can't short cut the view_OK this because the .val wouldn't necessarily have the right order and dtype
-    #def read(self, order='F', dtype=np.float64, force_python_only=False, view_ok=False):
-    #    """creates an in-memory :class:`.SnpData` with a copy of the genotype data
-    #    """
-    #    if view_ok:
-    #        return self
-    #    else:
-    #        return SnpReader.read(self, order, dtype, force_python_only, view_ok)
-
 
     # Most _read's support only indexlists or None, but this one supports Slices, too.
     _read_accepts_slices = True

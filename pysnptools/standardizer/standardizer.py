@@ -2,10 +2,56 @@ import numpy as np
 import scipy as sp
 import logging
 
-#!!!cmk need documentation
 class Standardizer(object):
+    '''
+    A Standardizer is a class such as :class:`.Unit` and :class:`.Beta` to be used by the :meth:`.SnpData.standardize` and :meth:`.SnpReader.read_kernel` method to standardize SNP data.
+
+    :Example:
+
+    Read and standardize SNP data.
+
+    >>> from pysnptools.standardizer import Unit
+    >>> from pysnptools.snpreader import Bed
+    >>> snpdata1 = Bed('../../tests/datasets/all_chr.maf0.001.N300').read().standardize(Unit())
+    >>> print snpdata1.val[0,0]
+    0.229415733871
+
+    Create a kernel from SNP data on disk.
+
+    >>> kerneldata = Bed('../examples/toydata.bed').read_kernel(Unit())
+    >>> print kerneldata.val[0,0]
+    9923.06992842
+
+    Standardize any Numpy array.
+
+    >>> val = Bed('../../tests/datasets/all_chr.maf0.001.N300').read().val
+    >>> print val[0,0]
+    2.0
+    >>> val = Unit().standardize(val)
+    >>> print val[0,0]
+    0.229415733871
+
+    Details of Methods & Properties:
+    '''
 
     def standardize(self, snps, block_size=None, force_python_only=False):
+        '''
+        Applies standardization, in place, to an NumPy array of SNP data. For convenience also returns the array.
+
+        :param snps: An array of snp data.
+        :type snps: NumPy array
+
+        :param block_size: *Not used*
+        :type block_size: None
+
+        :param force_python_only: optional -- If False (default), may use outside library code. If True, requests that the read
+            be done without outside library code.
+        :type force_python_only: bool
+
+        :rtype: NumPy array
+
+
+        '''
         if block_size is not None:
             warnings.warn("block_size is deprecated (and not needed, since standardization is in-place", DeprecationWarning)
         raise NotImplementedError("subclass {0} needs to implement method '.standardize'".format(self.__class__.__name__))
@@ -85,7 +131,7 @@ class Standardizer(object):
             if 0.0 in snp_std:
                 logging.warn("A least one snps has only one value, that is, its standard deviation is zero")
                 snp_std[snp_std == 0.0] = np.inf #We make the stdev infinity so that applying as a trained_standardizer will turn any input to 0. Thus if a variable has no variation in the training data, then it will be set to 0 in test data, too. 
-            stats[:,0] = snp_mean #!!!cmk0 add a test case of train and test for here and for beta
+            stats[:,0] = snp_mean
             stats[:,1] = snp_std
 
         if apply_in_place:
@@ -112,7 +158,7 @@ class Standardizer(object):
             snp_mean = (snp_sum*1.0)/n_obs_sum
             snp_std = np.sqrt(np.nansum((snps-snp_mean)**2, axis=0)/n_obs_sum)
             if 0.0 in snp_std:
-                logging.warn("A least one snps has only one value, that is, its standard deviation is zero") #!!!cmk0 should we do something to stop from making prediction with this variable, e.g. set test values to 0
+                logging.warn("A least one snps has only one value, that is, its standard deviation is zero")
                 snp_std[snp_std==0] = np.inf
             stats[:,0] = snp_mean
             stats[:,1] = snp_std
@@ -130,3 +176,9 @@ class Standardizer(object):
             snps[imissX] = 0.0
             if use_stats: #If we're applying to test data, set any variables with to 0 if they have no variation in the training data.
                 snps[:,snp_std==np.inf] = 0.0
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+
+    import doctest
+    doctest.testmod()

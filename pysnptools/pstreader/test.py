@@ -75,11 +75,8 @@ class TestLoader(unittest.TestCase):
                             i += 1
                             the_class.write(filename,pstdata)
                             for subsetter in [None, sp.s_[::2,::3]]:
-                                if the_class is PstHdf5 and i % 3 == 0:
-                                    reader = the_class(filename,block_size=3)#!!!cmk find all old apis with blocksize and offer both
-                                else:
-                                    reader = the_class(filename)
-                                    _fortesting_JustCheckExists().input(reader)
+                                reader = the_class(filename)
+                                _fortesting_JustCheckExists().input(reader)
                                 subreader = reader if subsetter is None else reader[subsetter[0],subsetter[1]]
                                 readdata = subreader.read(order='C')
                                 expected = pstdata if subsetter is None else pstdata[subsetter[0],subsetter[1]].read()
@@ -224,38 +221,37 @@ class TestLoader(unittest.TestCase):
 class TestDocStrings(unittest.TestCase):
     pass
 
-    #def test_snpreader(self):
-    #    import pysnptools.snpreader.snpreader
-    #    old_dir = os.getcwd()
-    #    os.chdir(os.path.dirname(os.path.realpath(__file__)))
-    #    result = doctest.testmod(pysnptools.snpreader.snpreader)
-    #    os.chdir(old_dir)
-    #    assert result.failed == 0, "failed doc test: " + __file__
+    def test_snpreader(self):
+        import pysnptools.pstreader.pstreader
+        old_dir = os.getcwd()
+        os.chdir(os.path.dirname(os.path.realpath(__file__)))
+        result = doctest.testmod(pysnptools.pstreader.pstreader)
+        os.chdir(old_dir)
+        assert result.failed == 0, "failed doc test: " + __file__
 
-    #def test_bed(self):
-    #    import pysnptools.snpreader.bed
-    #    old_dir = os.getcwd()
-    #    os.chdir(os.path.dirname(os.path.realpath(__file__)))
-    #    result = doctest.testmod(pysnptools.snpreader.bed)
-    #    os.chdir(old_dir)
-    #    assert result.failed == 0, "failed doc test: " + __file__
+    def test_snpdata(self):
+        import pysnptools.pstreader.pstdata
+        old_dir = os.getcwd()
+        os.chdir(os.path.dirname(os.path.realpath(__file__)))
+        result = doctest.testmod(pysnptools.pstreader.pstdata)
+        os.chdir(old_dir)
+        assert result.failed == 0, "failed doc test: " + __file__
 
-    #def test_snpdata(self):
-    #    import pysnptools.snpreader.snpdata
-    #    old_dir = os.getcwd()
-    #    os.chdir(os.path.dirname(os.path.realpath(__file__)))
-    #    result = doctest.testmod(pysnptools.snpreader.snpdata)
-    #    os.chdir(old_dir)
-    #    assert result.failed == 0, "failed doc test: " + __file__
+    def test_snpdata(self):
+        import pysnptools.pstreader.pstnpz
+        old_dir = os.getcwd()
+        os.chdir(os.path.dirname(os.path.realpath(__file__)))
+        result = doctest.testmod(pysnptools.pstreader.pstnpz)
+        os.chdir(old_dir)
+        assert result.failed == 0, "failed doc test: " + __file__
 
-    #def test_util(self):
-    #    import pysnptools.util
-    #    old_dir = os.getcwd()
-    #    os.chdir(os.path.dirname(os.path.realpath(__file__))+"/util")
-    #    result = doctest.testmod(pysnptools.util)
-    #    os.chdir(old_dir)
-    #    assert result.failed == 0, "failed doc test: " + __file__
-
+    def test_snpdata(self):
+        import pysnptools.pstreader.psthdf5
+        old_dir = os.getcwd()
+        os.chdir(os.path.dirname(os.path.realpath(__file__)))
+        result = doctest.testmod(pysnptools.pstreader.psthdf5)
+        os.chdir(old_dir)
+        assert result.failed == 0, "failed doc test: " + __file__
 
 def getTestSuite():
     """

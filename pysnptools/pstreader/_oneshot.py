@@ -10,7 +10,7 @@ import warnings
 
 class _OneShot(PstReader):
     '''
-    !!!cmk
+    A utility class that makes it easier to define readers that read all the data and into memory before doing any subsetting.
     '''
 
     def _read_pstdata():

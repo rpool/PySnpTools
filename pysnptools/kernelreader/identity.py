@@ -7,22 +7,30 @@ from kernelreader import KernelReader
 from pysnptools.pstreader import PstData
 
 class Identity(KernelReader):
-    """  This is a class hold SNP values in-memory along with related iid and sid information.
-    It is created by calling the :meth:`.SnpReader.read` method on another :class:`.SnpReader`, for example, :class:`.Bed`.
+    '''
+    A :class:`.KernelReader` for that represents an identity matrix. No memory for the values is allocated until :meth:`Identity.read` is called.
 
-    See :class:`.SnpReader` for details and examples. #!!!cmkupdate
-    """
-    def __init__(self, iid): #!!!autodoc doesn't generate good doc for this constructor
+    See :class:`.KernelReader` for general examples of using KernelReaders.
+
+    **Constructor:**
+        :Parameters: * **iid** (an array of strings) -- The :attr:`KernelReader.iid` information
+
+        :Example:
+
+        >>> from pysnptools.kernelreader import Identity
+        >>> identity = Identity(iid=[['fam0','iid0'],['fam0','iid1']])
+        >>> print identity.iid_count
+        2
+        >>> print identity.read().val
+        [[ 1.  0.]
+         [ 0.  1.]]
+    '''
+    def __init__(self, iid):
 
         if len(iid)>0:
             self._row = iid
         else:
             self._row = np.empty([0,2],dtype=str)
-
-    """The in-memory SNP data. A numpy.ndarray with dimensions :attr:`.iid_count` x :attr:`.sid_count`.
-
-    See :class:`.SnpReader` for details and examples.
-    """
 
     def __repr__(self): 
         return "{0}()".format(self.__class__.__name__)
@@ -30,18 +38,10 @@ class Identity(KernelReader):
 
     @property
     def row(self):
-        """A ndarray of the iid0s.
-
-        See :attr:`.SnpReader.iid` for details and examples.
-        """
         return self._row
 
     @property
     def col(self):
-        """A ndarray of the iid0s.
-
-        See :attr:`.SnpReader.iid` for details and examples.
-        """
         return self._row
 
     def _read(self, row_index_or_none, col_index_or_none, order, dtype, force_python_only, view_ok):
@@ -60,4 +60,3 @@ if __name__ == "__main__":
 
     import doctest
     doctest.testmod()
-    # There is also a unit test case in 'pysnptools\test.py' that calls this doc test

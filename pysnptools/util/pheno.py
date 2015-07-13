@@ -1,8 +1,17 @@
+'''
+.. deprecated::
+    Use :class:`.Pheno` instead.    
+'''
+
 import scipy as sp
 import logging
 
+
 def loadOnePhen(filename,  i_pheno = 0, missing ='-9', vectorize = False):
     '''
+    .. deprecated::
+       Use :class:`.Pheno` instead.    
+
     Load one column of a phenotype file. Remove any rows with missing data
 
     :param filename: name of the file
@@ -20,7 +29,7 @@ def loadOnePhen(filename,  i_pheno = 0, missing ='-9', vectorize = False):
 
     * 'header' : [1] array phenotype namesv (only if header line is specified in file),
     * 'vals'   : [N*1] array of phenotype-data,
-    * 'iid'    : [N*2] array of family IDs and individual IDs
+    * 'iid'    : [N*2] array of family IDs and case IDs
     '''
 
     allColumns = loadPhen(filename, missing)
@@ -46,6 +55,9 @@ def loadOnePhen(filename,  i_pheno = 0, missing ='-9', vectorize = False):
 
 def loadPhen(filename, missing ='-9',famid='FID', sampid='ID'):
     '''
+    .. deprecated::
+       Use :class:`.Pheno` instead.    
+
     Load a phenotype or covariate file. Covariates have the same file format.
 
     :param filename: name of the file
@@ -61,7 +73,7 @@ def loadPhen(filename, missing ='-9',famid='FID', sampid='ID'):
 
     * 'header' : [1] array phenotype names (only if header line is specified in file),
     * 'vals'   : [N*1] array of phenotype-data,
-    * 'iid'    : [N*2] array of family IDs and individual IDs
+    * 'iid'    : [N*2] array of family IDs and case IDs
     '''
     if missing == '-9':
         logging.warning("loadPhen is using default missing value of '-9'.")
@@ -91,3 +103,9 @@ def loadPhen(filename, missing ='-9',famid='FID', sampid='ID'):
             'iid':iid
             }
     return ret
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+
+    import doctest
+    doctest.testmod()

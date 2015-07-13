@@ -1,6 +1,4 @@
-"""Tools for reading SNP files
-
-
+"""Tools for reading and manipulating SNP data.
 """
 
 from pysnptools.snpreader.bed import Bed

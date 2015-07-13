@@ -10,19 +10,37 @@ import warnings
 
 class PstNpz(PstReader):
     '''
-    This is a class that reads into memory from PstNpz files.
+    A :class:`.PstReader` for reading \*.pst.npz files from disk.
+
+    See :class:`.PstReader` for general examples of using PstReaders.
+
+    The general NPZ format is described in http://docs.scipy.org/doc/numpy/reference/generated/numpy.savez.html. The PstNpz format stores
+    val, row, col, row_property, and col_property information in NPZ format.
+   
+    **Constructor:**
+        :Parameters: * **filename** (*string*) -- The PstNpz file to read.
+
+        :Example:
+
+        >>> from pysnptools.pstreader import PstNpz
+        >>> data_on_disk = PstNpz('../examples/little.pst.npz')
+        >>> print data_on_disk.iid_count
+        500
+
+    **Methods beyond** :class:`.NpzReader`
+
     '''
 
     _ran_once = False
 
-    def __init__(self, pstnpz_filename):
+    def __init__(self, filename):
         '''
         filename    : string of the name of the npz file.
         '''
-        self._npz_filename = pstnpz_filename
+        self._filename = filename
 
     def __repr__(self): 
-        return "{0}('{1}')".format(self.__class__.__name__,self._npz_filename)
+        return "{0}('{1}')".format(self.__class__.__name__,self._filename)
 
     @property
     def row(self):
@@ -50,7 +68,7 @@ class PstNpz(PstReader):
             return
         self._ran_once = True
 
-        with np.load(self._npz_filename) as data: #!! similar code in epistasis
+        with np.load(self._filename) as data: #!! similar code in epistasis
             if len(data.keys()) == 2 and 'arr_0' in data.keys(): #for backwards compatibility
                 self._row = data['arr_0']
                 self._col = self._row
@@ -68,7 +86,7 @@ class PstNpz(PstReader):
 
     def copyinputs(self, copier):
         # doesn't need to self.run_once()
-        copier.input(self._npz_filename)
+        copier.input(self._filename)
 
     # Most _read's support only indexlists or None, but this one supports Slices, too.
     _read_accepts_slices = True
@@ -78,7 +96,7 @@ class PstNpz(PstReader):
         self.run_once()
 
         #np.load does the right thing and doesn't load 'val' into memory until accessed here.
-        with np.load(self._npz_filename) as data: #!! similar code in epistasis
+        with np.load(self._filename) as data: #!! similar code in epistasis
             if len(data.keys()) == 2 and  'arr_1' in data.keys(): #for backwards compatibility
                val = data['arr_1']
             else:
@@ -89,6 +107,19 @@ class PstNpz(PstReader):
 
     @staticmethod
     def write(filename, pstdata):
+        """Writes a :class:`PstData` to PstNpz format.
+
+        :param filename: the name of the file to create
+        :type filename: string
+        :param pstdata: The in-memory data that should be written to disk.
+        :type pstdata: :class:`PstData`
+
+        >>> from pysnptools.pstreader import PstData, PstNpz
+        >>> import pysnptools.util as pstutil
+        >>> data1 = PstData(row=['a','b','c'],col=['y','z'],val=[[1,2],[3,4],[np.nan,6]],row_property=['A','B','C'])
+        >>> pstutil.create_directory_if_necessary("tempdir/tiny.pst.npz")
+        >>> PstNpz.write("tempdir/tiny.pst.npz",data1)          # Write data in PstNz format
+        """
         if isinstance(filename,PstData) and isinstance(pstdata,str): #For backwards compatibility, reverse inputs if necessary
             warnings.warn("write statement should have filename before data to write", DeprecationWarning)
             filename, pstdata = pstdata, filename 

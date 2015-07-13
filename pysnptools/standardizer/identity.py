@@ -4,7 +4,20 @@ import logging
 from pysnptools.standardizer import Standardizer
 
 class Identity(Standardizer):
-    """Do nothing to the data"""
+    '''
+    A :class:`.Standardizer` that does nothing to SNP data.
+
+    See :class:`.Standardizer` for more information about standardization.
+
+    >>> from pysnptools.standardizer import Identity
+    >>> from pysnptools.snpreader import Bed
+    >>> snpdata1 = Bed('../../tests/datasets/all_chr.maf0.001.N300').read()
+    >>> print snpdata1.val[0,0]
+    2.0
+    >>> snpdata1 = snpdata1.standardize(Identity())
+    >>> print snpdata1.val[0,0]
+    2.0
+    '''
 
     def __init__(self):
         pass
@@ -23,3 +36,8 @@ class Identity(Standardizer):
         return "{0}()".format(self.__class__.__name__)
 
 
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+
+    import doctest
+    doctest.testmod()

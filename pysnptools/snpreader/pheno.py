@@ -11,7 +11,40 @@ from pysnptools.pstreader import _OneShot
 
 class Pheno(_OneShot, SnpReader):
     '''
-    This is a class that reads into memory from pheno files or from in-memory pheno dictionaries
+    A :class:`.SnpReader` for reading "alternative alternative" phenotype files from disk.
+
+    See :class:`.SnpReader` for general examples of using SnpReaders.
+
+    This text format is described in http://pngu.mgh.harvard.edu/~purcell/plink/data.shtml#pheno and looks like::
+
+         FID    IID      qt1   bmi    site  
+         F1     1110     2.3   22.22  2     
+         F2     2202     34.12 18.23  1     
+         ...
+
+    where the heading row is optional.
+
+
+    **Constructor:**
+        :Parameters: * **input** (*string*) -- The phenotype file to read.
+                     * **iid_if_none** (*None* or array of strings) -- An :attr:`SnpReader.iid` to use if the file is empty.
+                     * **missing** (*None* or string) -- The value in the file that represents missing data.
+
+        For backwards compatibility with older code, **input** can be a dictionary (instead of a filename) with these fields:
+
+        * 'header' : [1] array phenotype name,
+        * 'vals'   : [N*1] array of phenotype data,
+        * 'iid'    : [N*2] array of family IDs and case IDs
+
+        :Example:
+
+        >>> from pysnptools.snpreader import Pheno, Bed
+        >>> data_on_disk = Pheno('../examples/toydata.phe')
+        >>> print data_on_disk.iid_count, data_on_disk.sid_count
+        500 1
+
+    **Methods beyond** :class:`.SnpReader`
+
     '''
 
     def __init__(self, input, iid_if_none=None, missing=None):
@@ -60,9 +93,14 @@ class Pheno(_OneShot, SnpReader):
 
     @staticmethod
     def write(filename, snpdata, missing='NaN', sep="\t"):
-        '''
-        !!!cmk
-        '''
+        """Writes a :class:`SnpData` to Pheno format.
+
+        >>> from pysnptools.snpreader import Pheno, Bed
+        >>> import pysnptools.util as pstutil
+        >>> snpdata = Bed('../examples/toydata.bed')[:,:10].read()  # Read first 10 snps from Bed format
+        >>> pstutil.create_directory_if_necessary("tempdir/toydata10.phe")
+        >>> Pheno.write("tempdir/toydata10.txt",snpdata)       # Write data in Pheno format
+        """
         with open(filename, 'w') as f:
             for i in xrange(snpdata.iid_count):
                 tmpstr = snpdata.iid[i,0] + sep + snpdata.iid[i,1]
@@ -75,4 +113,10 @@ class Pheno(_OneShot, SnpReader):
                     tmpstr += sep + vs
                 tmpstr += "\n"
                 f.write(tmpstr)
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+
+    import doctest
+    doctest.testmod()
 

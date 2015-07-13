@@ -13,6 +13,7 @@ from pysnptools.standardizer import Unit
 from pysnptools.standardizer import Beta
 from pysnptools.util import create_directory_if_necessary
 from pysnptools.kernelreader.test import TestLoader as KrTestLoader
+from pysnptools.kernelreader.test import TestDocStrings as KrDocStrings
 from pysnptools.pstreader.test import TestLoader as PstTestLoader
 from pysnptools.pstreader.test import TestDocStrings as PstDocStrings
 from pysnptools.kernelreader.test import _fortesting_JustCheckExists
@@ -86,7 +87,7 @@ class TestLoader(unittest.TestCase):
         np.random.seed(42)
         m = np.random.random((100,1000))
         from pysnptools.standardizer import DiagKtoN
-        s = DiagKtoN(100)
+        s = DiagKtoN()
         s.standardize(m)
         K = m.dot(m.T)
         sum_diag = np.sum(np.diag(K))
@@ -231,17 +232,15 @@ class TestLoader(unittest.TestCase):
         np.testing.assert_array_almost_equal(k0, k2, decimal=10)
 
         from pysnptools.standardizer.identity import Identity
-        from pysnptools.standardizer.bysidcount import BySidCount
-        from pysnptools.standardizer.bysqrtsidcount import BySqrtSidCount
         from pysnptools.standardizer.diag_K_to_N import DiagKtoN
         for dtype in [sp.float64,sp.float32]:
-            for std in [Unit(),Beta(),BySidCount(),BySqrtSidCount(),Identity(),DiagKtoN(50)]:
+            for std in [Unit(),Beta(1,25),Identity(),DiagKtoN()]:
                 s = str(std)
                 np.random.seed(0)
                 x = np.array(np.random.randint(3,size=[60,100]),dtype=dtype)
                 x2 = x[:,::2]
                 x2b = np.array(x2)
-                #!!!cmk0 what's this about? It doesn't do non-contiguous?
+                #LATER what's this about? It doesn't do non-contiguous?
                 #assert not x2.flags['C_CONTIGUOUS'] and not x2.flags['F_CONTIGUOUS'] #set up to test non contiguous
                 #assert x2b.flags['C_CONTIGUOUS'] or x2b.flags['F_CONTIGUOUS'] #set up to test non contiguous
                 #a,b = std.standardize(x2b),std.standardize(x2)
@@ -528,7 +527,7 @@ class NaNCNCTestCases(unittest.TestCase):
 
         snp_reader_factory_bed = lambda : Bed("examples/toydata")
         snp_reader_factory_snpmajor_hdf5 = lambda : SnpHdf5("examples/toydata.snpmajor.snp.hdf5")
-        snp_reader_factory_iidmajor_hdf5 = lambda : SnpHdf5("examples/toydata.iidmajor.snp.hdf5",block_size=6000)
+        snp_reader_factory_iidmajor_hdf5 = lambda : SnpHdf5("examples/toydata.iidmajor.snp.hdf5")
         snp_reader_factory_dat = lambda : Dat("examples/toydata.dat")
 
         previous_wd = os.getcwd()
@@ -605,7 +604,7 @@ class TestDocStrings(unittest.TestCase):
     def test_snpreader(self):
         import pysnptools.snpreader.snpreader
         old_dir = os.getcwd()
-        os.chdir(os.path.dirname(os.path.realpath(__file__)))
+        os.chdir(os.path.dirname(os.path.realpath(__file__))+"/snpreader")
         result = doctest.testmod(pysnptools.snpreader.snpreader)
         os.chdir(old_dir)
         assert result.failed == 0, "failed doc test: " + __file__
@@ -613,7 +612,7 @@ class TestDocStrings(unittest.TestCase):
     def test_bed(self):
         import pysnptools.snpreader.bed
         old_dir = os.getcwd()
-        os.chdir(os.path.dirname(os.path.realpath(__file__)))
+        os.chdir(os.path.dirname(os.path.realpath(__file__))+"/snpreader")
         result = doctest.testmod(pysnptools.snpreader.bed)
         os.chdir(old_dir)
         assert result.failed == 0, "failed doc test: " + __file__
@@ -621,8 +620,56 @@ class TestDocStrings(unittest.TestCase):
     def test_snpdata(self):
         import pysnptools.snpreader.snpdata
         old_dir = os.getcwd()
-        os.chdir(os.path.dirname(os.path.realpath(__file__)))
+        os.chdir(os.path.dirname(os.path.realpath(__file__))+"/snpreader")
         result = doctest.testmod(pysnptools.snpreader.snpdata)
+        os.chdir(old_dir)
+        assert result.failed == 0, "failed doc test: " + __file__
+
+    def test_pheno(self):
+        import pysnptools.snpreader.snpdata
+        old_dir = os.getcwd()
+        os.chdir(os.path.dirname(os.path.realpath(__file__))+"/snpreader")
+        result = doctest.testmod(pysnptools.snpreader.pheno)
+        os.chdir(old_dir)
+        assert result.failed == 0, "failed doc test: " + __file__
+
+    def test_ped(self):
+        import pysnptools.snpreader.snpdata
+        old_dir = os.getcwd()
+        os.chdir(os.path.dirname(os.path.realpath(__file__))+"/snpreader")
+        result = doctest.testmod(pysnptools.snpreader.ped)
+        os.chdir(old_dir)
+        assert result.failed == 0, "failed doc test: " + __file__
+
+    def test_dat(self):
+        import pysnptools.snpreader.snpdata
+        old_dir = os.getcwd()
+        os.chdir(os.path.dirname(os.path.realpath(__file__))+"/snpreader")
+        result = doctest.testmod(pysnptools.snpreader.dat)
+        os.chdir(old_dir)
+        assert result.failed == 0, "failed doc test: " + __file__
+
+    def test_dense(self):
+        import pysnptools.snpreader.snpdata
+        old_dir = os.getcwd()
+        os.chdir(os.path.dirname(os.path.realpath(__file__))+"/snpreader")
+        result = doctest.testmod(pysnptools.snpreader.dense)
+        os.chdir(old_dir)
+        assert result.failed == 0, "failed doc test: " + __file__
+
+    def test_snphdf5(self):
+        import pysnptools.snpreader.snpdata
+        old_dir = os.getcwd()
+        os.chdir(os.path.dirname(os.path.realpath(__file__))+"/snpreader")
+        result = doctest.testmod(pysnptools.snpreader.snphdf5)
+        os.chdir(old_dir)
+        assert result.failed == 0, "failed doc test: " + __file__
+
+    def test_snpnpz(self):
+        import pysnptools.snpreader.snpdata
+        old_dir = os.getcwd()
+        os.chdir(os.path.dirname(os.path.realpath(__file__))+"/snpreader")
+        result = doctest.testmod(pysnptools.snpreader.snpnpz)
         os.chdir(old_dir)
         assert result.failed == 0, "failed doc test: " + __file__
 
@@ -634,6 +681,25 @@ class TestDocStrings(unittest.TestCase):
         os.chdir(old_dir)
         assert result.failed == 0, "failed doc test: " + __file__
 
+    def test_util(self):
+        import pysnptools.util.pheno
+        old_dir = os.getcwd()
+        os.chdir(os.path.dirname(os.path.realpath(__file__))+"/util")
+        result = doctest.testmod(pysnptools.util.pheno)
+        os.chdir(old_dir)
+        assert result.failed == 0, "failed doc test: " + __file__
+
+    def test_standardize_testmod(self):
+        import pysnptools.standardizer
+        old_dir = os.getcwd()
+        os.chdir(os.path.dirname(os.path.realpath(__file__))+"/standardizer")
+        for mod in [pysnptools.standardizer.standardizer,pysnptools.standardizer.unit,pysnptools.standardizer.beta,
+                    pysnptools.standardizer.betatrained,pysnptools.standardizer.diag_K_to_N,pysnptools.standardizer.identity,
+                    pysnptools.standardizer.unittrained]:
+            result = doctest.testmod(mod)
+            assert result.failed == 0, "failed doc test: " + __file__
+        os.chdir(old_dir)
+
 
 def getTestSuite():
     """
@@ -642,14 +708,17 @@ def getTestSuite():
     
     test_suite = unittest.TestSuite([])
 
+    test_suite.addTests(NaNCNCTestCases.factory_iterator())
     test_suite.addTests(unittest.TestLoader().loadTestsFromTestCase(PstTestLoader))
     test_suite.addTests(unittest.TestLoader().loadTestsFromTestCase(PstDocStrings))
     test_suite.addTests(unittest.TestLoader().loadTestsFromTestCase(KrTestLoader))
+    test_suite.addTests(unittest.TestLoader().loadTestsFromTestCase(KrDocStrings))
     test_suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestDocStrings))
     test_suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestLoader))
-    test_suite.addTests(NaNCNCTestCases.factory_iterator())
     from pysnptools.util.intrangeset import TestLoader as IntRangeSetTestLoader
     test_suite.addTests(unittest.TestLoader().loadTestsFromTestCase(IntRangeSetTestLoader))
+
+
 
     return test_suite
 

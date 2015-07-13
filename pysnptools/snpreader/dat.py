@@ -10,7 +10,30 @@ from pysnptools.pstreader import _OneShot
 
 class Dat(_OneShot,SnpReader):
     '''
-    This is a class that reads into memory from DAT/FAM/MAP files.
+    A :class:`.SnpReader` for reading Dat/Fam/Map-formated files from disk.
+
+    See :class:`.SnpReader` for general examples of using SnpReaders.
+
+    This is a text format that can store any numeric values. (In contrast, Bed and Ped can only store 0,1,2, and missing). Its Dat files look like::
+    
+        null_0  	j	n	0.333	1	2
+        null_100	j	n	2	1	1
+        null_200	j	n	0	nan	1
+        ...
+
+    Its Map and Fam files are described in http://pngu.mgh.harvard.edu/~purcell/plink/data.shtml.
+
+    **Constructor:**
+        :Parameters: * **filename** (*string*) -- The Dat file to read.
+
+        :Example:
+
+        >>> from pysnptools.snpreader import Dat
+        >>> data_on_disk = Dat('../examples/toydata.dat')
+        >>> print data_on_disk.iid_count, data_on_disk.sid_count
+        500 10000
+
+    **Methods beyond** :class:`.SnpReader`
     '''
 
     def __init__(self, filename):
@@ -42,6 +65,19 @@ class Dat(_OneShot,SnpReader):
 
     @staticmethod
     def write(filename, snpdata):
+        """Writes a :class:`SnpData` to dat/fam/map format.
+
+        :param filename: the name of the file to create
+        :type filename: string
+        :param snpdata: The in-memory data that should be written to disk.
+        :type snpdata: :class:`SnpData`
+
+        >>> from pysnptools.snpreader import Dat, Bed
+        >>> import pysnptools.util as pstutil
+        >>> snpdata = Bed('../examples/toydata.bed')[:,:10].read()  # Read first 10 snps from Bed format
+        >>> pstutil.create_directory_if_necessary("tempdir/toydata10.dat")
+        >>> Dat.write("tempdir/toydata10.dat",snpdata)              # Write data in dat/fam/map format
+        """
 
         if isinstance(filename,SnpData) and isinstance(snpdata,str): #For backwards compatibility, reverse inputs if necessary
             warnings.warn("write statement should have filename before data to write", DeprecationWarning)
@@ -60,3 +96,8 @@ class Dat(_OneShot,SnpReader):
                 dat_filepointer.write("\t".join((str(i) for i in row)) + "\n")
         logging.info("Done writing " + filename)
 
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+
+    import doctest
+    doctest.testmod()

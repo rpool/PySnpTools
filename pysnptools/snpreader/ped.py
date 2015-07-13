@@ -11,8 +11,31 @@ from pysnptools.pstreader import _OneShot
 
 class Ped(_OneShot,SnpReader):
     '''
-    This is a class that does a Ped file. For examples of its use see its 'read' method. #!!LATER update comments
-    #!!!cmk mention that 012 may become 210
+    A :class:`.SnpReader` for reading Ped-formated (and the related Map-formated) files from disk.
+
+    See :class:`.SnpReader` for general examples of using SnpReaders.
+
+    This format is described in http://pngu.mgh.harvard.edu/~purcell/plink/data.shtml#ped and looks like::
+
+         FAM001  1  0 0  1  2  A A  G G  A C 
+         FAM001  2  0 0  1  2  A A  A G  0 0 
+         ...
+
+    the direction of the encoding from allele pair to 0,1,2 is arbitrary. That is, if the alleles are "A" and "G", then "G G" could be 0 and "A A" could be 2 or visa versa. The pair "A G" will always be 1.
+
+    **Constructor:**
+        :Parameters: * **filename** (*string*) -- The Ped file to read.
+                     * **missing** (*string*) -- The value in the file that represents missing data.
+
+
+        :Example:
+
+        >>> from pysnptools.snpreader import Ped
+        >>> data_on_disk = Ped('../examples/toydata.ped')
+        >>> print data_on_disk.iid_count, data_on_disk.sid_count
+        500 10000
+
+    **Methods beyond** :class:`.SnpReader`
     '''
 
     def __init__(self, filename, missing = '0'):
@@ -31,7 +54,7 @@ class Ped(_OneShot,SnpReader):
         snpsstr = ped[:,6::]
         inan=snpsstr==self.missing
         snps = np.zeros((snpsstr.shape[0],snpsstr.shape[1]/2))
-        for i in xrange(snpsstr.shape[1]/2):
+        for i in xrange(snpsstr.shape[1]//2):
             snps[inan[:,2*i],i]=np.nan
             vals=snpsstr[~inan[:,2*i],2*i:2*(i+1)]
             snps[~inan[:,2*i],i]+=(vals==vals[0,0]).sum(1)
@@ -46,6 +69,20 @@ class Ped(_OneShot,SnpReader):
 
     @staticmethod
     def write(filename, snpdata):
+        """Writes a :class:`SnpData` to Ped format. The values must be 0,1,2. The direction of the encoding to allele pairs is arbitrary. This means
+        that if a SnpData is written in Ped format and then read back, then 0's may become 2's and 2's may become 0's. (1's will stay 1's).
+
+        :param filename: the name of the file to create
+        :type filename: string
+        :param snpdata: The in-memory data that should be written to disk.
+        :type snpdata: :class:`SnpData`
+
+        >>> from pysnptools.snpreader import Ped, Bed
+        >>> import pysnptools.util as pstutil
+        >>> snpdata = Bed('../examples/toydata.bed')[:,:10].read()  # Read first 10 snps from Bed format
+        >>> pstutil.create_directory_if_necessary("tempdir/toydata10.ped")
+        >>> Ped.write("tempdir/toydata10.ped",snpdata)            # Write data in Ped format
+        """
 
         if isinstance(filename,SnpData) and isinstance(snpdata,str): #For backwards compatibility, reverse inputs if necessary
             warnings.warn("write statement should have filename before data to write", DeprecationWarning)
@@ -55,7 +92,7 @@ class Ped(_OneShot,SnpReader):
 
         # The PED file is a white-space (space or tab) delimited file: the first six columns are mandatory:
         # Family ID
-        # Individual ID
+        # Case ID
         # Paternal ID
         # Maternal ID
         # Sex (1=male; 2=female; other=unknown)
@@ -79,3 +116,9 @@ class Ped(_OneShot,SnpReader):
                         raise Exception("Expect values for ped file to be 0,1,2, or NAN. Instead, saw '{0}'".format(val))
                     ped_filepointer.write("\t"+s)
                 ped_filepointer.write("\n")
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+
+    import doctest
+    doctest.testmod()

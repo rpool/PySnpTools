@@ -42,12 +42,7 @@ class TestLoader(unittest.TestCase):
     def setUpClass(self):
         self.currentFolder = os.path.dirname(os.path.realpath(__file__))
 
-    #!!!cmk0 Get test_respect_inputs to pass (it has new two-snpreader code
-    #!!!cmk0 Think about what happens if there are to snpreaders and they have orderlapping iids
-    #!!!cmk0 Think about About if it every makes since to subset a kernel (yes, to get parts. no, subsetting should always be applied to the implict snpreader)
-    #!!!cmk0 Think about what intersect_apply should do with: square, xclusive iids rect, overlappyg iid rect
-    #!!!cmk0 We want to apply the standaridzation from the training to the test, right? Or we want to standardize test and try together (easy to do because both are right there), right?
-
+    
     def test_cpp_std(self):
 
         #Order C vs F
@@ -117,6 +112,36 @@ class TestLoader(unittest.TestCase):
         logging.info("done with 'test_cpp_std'")
 
 
+    def test_intersection(self):
+
+        from sklearn import cross_validation
+        from pysnptools.standardizer import Unit
+        from pysnptools.kernelreader import SnpKernel
+        from pysnptools.snpreader import Pheno
+        from pysnptools.kernelreader._subset import _Subset as KernelSubset
+        from pysnptools.snpreader._subset import _Subset as SnpSubset
+        from pysnptools.util import intersect_apply
+
+        snps_all = Bed(self.currentFolder + "/../examples/toydata")
+        k = SnpKernel(snps_all,Unit())
+
+        pheno = Pheno(self.currentFolder + "/../examples/toydata.phe")
+        pheno = pheno[1:,:] # To test intersection we remove a iid from pheno
+
+        k1,pheno = intersect_apply([k,pheno]) #SnpKernel is special because it standardizes AFTER intersecting.
+        assert isinstance(k1.snpreader,SnpSubset) and not isinstance(k1,KernelSubset)
+
+        #What happens with fancy selection?
+        k2 = k[::2]
+        assert isinstance(k2,KernelSubset)
+
+        logging.info("Done with test_intersection")
+
+
+
+
+
+
     def test_demo_kernel(self):
 
         from sklearn import cross_validation
@@ -124,22 +149,19 @@ class TestLoader(unittest.TestCase):
 
         snps_all = Bed(self.currentFolder + "/../examples/toydata")
 
-
-        #!!!cmk0 would be nice to get the statistics of standardization for all of bed here and apply to both later
-
-        k_fold = cross_validation.KFold(n=snps_all.iid_count, n_folds=10, random_state=0)
+        k_fold = cross_validation.KFold(n=snps_all.iid_count, n_folds=10, shuffle=True, random_state=0)
         for train_index, test_index in k_fold:
             snps_train = snps_all[train_index,:]
             snps_test = snps_all[test_index,:]
 
             # returns a snps_train.iid_count x snps_train.iid_count KernelData
-            kernel_train = snps_train.read_kernel(standardizer=Unit(),block_size=1000,force_python_only=False) #force_python_only=True#!!!cmk0
+            kernel_train = snps_train.read_kernel(standardizer=Unit(),block_size=1000)
             #     '.val' is the ndarray. 'iid' is the list of iids.
             #     We require that the 'standardizer' be given explicitly because both 'Unit()' and 'Identity()' is reasonable.
             #     By giving a block_size, we tell it read only 10 SNPs at a time, standardizing on the fly.
 
             # returns a snps_train.iid_count x snps_test.iid_count KernelData
-            kernel_test = snps_train.read_kernel(standardizer=Unit(),test=snps_test,block_size=1000,force_python_only=False)#force_python_only=True#!!!Cmk0
+            kernel_test = snps_train.read_kernel(standardizer=Unit(),test=snps_test,block_size=1000)
             #     By giving a 'reference' we tell it to standardize 'snps_test' according to 'snps_train'.
             #     '.val' is the ndarray. 'iid0' is the list of test iids, 'iid1' is the list of train iids.
             #     By giving a block_size, we tell it read everything from disk again, only 10 SNPs at a time, standardizing on the fly.
@@ -180,16 +202,16 @@ class TestLoader(unittest.TestCase):
                             snpreader1 = snpreader0[1:,:]
 
                             refdata0 = snpreader0.read()
-                            trained_standardizer = refdata0.train_standardizer(apply_in_place=True,standardizer=stdx,force_python_only=True) #!!!cmk00 remove ,force_python_only=True
+                            trained_standardizer = refdata0.train_standardizer(apply_in_place=True,standardizer=stdx,force_python_only=True)
                             refval0 = refdata0.val.dot(refdata0.val.T)
-                            refdata1 = snpreader1.read().standardize(trained_standardizer,force_python_only=True) #!!!cmk00 remove ,force_python_only=True
+                            refdata1 = snpreader1.read().standardize(trained_standardizer,force_python_only=True)
                             refval1 = refdata0.val.dot(refdata1.val.T)
                             for dtype_goal,decimal_goal in [(np.float32,5),(np.float64,10)]:
                                 for order_goal in ['F','C','A']:
-                                    k = snpreader0.read_kernel(standardizer=stdx,block_size=1,order=order_goal,dtype=dtype_goal,force_python_only=False) #!!!cmk00 remove ,force_python_only=True)
+                                    k = snpreader0.read_kernel(standardizer=stdx,block_size=1,order=order_goal,dtype=dtype_goal)
                                     PstReader._array_properties_are_ok(k.val,order_goal,dtype_goal)
                                     np.testing.assert_array_almost_equal(refval0,k.val, decimal=min(decimal_start,decimal_goal))
-                                    k1 = snpreader0.read_kernel(standardizer=stdx,test=snpreader1,block_size=1,order=order_goal,dtype=dtype_goal,force_python_only=False) #!!!cmk00 remove ,force_python_only=True
+                                    k1 = snpreader0.read_kernel(standardizer=stdx,test=snpreader1,block_size=1,order=order_goal,dtype=dtype_goal)
                                     PstReader._array_properties_are_ok(k1.val,order_goal,dtype_goal)
                                     np.testing.assert_array_almost_equal(refval1,k1.val, decimal=min(decimal_start,decimal_goal))
 
@@ -200,11 +222,11 @@ class TestLoader(unittest.TestCase):
         snpdata0 = SnpData(iid=[["0","0"],["1","1"],["2","2"]],sid=[str(i) for i in xrange(snp_count)],val=np.array(np.random.randint(3,size=[3,snp_count]),dtype=np.float64))
         snpdata1 = SnpData(iid=[["3","3"],["4","4"]],sid=[str(i) for i in xrange(snp_count)],val=np.array(np.random.randint(3,size=[2,snp_count]),dtype=np.float64))
         #create kernel for snpdata0 x snpdata1
-        k01 = snpdata0.read_kernel(standardizer=stdizer.Unit(),test=snpdata1,force_python_only=False) #!!!cmk00 remove ,force_python_only=True)
-        k01f = snpdata0.read_kernel(standardizer=stdizer.Unit(),test=snpdata1,order='F',force_python_only=False) #!!!cmk00 remove ,force_python_only=True))
-        k0132 = snpdata0.read_kernel(standardizer=stdizer.Unit(),test=snpdata1,dtype=np.float32,force_python_only=False) #!!!cmk00 remove ,force_python_only=True))
-        trained_standardizer=snpdata0.train_standardizer(apply_in_place=True,force_python_only=True) #!!!cmk00 remove ,force_python_only=True)
-        snpdata1.standardize(trained_standardizer,force_python_only=True) #!!!cmk00 remove ,force_python_only=True))
+        k01 = snpdata0.read_kernel(standardizer=stdizer.Unit(),test=snpdata1)
+        k01f = snpdata0.read_kernel(standardizer=stdizer.Unit(),test=snpdata1,order='F')
+        k0132 = snpdata0.read_kernel(standardizer=stdizer.Unit(),test=snpdata1,dtype=np.float32)
+        trained_standardizer=snpdata0.train_standardizer(apply_in_place=True,force_python_only=True)
+        snpdata1.standardize(trained_standardizer,force_python_only=True)
         refval = snpdata0.val.dot(snpdata1.val.T)
         np.testing.assert_array_almost_equal(refval,k01.val, decimal=10)
         np.testing.assert_array_almost_equal(refval,k01f.val, decimal=10)
@@ -235,7 +257,7 @@ class TestLoader(unittest.TestCase):
     def test_snp_kernel2(self):
         logging.info("in test_snp_kernel2")
         snpreader = Bed(self.currentFolder + "/../examples/toydata")
-        snpkernel = SnpKernel(snpreader,standardizer=stdizer.Beta())
+        snpkernel = SnpKernel(snpreader,standardizer=stdizer.Beta(1,25))
         s  = str(snpkernel)
         _fortesting_JustCheckExists().input(snpkernel)
         
@@ -258,12 +280,12 @@ class TestLoader(unittest.TestCase):
         snpkernel = SnpKernel(snpreader,stdizer.Unit())
         krsub = snpkernel[::2,::2]
         kerneldata1 = krsub.read()
-        expected = snpreader[::2,:].kernel(stdizer.Unit())
-        np.testing.assert_array_almost_equal(kerneldata1.val, expected, decimal=10)
+        expected = snpreader.read_kernel(stdizer.Unit())[::2].read()
+        np.testing.assert_array_almost_equal(kerneldata1.val, expected.val, decimal=10)
 
         krsub2 = snpkernel[::2]
         kerneldata2 = krsub2.read()
-        np.testing.assert_array_almost_equal(kerneldata2.val, expected, decimal=10)
+        np.testing.assert_array_almost_equal(kerneldata2.val, expected.val, decimal=10)
         logging.info("done with test")
 
     def test_identity(self):
@@ -295,6 +317,59 @@ class TestLoader(unittest.TestCase):
         logging.info("done with test")
 
 
+# We do it this way instead of using doctest.DocTestSuite because doctest.DocTestSuite requires modules to be pickled, which python doesn't allow.
+# We need tests to be pickleable so that they can be run on a cluster.
+class TestDocStrings(unittest.TestCase):
+    def test_kernelreader(self):
+        import pysnptools.kernelreader.kernelreader
+        old_dir = os.getcwd()
+        os.chdir(os.path.dirname(os.path.realpath(__file__)))
+        result = doctest.testmod(pysnptools.kernelreader.kernelreader)
+        os.chdir(old_dir)
+        assert result.failed == 0, "failed doc test: " + __file__
+
+    def test_snpkernel(self):
+        import pysnptools.kernelreader.snpkernel
+        old_dir = os.getcwd()
+        os.chdir(os.path.dirname(os.path.realpath(__file__)))
+        result = doctest.testmod(pysnptools.kernelreader.snpkernel)
+        os.chdir(old_dir)
+        assert result.failed == 0, "failed doc test: " + __file__
+
+    def test_kerneldata(self):
+        import pysnptools.kernelreader.kerneldata
+        old_dir = os.getcwd()
+        os.chdir(os.path.dirname(os.path.realpath(__file__)))
+        result = doctest.testmod(pysnptools.kernelreader.kerneldata)
+        os.chdir(old_dir)
+        assert result.failed == 0, "failed doc test: " + __file__
+
+    def test_identity(self):
+        import pysnptools.kernelreader.identity
+        old_dir = os.getcwd()
+        os.chdir(os.path.dirname(os.path.realpath(__file__)))
+        result = doctest.testmod(pysnptools.kernelreader.identity)
+        os.chdir(old_dir)
+        assert result.failed == 0, "failed doc test: " + __file__
+
+    def test_snphdf5(self):
+        import pysnptools.kernelreader.kernelhdf5
+        old_dir = os.getcwd()
+        os.chdir(os.path.dirname(os.path.realpath(__file__)))
+        result = doctest.testmod(pysnptools.kernelreader.kernelhdf5)
+        os.chdir(old_dir)
+        assert result.failed == 0, "failed doc test: " + __file__
+
+    def test_snpnpz(self):
+        import pysnptools.kernelreader.kernelnpz
+        old_dir = os.getcwd()
+        os.chdir(os.path.dirname(os.path.realpath(__file__)))
+        result = doctest.testmod(pysnptools.kernelreader.kernelnpz)
+        os.chdir(old_dir)
+        assert result.failed == 0, "failed doc test: " + __file__
+
+
+
 def getTestSuite():
     """
     set up composite test suite
@@ -302,11 +377,12 @@ def getTestSuite():
     
     test_suite = unittest.TestSuite([])
     test_suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestLoader))
+    test_suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestDocStrings))
     return test_suite
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
 
     suites = getTestSuite()
-    r = unittest.TextTestRunner(failfast=True) #!!!cmk
+    r = unittest.TextTestRunner(failfast=False)
     r.run(suites)

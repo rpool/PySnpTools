@@ -4,22 +4,39 @@ except:
     pass
 
 import logging
-import scipy as sp
+import scipy as np
 from pstreader import PstReader
 from pstdata import PstData
 import warnings
 
-#!! document the format
-
 class PstHdf5(PstReader):
+    '''
+    A :class:`.PstReader` for reading \*.pst.hdf5 files from disk.
 
+    See :class:`.PstReader` for general examples of using PstReaders.
+
+    The general HDF5 format is described in http://www.hdfgroup.org/HDF5/. The PstHdf5 format stores
+    val, row, col, row_property, and col_property information in Hdf5 format.
+   
+    **Constructor:**
+        :Parameters: * **filename** (*string*) -- The PstHdf5 file to read.
+
+        :Example:
+
+        >>> from pysnptools.pstreader import PstHdf5
+        >>> on_disk = PstHdf5('../examples/toydata.iidmajor.snp.hdf5') # PstHdf5 can load .pst.hdf5, .snp.hdf5, and kernel.hdf5
+        >>> print on_disk.row_count
+        500
+
+    **Methods beyond** :class:`.PstReader`
+    '''
     _ran_once = False
-    h5 = None
+    _h5 = None
 
-    def __init__(self, filename, block_size=5000):
-        #!! copy relevant comments from Bed reader
+    def __init__(self, filename):
         self.filename=filename
-        self.block_size = block_size
+
+    _block_size = 5000
 
     def __repr__(self): 
         return "{0}('{1}')".format(self.__class__.__name__,self.filename) #!!LATER print non-default values, too
@@ -29,48 +46,50 @@ class PstHdf5(PstReader):
 
     @property
     def row(self):
-        self.run_once()
+        self._run_once()
         return self._row
 
     @property
     def col(self):
-        self.run_once()
+        self._run_once()
         return self._col
 
     @property
     def row_property(self):
-        self.run_once()
+        self._run_once()
         return self._row_property
 
     @property
     def col_property(self):
-        self.run_once()
+        self._run_once()
         return self._col_property
 
     def _find_vocab(self):
         vocab_list = [['row','col','val','row_property','col_property'],['iid','sid','val',None,'pos'],['iid','rs','snps',None,'pos']]
 
         for vocab in vocab_list:
-            if all((key is None or key in self.h5) for key in vocab):
+            if all((key is None or key in self._h5) for key in vocab):
                 return vocab
-        raise Exception("Don't know how to read HDF5 with these keys: " + ",".join(self.h5.iterkeys()))
+        raise Exception("Don't know how to read HDF5 with these keys: " + ",".join(self._h5.iterkeys()))
 
 
-    def run_once(self):
+    def _run_once(self):
         if self._ran_once:
             return
         try:
-            self.h5 = h5py.File(self.filename, "r")
+            self._h5 = h5py.File(self.filename, "r")
         except IOError, e:
             raise IOError("Missing or unopenable file '{0}' -- Native error message: {1}".format(self.filename,e))
 
         row_key,col_key,val_key,row_property_key,col_property_key = self._find_vocab()
 
-        self._row = PstData._fixup_input(self.h5[row_key])
-        self._col = PstData._fixup_input(self.h5[col_key])
-        self._row_property = PstData._fixup_input(self.h5[row_property_key] if row_property_key else None,count=len(self._row))  #Extra "if ... else" for backwards compatibility.
-        self._col_property = PstData._fixup_input(self.h5[col_property_key],count=len(self._col))
-        self.val_in_file = self.h5[val_key]
+        self._row = PstData._fixup_input(self._h5[row_key])
+        self._col = PstData._fixup_input(self._h5[col_key])
+        if np.array_equal(self._row,self._col):  #If it's square, mark it so by making the col and row the same object
+            self._row = self._col
+        self._row_property = PstData._fixup_input(self._h5[row_property_key] if row_property_key else None,count=len(self._row))  #Extra "if ... else" for backwards compatibility.
+        self._col_property = PstData._fixup_input(self._h5[col_property_key],count=len(self._col))
+        self.val_in_file = self._h5[val_key]
 
         self.is_col_major = None
         if "col-major" in self.val_in_file.attrs:
@@ -100,10 +119,10 @@ class PstHdf5(PstReader):
     
 
     def __del__(self):
-        if self.h5 != None:  # we need to test this because Python doesn't guarantee that __init__ was fully run
-            self.h5.close()
+        if self._h5 != None:  # we need to test this because Python doesn't guarantee that __init__ was fully run
+            self._h5.close()
 
-    def read_direct(self, val, selection=sp.s_[:,:]):
+    def _read_direct(self, val, selection=np.s_[:,:]):
         if self.is_col_major:
             selection = tuple(reversed(selection))
 
@@ -112,16 +131,16 @@ class PstHdf5(PstReader):
         else:
             self.val_in_file.read_direct(val,selection)
 
-    def create_block(self, block_size, order, dtype):
+    def _create_block(self, block_size, order, dtype):
         matches_order = self.is_col_major == (order =="F")
         opposite_order = "C" if order == "F" else "F"
         if matches_order:
-            return sp.empty([len(self._row),block_size], dtype=dtype, order=order)
+            return np.empty([len(self._row),block_size], dtype=dtype, order=order)
         else:
-            return sp.empty([len(self._row),block_size], dtype=dtype, order=opposite_order)
+            return np.empty([len(self._row),block_size], dtype=dtype, order=opposite_order)
 
     def _read(self, row_index_or_none, col_index_or_none, order, dtype, force_python_only, view_ok):
-        self.run_once()
+        self._run_once()
 
         opposite_order = "C" if order == "F" else "F"
 
@@ -129,6 +148,8 @@ class PstHdf5(PstReader):
             row_index_count = len(row_index_or_none)
             row_index_list = row_index_or_none
             row_is_sorted = PstHdf5._is_sorted_without_repeats(row_index_list)
+            if isinstance(row_index_list,np.ndarray):
+                row_index_list = row_index_list.tolist()
         else:
             row_index_count = self.row_count
             row_index_list = range(self.row_count)
@@ -137,13 +158,15 @@ class PstHdf5(PstReader):
         if col_index_or_none is not None:
             col_index_count = len(col_index_or_none)
             col_index_list = col_index_or_none
+            if isinstance(col_index_list,np.ndarray):
+                col_index_list = col_index_list.tolist()
         else:
             col_index_count = self.col_count
             col_index_list = range(self.col_count)
         #Check if snps and iids indexes are in order and in range
         col_are_sorted = PstHdf5._is_sorted_without_repeats(col_index_list)
 
-        val = sp.empty([row_index_count, col_index_count], dtype=dtype, order=order)
+        val = np.empty([row_index_count, col_index_count], dtype=dtype, order=order)
 
         matches_order = self.is_col_major == (order=="F")
         is_simple = not force_python_only and row_is_sorted and col_are_sorted and matches_order #If 'is_simple' may be able to use a faster reader
@@ -152,38 +175,38 @@ class PstHdf5(PstReader):
         if row_index_count == 0 or col_index_count == 0:
             pass
 
-        # case 1 - all snps & all ids requested
+        # case 1 - all cols & all rows requested
         elif is_simple and col_index_count == self.col_count and row_index_count == self.row_count:
-            self.read_direct(val)
+            self._read_direct(val)
 
-        # case 2 - some snps and all ids
+        # case 2 - some cols and all rows
         elif is_simple and row_index_count == self.row_count:
-            self.read_direct(val, sp.s_[:,col_index_list])
+            self._read_direct(val, np.s_[:,col_index_list])
 
-        # case 3 all snps and some ids
+        # case 3 all cols and some row
         elif is_simple and col_index_count == self.col_count:
-            self.read_direct(val, sp.s_[row_index_list,:])
+            self._read_direct(val, np.s_[row_index_list,:])
 
-        # case 4 some snps and some ids -- use blocks
+        # case 4 some cols and some rows -- use blocks
         else:
-            block_size = min(self.block_size, col_index_count)
-            block = self.create_block(block_size, order, dtype)
+            block_size = min(self._block_size, col_index_count)
+            block = self._create_block(block_size, order, dtype)
 
             if not col_are_sorted:
-                col_index_index_list = sp.argsort(col_index_list)
-                col_index_list_sorted = col_index_list[col_index_index_list]
+                col_index_index_list = np.argsort(col_index_list).tolist()
+                col_index_list_sorted = list(np.array(col_index_list)[col_index_index_list])
             else:
-                col_index_index_list = sp.arange(col_index_count)
+                col_index_index_list = np.arange(col_index_count)
                 col_index_list_sorted = col_index_list
 
             for start in xrange(0, col_index_count, block_size):
                 #print start
                 end = min(start+block_size,col_index_count)
                 if end-start < block_size:  #On the last loop, the buffer might be too big, so make it smaller
-                    block = self.create_block(end-start, order, dtype)
+                    block = self._create_block(end-start, order, dtype)
                 col_index_list_forblock = col_index_list_sorted[start:end]
                 col_index_index_list_forblock = col_index_index_list[start:end]
-                self.read_direct(block, sp.s_[:,col_index_list_forblock])
+                self._read_direct(block, np.s_[:,col_index_list_forblock])
                 val[:,col_index_index_list_forblock] = block[row_index_list,:]
 
         #!!LATER does this test work when the size is 1 x 1 and order if F? iid_index_or_none=[0], sid_index_or_none=[1000] (based on test_blocking_hdf5)
@@ -195,13 +218,32 @@ class PstHdf5(PstReader):
 
 
     @staticmethod
-    def write(filename, pstdata, dtype='f8',col_major=True):
+    def write(filename, pstdata, hdf5_dtype=None, col_major=True):
+        """Writes a :class:`PstData` to PstHdf5 format.
+
+        :param filename: the name of the file to create
+        :type filename: string
+        :param pstdata: The in-memory data that should be written to disk.
+        :type pstdata: :class:`PstData`
+        :param hdf5_dtype: None (use the .val's dtype) or a Hdf5 dtype, e.g. 'f8','f4',etc.
+        :type hdf5_dtype: string
+        :param col_major: Tells if vals should be stored on disk in col_major (default) or row_major format.
+        :type col_major: bool
+
+        >>> import numpy as np
+        >>> from pysnptools.pstreader import PstData, PstHdf5
+        >>> import pysnptools.util as pstutil
+        >>> data1 = PstData(row=['a','b','c'],col=['y','z'],val=[[1,2],[3,4],[np.nan,6]],row_property=['A','B','C'])
+        >>> pstutil.create_directory_if_necessary("tempdir/tiny.pst.hdf5")
+        >>> PstHdf5.write("tempdir/tiny.pst.hdf5",data1)          # Write data in PstHdf5 format
+        """
 
         if isinstance(filename,PstData) and isinstance(pstdata,str): #For backwards compatibility, reverse inputs if necessary
             warnings.warn("write statement should have filename before data to write", DeprecationWarning)
             filename, pstdata = pstdata, filename 
 
-        if not isinstance(dtype, str) or len(dtype) != 2 or dtype[0] != 'f' : raise Exception("Expect dtype to start with 'f', e.g. 'f4' for single, 'f8' for double")
+        assert hdf5_dtype is None or (isinstance(hdf5_dtype, str) and len(hdf5_dtype) == 2 and  hdf5_dtype[0] == 'f'), "Expect hdf5_dtype to be None or to start with 'f', e.g. 'f4' for single, 'f8' for double"
+
         val = (pstdata.val.T) if col_major else pstdata.val
 
         with h5py.File(filename, "w") as h5:
@@ -209,56 +251,12 @@ class PstHdf5(PstReader):
             h5.create_dataset('col', data=pstdata.col)
             h5.create_dataset('row_property', data=pstdata.row_property)
             h5.create_dataset('col_property', data=pstdata.col_property)
-            h5.create_dataset('val', data=val,dtype=dtype,shuffle=True)#compression="gzip", doesn't seem to work with Anaconda
+            h5.create_dataset('val', data=val,dtype=hdf5_dtype,shuffle=True)#compression="gzip", doesn't seem to work with Anaconda
             h5['val'].attrs["col-major"] = col_major
+
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
-    #snpreader = Hdf5(r'../tests/datasets/all_chr.maf0.001.N300.hdf5')
-    #snp_matrix = snpreader.read()
-    #print len(snp_matrix['sid'])
-    #snp_matrix = snpreader[:,:].read()
-    #print len(snp_matrix['sid'])
-    #sid_index_list = snpreader.sid_to_index(['23_9','23_2'])
-    #snp_matrix = snpreader[:,sid_index_list].read()
-    #print ",".join(snp_matrix['sid'])
-    #snp_matrix = snpreader[:,0:10].read()
-    #print ",".join(snp_matrix['sid'])
-
-    #print snpreader.iid_count
-    #print snpreader.sid_count
-    #print len(snpreader.pos)
-
-    #snpreader2 = snpreader[::-1,4]
-    #print snpreader.iid_count
-    #print snpreader2.sid_count
-    #print len(snpreader2.pos)
-
-    #snp_matrix = snpreader2.read()
-    #print len(snp_matrix['iid'])
-    #print len(snp_matrix['sid'])
-
-    #snp_matrix = snpreader2[5,:].read()
-    #print len(snp_matrix['iid'])
-    #print len(snp_matrix['sid'])
-
-    #iid_index_list = snpreader2.iid_to_index(snpreader2.iid[::2])
-    #snp_matrix = snpreader2[iid_index_list,::3].read()
-    #print len(snp_matrix['iid'])
-    #print len(snp_matrix['sid'])
-
-    #snp_matrix = snpreader[[4,5],:].read()
-    #print len(snp_matrix['iid'])
-    #print len(snp_matrix['sid'])
-
-    #print snpreader2
-    #print snpreader[::-1,4]
-    #print snpreader2[iid_index_list,::3]
-    #print snpreader[:,sid_index_list]
-    #print snpreader2[5,:]
-    #print snpreader[[4,5],:]
-
-
-    #import doctest
-    #doctest.testmod()
+    import doctest
+    doctest.testmod()

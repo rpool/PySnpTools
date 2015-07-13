@@ -143,7 +143,7 @@ class IntRangeSet(object):
                                        ``a.difference_update(b)``,
                                        ``a.discard(b)``,
     remove b from a, error if missing  ``a.remove(b)``                    :meth:`remove`
-    a 'set difference' b                ``a - b``                         :meth:`__sub__`
+    a 'set difference' b                ``a - b``,                        :meth:`__sub__`
                                         ``a.difference(b)``
     iterate integers in a, from low    ``for element in a:``              :meth:`__iter__`
     iterate integers in a, from high   ``for element in reverse(a):``     :meth:`__reversed__`
@@ -153,7 +153,7 @@ class IntRangeSet(object):
     iterate ranges in a, from low      ``for start,stop in a.ranges():``  :meth:`ranges`
     count of ranges in a               ``a.ranges_len``                   :meth:`ranges_len`
     index of range containing b        ``a.ranges_index(b)``              :meth:`ranges_index`
-    get *i*th smallest range           ``a.ranges_getitem(i)``            :meth:`ranges_getitem`
+    get *i* th smallest range          ``a.ranges_getitem(i)``            :meth:`ranges_getitem`
     a as a string                      ``str(a)``                         :meth:`__str__`
     remove all elements from a         ``a.clear()``                      :meth:`clear`
     copy a                             ``a.copy()``                       :meth:`copy`

@@ -1,6 +1,4 @@
-"""Tools for reading SNP files #!!!cmkfix comment
-
-
+"""Tools for reading and manipulating kernels. A kernels is a matrix from iid to iid that typically tells the relatedness of pairs of people.
 """
 
 from pysnptools.kernelreader.kernelreader import KernelReader

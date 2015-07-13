@@ -8,13 +8,37 @@ from kernelreader import KernelReader
 from kerneldata import KernelData
 
 class SnpKernel(KernelReader):
-    #!!!cmk update all comments
-    """  This is a class hold SNP values in-memory along with related iid and sid information.
-    It is created by calling the :meth:`.SnpReader.read` method on another :class:`.SnpReader`, for example, :class:`.Bed`.
+    '''
+    A :class:`.KernelReader` that creates a kernel from a :class:`.SnpReader`. No SNP data will be read until
+    the :meth:`SnpKernel.read` method is called. Use block_size to avoid ever reading all the SNP data into memory
+    at once.
 
-    See :class:`.SnpReader` for details and examples.
-    """
-    def __init__(self, snpreader, standardizer=None, test=None, block_size=None): #!!!autodoc doesn't generate good doc for this constructor
+    See :class:`.KernelReader` for general examples of using KernelReaders.
+
+    **Constructor:**
+        :Parameters: * **snpreader** (:class:`SnpReader`) -- The SNP data
+                     * **standardizer** (:class:`Standardizer`) -- How the SNP data should be standardized
+                     * **test** (optional, :class:`SnpReader`) -- SNP data for test iids.
+                     * **block_size** (optional, int) -- The number of SNPs to read at a time.
+
+        If **test** is not given, then the kernel will be for the iids in **snpreader**.
+        If **block_size** is not given, then all SNP data will be read at once.
+
+        :Example:
+
+        >>> from pysnptools.snpreader import Bed
+        >>> from pysnptools.standardizer import Unit
+        >>> snp_on_disk = Bed('../examples/toydata.bed')                    # A Bed file is specified, but nothing is read from disk
+        >>> kernel_on_disk = SnpKernel(snp_on_disk, Unit(),block_size=500)  # A kernel is specified, but nothing is read from disk
+        >>> print kernel_on_disk #Print the specification
+        SnpKernel(Bed('../examples/toydata.bed'),standardizer=Unit(),block_size=500)
+        >>> print kernel_on_disk.iid_count                                  # iid information is read from disk, but not SNP data
+        500
+        >>> kerneldata = kernel_on_disk.read().standardize()                # SNPs are read and Unit standardized, 500 at a time, to create a kernel, which is then standardized
+        >>> print kerneldata.val[0,0]
+        0.992306992842
+    '''
+    def __init__(self, snpreader, standardizer=None, test=None, block_size=None):
         assert standardizer is not None, "'standardizer' must be provided"
 
         self.snpreader = snpreader
@@ -24,18 +48,10 @@ class SnpKernel(KernelReader):
 
     @property
     def row(self):
-        """A ndarray of the iids.
-
-        See :attr:`.SnpReader.iid` for details and examples.
-        """
         return self.snpreader.iid
 
     @property
     def col(self):
-        """A ndarray of the iid0s.
-
-        See :attr:`.SnpReader.iid` for details and examples.
-        """
         return self.test.iid
 
     def __repr__(self):
@@ -58,35 +74,18 @@ class SnpKernel(KernelReader):
         if self.snpreader is not self.test:
             copier.input(self.test)
 
-    #!!!cmk0
     def _read(self, row_index_or_none, col_index_or_none, order, dtype, force_python_only, view_ok):
-        if row_index_or_none is col_index_or_none or np.array_equal(row_index_or_none,row_index_or_none):
-            if row_index_or_none is None:
-                return self.snpreader._read_kernel(self.standardizer,self.test,self.block_size,order, dtype, force_python_only, view_ok)
-            else:
-                #!!!CMK0
-                raise NotImplementedError("Don't currently support reading non-square kernels from SnpKernels")
-                return self.snpreader[row_index_or_none,:]._read_kernel(self.standardizer,self.test,self.block_size,order, dtype, force_python_only, view_ok)
+        #Special case: If square and Identity, can push the subsetting into the SnpReader
+        from pysnptools.standardizer import Identity as Stdizer_Identity
+        if (isinstance(self.standardizer,Stdizer_Identity) and self.snpreader is self.test and 
+            row_index_or_none is not None and col_index_or_none is not None and np.array_equal(row_index_or_none,col_index_or_none)):
+            return self.snpreader[row_index_or_none,:]._read_kernel(self.standardizer,self.test,self.block_size,order, dtype, force_python_only, view_ok)
         else:
-            #!!!cmk0: Need to find the iids that are in either the cols or the rows. Standardize the snps with just those and then turn that square into the rectangle requested
-            raise NotImplementedError("Don't currently support reading non-square kernels from SnpKernels")
-
-    #!!!cmk0
-    #!!!cmk be sure to document that any subsetting applies to the inter snpreader BEFORE standardization.
-    def __getitem__(self, iid_indexer_and_snp_indexer):
-        assert not isinstance(iid_indexer_and_snp_indexer, str), "Don't expect SnpKernel to be subsetted with a string" #LATER is this the best place for this test?
-        try:
-            iid0,iid1 = iid_indexer_and_snp_indexer
-        except:
-            iid0 = iid_indexer_and_snp_indexer
-            iid1 = iid0
-
-        #LATER is '==' and array_equal the right way to check for all possible advanced indexing, e.g. slices, etc.
-        assert iid0 is iid1 or np.array_equal(iid0,iid1), "when selecting a subset of snps from a SnpKernel, the two snps lists must be the same" #LATER is this restriction good?
-
-        return SnpKernel(self.snpreader[iid0,:],standardizer=self.standardizer)
-
-
+            #LATER: If it was often that case that we wanted to standardize on all the data, but then only return a slice of the result,
+            #       that could be done with less memory by working in blocks but not tabulating for all the iids.
+            whole = self.snpreader._read_kernel(self.standardizer,self.test,self.block_size,order, dtype, force_python_only, view_ok)
+            val, shares_memory = self._apply_sparray_or_slice_to_val(whole, row_index_or_none, col_index_or_none, order, dtype, force_python_only)
+            return val
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
