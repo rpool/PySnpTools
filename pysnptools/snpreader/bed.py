@@ -6,59 +6,61 @@ import logging
 from snpreader import SnpReader
 from snpdata import SnpData
 import math
-
-#!!LATER fix bug in Hadoop whereas it won't use data two levels down
+import warnings
 
 class Bed(SnpReader):
     '''
-    This is a class that does random-access reads of a Bed/Bim/Fam files from disk.
+    A :class:`.SnpReader` for random-access reads of Bed/Bim/Fam files from disk.
 
     See :class:`.SnpReader` for details and examples.
 
-    Constructor:
-        basefilename    : string of the basename of [basename].bed, [basename].bim,
-                            and [basename].fam
+    The format is described in http://pngu.mgh.harvard.edu/~purcell/plink/binary.shtml.
+
+    **Constructor:**
+        :Parameters: * **filename** (*string*) -- The \*.bed file to read. The '.bed' suffix is optional. The related \*.bim and \*.fam files will also be read.
+
+    **Methods beyond** :class:`.SnpReader`
     '''
     _ran_once = False
     _filepointer = None
 
-    def __init__(self, basefilename):
-        self.basefilename = basefilename
+    def __init__(self, filename):
+        self.filename = filename
 
     def __repr__(self): 
-        return "{0}('{1}')".format(self.__class__.__name__,self.basefilename)
+        return "{0}('{1}')".format(self.__class__.__name__,self.filename)
 
     @property
-    def iid(self):
-        """list of iids
+    def row(self):
+        """*same as* :attr:`iid`
         """
         self._run_once()
-        return self._iid
+        return self._row
 
     @property
-    def sid(self):
-        """list of sids
+    def col(self):
+        """*same as* :attr:`sid`
         """
         self._run_once()
-        return self._sid
+        return self._col
 
     @property
-    def pos(self):
-        """list of position information
+    def col_property(self):
+        """*same as* :attr:`pos`
         """
         self._run_once()
-        return self._pos
+        return self._col_property
 
     def _run_once(self):
-        if (self._ran_once):
+        if self._ran_once:
             return
         self._ran_once = True
 
-        self._iid = SnpReader._read_fam(self.basefilename,remove_suffix="bed")
-        self._sid, self._pos = SnpReader._read_map_or_bim(self.basefilename,remove_suffix="bed", add_suffix="bim")
+        self._row = SnpReader._read_fam(self.filename,remove_suffix="bed")
+        self._col, self._col_property = SnpReader._read_map_or_bim(self.filename,remove_suffix="bed", add_suffix="bim")
         self._assert_iid_sid_pos()
 
-        bedfile = self.basefilename+ '.bed'
+        bedfile = SnpReader._name_of_other_file(self.filename,"bed","bed")
         self._filepointer = open(bedfile, "rb")
         mode = self._filepointer.read(2)
         if mode != 'l\x1b': raise Exception('No valid binary BED file')
@@ -72,18 +74,36 @@ class Bed(SnpReader):
 
     def copyinputs(self, copier):
         # doesn't need to self.run_once() because only uses original inputs
-        copier.input(SnpReader._name_of_other_file(self.basefilename,remove_suffix="bed", add_suffix="bed"))
-        copier.input(SnpReader._name_of_other_file(self.basefilename,remove_suffix="bed", add_suffix="bim"))
-        copier.input(SnpReader._name_of_other_file(self.basefilename,remove_suffix="bed", add_suffix="fam"))
+        copier.input(SnpReader._name_of_other_file(self.filename,remove_suffix="bed", add_suffix="bed"))
+        copier.input(SnpReader._name_of_other_file(self.filename,remove_suffix="bed", add_suffix="bim"))
+        copier.input(SnpReader._name_of_other_file(self.filename,remove_suffix="bed", add_suffix="fam"))
 
 
     @staticmethod
-    def write(snpdata, basefilename,force_python_only=False):
-        SnpReader._write_fam(snpdata, basefilename, remove_suffix="bed")
-        SnpReader._write_map_or_bim(snpdata, basefilename, remove_suffix="bed", add_suffix="bim")
+    def write(filename, snpdata, force_python_only=False):
+        """Writes a :class:`SnpData` to Bed format.
 
-        bedfile = SnpReader._name_of_other_file(basefilename,remove_suffix="bed", add_suffix="bed")
+        :param filename: the name of the file to create
+        :type filename: string
+        :param snpdata: The in-memory data that should be written to disk.
+        :type snpdata: :class:`SnpData`
 
+        >>> from pysnptools.snpreader import Pheno, Bed
+        >>> import pysnptools.util as pstutil
+        >>> snpdata = Pheno('../examples/toydata.phe').read() # Read data from Pheno format
+        >>> pstutil.create_directory_if_necessary("tempdir/toydata.bed")
+        >>> Bed.write("tempdir/toydata.bed",snpdata)       # Write data in Bed format
+        """
+
+        if isinstance(filename,SnpData) and isinstance(snpdata,str): #For backwards compatibility, reverse inputs if necessary
+            warnings.warn("write statement should have filename before data to write", DeprecationWarning)
+            filename, snpdata = snpdata, filename 
+
+
+        SnpReader._write_fam(snpdata, filename, remove_suffix="bed")
+        SnpReader._write_map_or_bim(snpdata, filename, remove_suffix="bed", add_suffix="bim")
+
+        bedfile = SnpReader._name_of_other_file(filename,remove_suffix="bed", add_suffix="bed")
 
         if not force_python_only:
             from pysnptools.snpreader import wrap_plink_parser
@@ -117,7 +137,7 @@ class Bed(SnpReader):
 
                 for sid_index in xrange(snpdata.sid_count):
                     if sid_index % 1 == 0:
-                        logging.info("Writing snp # {0} to file '{1}'".format(sid_index, basefilename))
+                        logging.info("Writing snp # {0} to file '{1}'".format(sid_index, filename))
 
                     col = snpdata.val[:, sid_index]
                     for iid_by_four in xrange(0,snpdata.iid_count,4):
@@ -137,24 +157,18 @@ class Bed(SnpReader):
                                 raise Exception("Can't convert value '{0}' to BED format (only 0,1,2,NAN allowed)".format(val))
                             byte |= (code << (val_index*2))
                         bed_filepointer.write(chr(byte))
-        logging.info("Done writing " + basefilename)
+        logging.info("Done writing " + filename)
 
 
         
     def _read(self, iid_index_or_none, sid_index_or_none, order, dtype, force_python_only, view_ok):
         self._run_once()
+        
+        if order=='A':
+            order='F'
+
         assert not hasattr(self, 'ind_used'), "A SnpReader should not have a 'ind_used' attribute"
 
-
-        if order is None:
-            order = "F"
-        if dtype is None:
-            dtype = np.float64
-        if force_python_only is None:
-            force_python_only = False
-
-
-        #!! this could be re-factored to not use so many names
         iid_count_in = self.iid_count
         sid_count_in = self.sid_count
 
@@ -175,7 +189,7 @@ class Bed(SnpReader):
         if not force_python_only:
             from pysnptools.snpreader import wrap_plink_parser
             val = np.zeros((iid_count_out, sid_count_out), order=order, dtype=dtype)
-            bed_fn = self.basefilename + ".bed"
+            bed_fn = SnpReader._name_of_other_file(self.filename,"bed","bed")
 
             if dtype == np.float64:
                 if order=="F":
@@ -233,93 +247,6 @@ class Bed(SnpReader):
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-
-    ##What if you want to some level cached?  e.g.
-    #from standardizer.BySqrtSidCount import BySqrtSidCount
-    #l0 = Bed('../tests/datasets/all_chr.maf0.001.N300').read(order='F')
-    #l0.standardize()
-    #for test_start_index in range(10):
-    #    test = l0[test_start_index::10,:].read(order='C') #1/10th of the cids by starting at 0 to 9 and then incrementing by 10
-
-    #    for snp_start_index in range(0, test.sid_count, 5):
-    #        gene_on_test = test[:,snp_start_index:snp_start_index+5].read().standardize(BySqrtSidCount())
-    #        #print gene_on_test
-    #        #print gene_on_test.val
-    #print "done"
-
-
-    #snpreader0 = Bed('../tests/datasets/all_chr.maf0.001.N300')
-
-
-    ##from hdf5 import Hdf5
-    ##Hdf5.write(snpreader, r'../tests/datasets/all_chr.maf0.001.N300.hdf5')
-
-    ##from dat import Dat
-    ##Dat.write(snpreader, r'../tests/datasets/all_chr.maf0.001.N300.dat')
-
-    #G0 = snpreader0.read()
-    #assert(G0 is not snpreader0.read())
-
-    #G1 = G0.read()
-    #assert(G0 is not G1)
-    #assert(G0.val is not G1.val)
-
-    #assert(G0.val[0,0] == 2)
-    #G0.val[0,0] = 3
-    #assert(G0.val[0,0] == 3)
-    #assert(G1.val[0,0] == 2)
-
-    #snpreader0b = snpreader0[:,:]
-    #assert(snpreader0b is not snpreader0)
-
-    #G = snpreader0[:,:].read()
-    #assert snpreader0.iid_count == G.val.shape[0]
-    #assert snpreader0.sid_count == G.val.shape[1]
-
-    #sid_index_list = snpreader0.sid_to_index(['23_9','23_2'])
-    #snpreader = snpreader0[:,sid_index_list]
-    #assert((snpreader.sid == ['23_9','23_2'])).all()
-    #snpreader = snpreader0[:,0:10]
-    #assert((snpreader.sid == snpreader0.sid[0:10]).all())
-
-    #snpreader2 = snpreader0[::-1,4]
-    #print snpreader2
-    #assert(snpreader2.iid_count == snpreader0.iid_count)
-    #assert(snpreader2.sid_count == 1)
-    #assert(len(snpreader2.pos) == 1)
-    #assert(snpreader2.read().val.shape == (snpreader2.iid_count, snpreader2.sid_count))
-
-    #assert(snpreader2[5,:].read().val.shape == (1L,1L))
-
-    #iid_index_list = snpreader2.iid_to_index(snpreader2.iid[::2])
-    #G = snpreader2[iid_index_list,::3].read()
-    #assert(G.val.shape == (math.ceil(snpreader2.iid_count/2.0),math.ceil(snpreader2.sid_count/3.0) ))
-
-    #assert(snpreader0[[4,5],:].read().val.shape == (2, snpreader0.sid_count))
-
-    #snpreader_half = snpreader0[::2,::2]
-    #assert(snpreader_half.read().val.shape == (math.ceil(snpreader0.iid_count/2.0), math.ceil(snpreader0.sid_count/2.0)))
-    #snpreader_quarter = snpreader_half[::2,::2]
-    #assert(snpreader_quarter.read().val.shape == (math.ceil(snpreader_half.iid_count/2.0), math.ceil(snpreader_half.sid_count/2.0)))
-
-    #print snpreader2
-    #print snpreader[::-1,4]
-    #print snpreader2[iid_index_list,::3]
-    #print snpreader[:,sid_index_list]
-    #print snpreader2[5,:]
-    #print snpreader[[4,5],:]
-
-    #near_front = snpreader.pos[:,1] < .1
-    #boolex = snpreader[:,near_front]
-    #assert(boolex.read().val.shape == (snpreader.iid_count, 4))
-    #boolex = snpreader[:,~near_front]
-    #assert(boolex.read().val.shape == (snpreader.iid_count, 6))
-    
-    #print snpreader.read()
-    #print snpreader.read().standardize()
-    #print snpreader.read()
-
-
 
     import doctest
     doctest.testmod()

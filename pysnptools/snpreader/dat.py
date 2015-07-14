@@ -4,174 +4,100 @@ from itertools import *
 import pandas as pd
 import logging
 from snpreader import SnpReader
+from snpdata import SnpData
+import warnings
+from pysnptools.pstreader import _OneShot
 
-class Dat(SnpReader):
+class Dat(_OneShot,SnpReader):
     '''
-    This is a class that reads into memory from DAT/FAM/MAP files.
+    A :class:`.SnpReader` for reading Dat/Fam/Map-formated files from disk.
+
+    See :class:`.SnpReader` for general examples of using SnpReaders.
+
+    This is a text format that can store any numeric values. (In contrast, Bed and Ped can only store 0,1,2, and missing). Its Dat files look like::
+    
+        null_0  	j	n	0.333	1	2
+        null_100	j	n	2	1	1
+        null_200	j	n	0	nan	1
+        ...
+
+    Its Map and Fam files are described in http://pngu.mgh.harvard.edu/~purcell/plink/data.shtml.
+
+    **Constructor:**
+        :Parameters: * **filename** (*string*) -- The Dat file to read.
+
+        :Example:
+
+        >>> from pysnptools.snpreader import Dat
+        >>> data_on_disk = Dat('../examples/toydata.dat')
+        >>> print data_on_disk.iid_count, data_on_disk.sid_count
+        500 10000
+
+    **Methods beyond** :class:`.SnpReader`
     '''
 
-    _ran_once = False
-
-    def __init__(self, dat_filename):
+    def __init__(self, filename):
         '''
         filename    : string of the name of the Dat file.
         '''
-        self.dat_filename = SnpReader._name_of_other_file(dat_filename,remove_suffix="dat", add_suffix="dat")
+        self.filename = SnpReader._name_of_other_file(filename,remove_suffix="dat", add_suffix="dat")
 
-    def __repr__(self): 
-        return "{0}('{1}')".format(self.__class__.__name__,self.dat_filename)
-
-
-    @property
-    def iid(self):
-        self.run_once()
-        return self._iid
-
-    @property
-    def sid(self):
-        self.run_once()
-        return self._sid
-
-    @property
-    def pos(self):
-        self.run_once()
-        return self._pos
-
-    def run_once(self):
-        if (self._ran_once):
-            return
-        self._ran_once = True
-
-        self._iid = SnpReader._read_fam(self.dat_filename,remove_suffix="dat")
-        self._sid, self._pos = SnpReader._read_map_or_bim(self.dat_filename,remove_suffix="dat", add_suffix="map")
-
-        self._assert_iid_sid_pos()
-
-
-        return self
-
-    #def __del__(self):
-    #    if self._filepointer != None:  # we need to test this because Python doesn't guarantee that __init__ was fully run
-    #        self._filepointer.close()
+    def _read_pstdata(self):
+        row = SnpReader._read_fam(self.filename,remove_suffix="dat")
+        col, col_property = SnpReader._read_map_or_bim(self.filename,remove_suffix="dat", add_suffix="map")
+        if len(row)==0 or len(col)==0:
+            return SnpData(iid=row,sid=col,pos=col_property,val=np.empty([len(row),len(col)]))
+        datfields = pd.read_csv(self.filename,delimiter = '\t',header=None,index_col=False)
+        if not np.array_equal(np.array(datfields[0],dtype="string"), col) : raise Exception("Expect snp list in map file to exactly match snp list in dat file")
+        del datfields[0]
+        del datfields[1]
+        del datfields[2]
+        assert len(row) == datfields.shape[1], "Expect # iids in fam file to match dat file"
+        val = datfields.as_matrix().T
+        snpdata = SnpData(iid=row,sid=col,pos=col_property,val=val)
+        return snpdata
 
     def copyinputs(self, copier):
         # doesn't need to self.run_once() because creates name of all files itself
-        copier.input(SnpReader._name_of_other_file(self.dat_filename,remove_suffix="dat", add_suffix="dat"))
-        copier.input(SnpReader._name_of_other_file(self.dat_filename,remove_suffix="dat", add_suffix="fam"))
-        copier.input(SnpReader._name_of_other_file(self.dat_filename,remove_suffix="dat", add_suffix="map"))
-
-    @property
-    def datfields(self):
-        if not hasattr(self,"_datfields"):
-            #!!could change to just create/find an index to the file position of each row. Instead, reading all into memory
-            datfields = pd.read_csv(self.dat_filename,delimiter = '\t',header=None,index_col=False)
-            if not np.array_equal(np.array(datfields[0],dtype="string"), self.sid) : raise Exception("Expect snp list in map file to exactly match snp list in dat file")
-            self.start_column = 3
-            if len(self._iid) != datfields.shape[1]-self.start_column : raise Exception("Expect # iids in fam file to match dat file")
-            self._datfields = datfields.T
-        return self._datfields
-
-    def _read(self, iid_index_or_none, sid_index_or_none, order, dtype, force_python_only, view_ok):
-        '''
-        Output dictionary:
-        'iid' : [N*2] array of family IDs and individual IDs
-        'sid' : [S] array rs-numbers or snp identifiers
-        'pos' : [S*3] array of positions [chromosome, genetic dist, basepair dist]
-        'val' : [N*S] matrix of per iid snp values
-        '''
-        assert not hasattr(self, 'ind_used'), "A SnpReader should not have a 'ind_used' attribute"
-        if order is None:
-            order = "F"
-        if dtype is None:
-            dtype = np.float64
-        if force_python_only is None:
-            force_python_only = False
-
-        #This could be re-factored to not use so many names
-        iid_count_in = self.iid_count
-        sid_count_in = self.sid_count
-
-        if iid_index_or_none is not None:
-            iid_count_out = len(iid_index_or_none)
-            iid_index_out = iid_index_or_none
-        else:
-            iid_count_out = iid_count_in
-            iid_index_out = range(iid_count_in)
-
-        if sid_index_or_none is not None:
-            sid_count_out = len(sid_index_or_none)
-            sid_index_out = sid_index_or_none
-        else:
-            sid_count_out = sid_count_in
-            sid_index_out = range(sid_count_in)
-
-
-        val = np.zeros((iid_count_out,sid_count_out),order=order, dtype=dtype)
-        datfields = self.datfields
-        for SNPsIndex, sid_index in enumerate(sid_index_out):
-            row = np.array(datfields[sid_index])[self.start_column:,]
-            val[:,SNPsIndex] = row[iid_index_out]
-        return val
-
+        copier.input(SnpReader._name_of_other_file(self.filename,remove_suffix="dat", add_suffix="dat"))
+        copier.input(SnpReader._name_of_other_file(self.filename,remove_suffix="dat", add_suffix="fam"))
+        copier.input(SnpReader._name_of_other_file(self.filename,remove_suffix="dat", add_suffix="map"))
 
     @staticmethod
-    def write(snpdata, basefilename):
-        SnpReader._write_fam(snpdata, basefilename, remove_suffix="dat")
-        SnpReader._write_map_or_bim(snpdata, basefilename, remove_suffix="dat", add_suffix="map")
+    def write(filename, snpdata):
+        """Writes a :class:`SnpData` to dat/fam/map format.
+
+        :param filename: the name of the file to create
+        :type filename: string
+        :param snpdata: The in-memory data that should be written to disk.
+        :type snpdata: :class:`SnpData`
+
+        >>> from pysnptools.snpreader import Dat, Bed
+        >>> import pysnptools.util as pstutil
+        >>> snpdata = Bed('../examples/toydata.bed')[:,:10].read()  # Read first 10 snps from Bed format
+        >>> pstutil.create_directory_if_necessary("tempdir/toydata10.dat")
+        >>> Dat.write("tempdir/toydata10.dat",snpdata)              # Write data in dat/fam/map format
+        """
+
+        if isinstance(filename,SnpData) and isinstance(snpdata,str): #For backwards compatibility, reverse inputs if necessary
+            warnings.warn("write statement should have filename before data to write", DeprecationWarning)
+            filename, snpdata = snpdata, filename 
+
+        SnpReader._write_fam(snpdata, filename, remove_suffix="dat")
+        SnpReader._write_map_or_bim(snpdata, filename, remove_suffix="dat", add_suffix="map")
 
         snpsarray = snpdata.val
-        with open(basefilename,"w") as dat_filepointer:
+        with open(filename,"w") as dat_filepointer:
             for sid_index, sid in enumerate(snpdata.sid):
                 if sid_index % 1000 == 0:
-                    logging.info("Writing snp # {0} to file '{1}'".format(sid_index, basefilename))
+                    logging.info("Writing snp # {0} to file '{1}'".format(sid_index, filename))
                 dat_filepointer.write("{0}\tj\tn\t".format(sid)) #use "j" and "n" as the major and minor allele
                 row = snpsarray[:,sid_index]
                 dat_filepointer.write("\t".join((str(i) for i in row)) + "\n")
-        logging.info("Done writing " + basefilename)
+        logging.info("Done writing " + filename)
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
-    snpreader = Dat(r'../tests/datasets/all_chr.maf0.001.N300.dat')
-    snp_matrix = snpreader.read()
-    print len(snp_matrix['sid'])
-    snp_matrix = snpreader[:,:].read()
-    print len(snp_matrix['sid'])
-    sid_index_list = snpreader.sid_to_index(['23_9','23_2'])
-    snp_matrix = snpreader[:,sid_index_list].read()
-    print ",".join(snp_matrix['sid'])
-    snp_matrix = snpreader[:,0:10].read()
-    print ",".join(snp_matrix['sid'])
-
-    print snpreader.iid_count
-    print snpreader.sid_count
-    print len(snpreader.pos)
-
-    snpreader2 = snpreader[::-1,4]
-    print snpreader.iid_count
-    print snpreader2.sid_count
-    print len(snpreader2.pos)
-
-    snp_matrix = snpreader2.read()
-    print len(snp_matrix['iid'])
-    print len(snp_matrix['sid'])
-
-    snp_matrix = snpreader2[5,:].read()
-    print len(snp_matrix['iid'])
-    print len(snp_matrix['sid'])
-
-    iid_index_list = snpreader2.iid_to_index(snpreader2.iid[::2])
-    snp_matrix = snpreader2[iid_index_list,::3].read()
-    print len(snp_matrix['iid'])
-    print len(snp_matrix['sid'])
-
-    snp_matrix = snpreader[[4,5],:].read()
-    print len(snp_matrix['iid'])
-    print len(snp_matrix['sid'])
-
-    print snpreader2
-    print snpreader[::-1,4]
-    print snpreader2[iid_index_list,::3]
-    print snpreader[:,sid_index_list]
-    print snpreader2[5,:]
-    print snpreader[[4,5],:]
+    import doctest
+    doctest.testmod()

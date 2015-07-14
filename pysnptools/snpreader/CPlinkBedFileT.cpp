@@ -311,7 +311,10 @@ void SUFFIX(ImputeAndZeroMeanSNPs)(
 	const size_t nSNPs, 
 	const bool betaNotUnitVariance,
 	const REAL betaA,
-	const REAL betaB
+	const REAL betaB,
+	const bool apply_in_place,
+	const bool use_stats,
+	REAL *stats
 	)
 {
 	bool seenSNC = false; //Keep track of this so that only one warning message is reported
@@ -319,99 +322,107 @@ void SUFFIX(ImputeAndZeroMeanSNPs)(
 
 	for ( size_t iSnp = 0; iSnp < nSNPs; ++iSnp )
 	{
-
-		REAL n_observed = 0.0;
-		REAL sum_s  = 0.0;      //the sum of a SNP over all observed individuals
-		REAL sum2_s = 0.0;      //the sum of the squares of the SNP over all observed individuals
-
+		REAL mean_s;
+		REAL std;
+		REAL freq = 0;
 		size_t end = nIndividuals;
 		size_t delta = 1;
-		for( size_t ind = 0; ind < end; ind+=delta )
+		bool isSNC;
+
+		if (use_stats)
 		{
-			if (SNPs[ind] == SNPs[ind])
+			mean_s = stats[iSnp];
+			std = stats[iSnp + nSNPs];
+			isSNC = !isfinite(std);
+		}
+		else
+		{
+			isSNC = false;
+			REAL n_observed = 0.0;
+			REAL sum_s = 0.0;      //the sum of a SNP over all observed individuals
+			REAL sum2_s = 0.0;      //the sum of the squares of the SNP over all observed individuals
+
+			for (size_t ind = 0; ind < end; ind += delta)
 			{
-				//check for not NaN
-				sum_s += SNPs[ ind ];
-				sum2_s+= SNPs[ ind ] * SNPs[ ind ];
-				++n_observed;
-			}
-		}
-
-		if ( n_observed < 1.0 )
-		{
-			printf( "No individual observed for the SNP.\n");
-		}
-
-		REAL mean_s  = sum_s  / n_observed;    //compute the mean over observed individuals for the current SNP
-		REAL mean2_s = sum2_s / n_observed;    //compute the mean of the squared SNP
-
-		//When beta standardization is being done, check that data is 0,1,2
-		if (betaNotUnitVariance && sum_s <= (REAL)0.0)
-		{
-			REAL freqT = sum_s/n_observed;
-			fprintf(stderr, "Observed SNP freq is %.2f. for a SNPs[:][%i]\n", freqT, iSnp );
-			exit(1);
-		}
-
-
-		//The SNP frequency
-		REAL freq = (sum_s) / (n_observed * (REAL)2.0);   //compute snp-freq as in the Visscher Height paper (Nat Gen, Yang et al 2010).
-
-		if ((freq != freq) || betaNotUnitVariance && ((freq >= (REAL)1.0) || (freq <= (REAL)0.0)))
-		{
-			if (!seenSNC)
-			{
-				seenSNC = true;
-				fprintf(stderr, "Illegal SNP frequency: %.2f for SNPs[:][%i]\n", freq, iSnp);
-			}
-		}
-
-
-		REAL variance = mean2_s-mean_s * mean_s;        //By the Cauchy Shwartz inequality this should always be positive
-		REAL std = sqrt( variance );                    //The SNP frequency
-
-		bool isSNC = false;
-		if ( (std != std) || (std <= (REAL)0.0) )
-		{
-			// a std == 0.0 means all SNPs have the same value (no variation or Single Nucleotide Constant (SNC))
-			//   however ALL SNCs should have been removed in previous filtering steps
-			//   This test now prevents a divide by zero error below
-			std = 1.0;
-			isSNC = true;
-			if (!seenSNC)
-			{
-				seenSNC = true;
-				fprintf(stderr, "std=.%2f has illegal value for SNPs[:][%i]\n", std, iSnp );
-			}
-
-		}
-
-		if (betaNotUnitVariance && freq > .5)
-		{
-			freq = 1.0 - freq;
-		}
-
-		for( size_t ind = 0; ind < end; ind+=delta )
-		{
-			//check for NaN
-			if ( (SNPs[ ind ]!=SNPs[ ind ]) || isSNC)
-			{
-				SNPs[ ind ] = 0.0;
-			}
-			else
-			{
-				SNPs[ ind ] -= mean_s;     //subtract the mean from the data
-				if (betaNotUnitVariance )
+				if (SNPs[ind] == SNPs[ind])
 				{
-					REAL rT = SUFFIX(BetaPdf)( freq, betaA, betaB );
-					//fprintf(stderr, "BetaPdf(%f,%f,%f)=%f\n",  freq, betaA, betaB, rT);
-					SNPs[ ind ] *= rT;
+					//check for not NaN
+					sum_s += SNPs[ind];
+					sum2_s += SNPs[ind] * SNPs[ind];
+					++n_observed;
+				}
+			}
+
+			if (n_observed < 1.0)
+			{
+				printf("No individual observed for the SNP.\n");
+				//LATER make it work (in some form) for n of 0
+			}
+
+			mean_s = sum_s / n_observed;    //compute the mean over observed individuals for the current SNP
+			REAL mean2_s = sum2_s / n_observed;    //compute the mean of the squared SNP
+
+			if ((mean_s != mean_s) || betaNotUnitVariance && ((mean_s > (REAL)2.0) || (mean_s < (REAL)0.0)))
+			{
+				if (!seenSNC)
+				{
+					seenSNC = true;
+					fprintf(stderr, "Illegal SNP mean: %.2f for SNPs[:][%i]\n", mean_s, iSnp);
+				}
+			}
+
+
+			REAL variance = mean2_s - mean_s * mean_s;        //By the Cauchy Shwartz inequality this should always be positive
+			std = sqrt(variance);
+
+			if ((std != std) || (std <= (REAL)0.0))
+			{
+				// a std == 0.0 means all SNPs have the same value (no variation or Single Nucleotide Constant (SNC))
+				//   however ALL SNCs should have been removed in previous filtering steps
+				//   This test now prevents a divide by zero error below
+				isSNC = true;
+				if (!seenSNC)
+				{
+					seenSNC = true;
+					fprintf(stderr, "std=.%2f has illegal value for SNPs[:][%i]\n", std, iSnp);
+				}
+				std = std::numeric_limits<REAL>::infinity();
+
+			}
+
+			stats[iSnp] = mean_s;
+			stats[iSnp + nSNPs] = std;
+		}
+
+
+		if (apply_in_place)
+		{
+			for (size_t ind = 0; ind < end; ind += delta)
+			{
+				//check for NaN
+				if ((SNPs[ind] != SNPs[ind]) || isSNC)
+				{
+					SNPs[ind] = 0.0;
 				}
 				else
 				{
-					SNPs[ ind ] /= std;        //unit variance as well
+					SNPs[ind] -= mean_s;     //subtract the mean from the data
+					if (betaNotUnitVariance) //compute snp-freq as in the Visscher Height paper (Nat Gen, Yang et al 2010).
+					{
+						REAL freq = mean_s / 2.0;
+						if (freq > .5)
+						{
+							freq = 1.0 - freq;
+						}
+						REAL rT = SUFFIX(BetaPdf)(freq, betaA, betaB);
+						//fprintf(stderr, "BetaPdf(%f,%f,%f)=%f\n",  freq, betaA, betaB, rT);
+						SNPs[ind] *= rT;
+					}
+					else
+					{
+						SNPs[ind] /= std;        //unit variance as well
+					}
 				}
-
 			}
 		}
 
@@ -420,113 +431,120 @@ void SUFFIX(ImputeAndZeroMeanSNPs)(
 
 #else //Order C
 
-
-	// Make one pass through the data (by individual, because that is how it is laid out), collecting statistics
-	std::vector<REAL> n_observed(nSNPs); //                                                C++ inits to 0's
-	std::vector<REAL> sum_s(nSNPs);      //the sum of a SNP over all observed individuals. C++ inits to 0's
-	std::vector<REAL> sum2_s(nSNPs);     //the sum of the squares of the SNP over all observed individuals.     C++ inits to 0's
-
-	for( size_t ind = 0; ind < nIndividuals; ++ind)
-	{
-		size_t rowStart = ind * nSNPs;
-		for ( size_t iSnp = 0; iSnp < nSNPs; ++iSnp )
-		{
-			REAL value = SNPs[rowStart+iSnp];
-			if ( value == value )
-			{
-				sum_s[iSnp] += value;
-				sum2_s[iSnp] += value * value;
-				++n_observed[iSnp];
-			}
-		}
-	}
-
-
 	std::vector<REAL> mean_s(nSNPs);  //compute the mean over observed individuals for the current SNP
-	std::vector<REAL> mean2_s(nSNPs); //compute the mean of the squared SNP
 	std::vector<REAL> std(nSNPs); //the standard deviation
-	std::vector<REAL> freq(nSNPs); //The SNP frequency
 	std::vector<bool> isSNC(nSNPs); // Is this a SNC (C++ inits to false)
-
-	for ( size_t iSnp = 0; iSnp < nSNPs; ++iSnp )
+	if (use_stats)
 	{
-		if ( n_observed[iSnp] < 1.0 )
+		for (size_t iSnp = 0; iSnp < nSNPs; ++iSnp)
 		{
-			printf( "No individual observed for the SNP.\n");
+			mean_s[iSnp] = stats[iSnp*2];
+			std[iSnp] = stats[iSnp * 2+1];
+			isSNC[iSnp] = !isfinite(std[iSnp]);
 		}
+	}
+	else
+	{
+		// Make one pass through the data (by individual, because that is how it is laid out), collecting statistics
+		std::vector<REAL> n_observed(nSNPs); //                                                C++ inits to 0's
+		std::vector<REAL> sum_s(nSNPs);      //the sum of a SNP over all observed individuals. C++ inits to 0's
+		std::vector<REAL> sum2_s(nSNPs);     //the sum of the squares of the SNP over all observed individuals.     C++ inits to 0's
 
-		mean_s[iSnp]  = sum_s[iSnp]  / n_observed[iSnp];    //compute the mean over observed individuals for the current SNP
-		mean2_s[iSnp] = sum2_s[iSnp] / n_observed[iSnp];    //compute the mean of the squared SNP
-
-		//When beta standardization is being done, check that data is 0,1,2
-		if (betaNotUnitVariance && sum_s[iSnp] <= (REAL)0.0)
+		for( size_t ind = 0; ind < nIndividuals; ++ind)
 		{
-			REAL freqT = sum_s[iSnp]/n_observed[iSnp];
-			fprintf(stderr, "Observed SNP freq is %.2f. for a SNPs[:][%i]\n", freqT, iSnp );
-			exit(1);
-		}
-
-		freq[iSnp] = (sum_s[iSnp]) / (n_observed[iSnp] * (REAL)2.0);   //compute snp-freq[iSnp] as in the Visscher Height paper (Nat Gen, Yang et al 2010).
-
-		if ((freq[iSnp] != freq[iSnp]) || betaNotUnitVariance && ((freq[iSnp] >= (REAL)1.0) || (freq[iSnp] <= (REAL)0.0)))
-		{
-			if (!seenSNC)
+			size_t rowStart = ind * nSNPs;
+			for ( size_t iSnp = 0; iSnp < nSNPs; ++iSnp )
 			{
-				seenSNC = true;
-				fprintf(stderr, "Illegal SNP frequency: %.2f for SNPs[:][%i]\n", freq[iSnp], iSnp);
+				REAL value = SNPs[rowStart+iSnp];
+				if ( value == value )
+				{
+					sum_s[iSnp] += value;
+					sum2_s[iSnp] += value * value;
+					++n_observed[iSnp];
+				}
 			}
 		}
 
 
-		REAL variance = mean2_s[iSnp]-mean_s[iSnp] * mean_s[iSnp];        //By the Cauchy Shwartz inequality this should always be positive
-		std[iSnp] = sqrt( variance );
+		std::vector<REAL> mean2_s(nSNPs); //compute the mean of the squared SNP
 
-		if ( (std[iSnp] != std[iSnp]) || (std[iSnp] <= (REAL)0.0) )
+		for (size_t iSnp = 0; iSnp < nSNPs; ++iSnp)
 		{
-			// a std == 0.0 means all SNPs have the same value (no variation or Single Nucleotide Constant (SNC))
-			//   however ALL SNCs should have been removed in previous filtering steps
-			//   This test now prevents a divide by zero error below
-			std[iSnp] = 1.0;
-			isSNC[iSnp] = true;
-			if (!seenSNC)
+			if (n_observed[iSnp] < 1.0)
 			{
-				seenSNC = true;
-				fprintf(stderr, "std=.%2f has illegal value for SNPs[:][%i]\n", std[iSnp], iSnp );
+				printf("No individual observed for the SNP.\n");
 			}
-		}
 
-		if (betaNotUnitVariance && freq[iSnp] > .5)
-		{
-			freq[iSnp] = 1.0 - freq[iSnp];
+			mean_s[iSnp] = sum_s[iSnp] / n_observed[iSnp];    //compute the mean over observed individuals for the current SNP
+			mean2_s[iSnp] = sum2_s[iSnp] / n_observed[iSnp];    //compute the mean of the squared SNP
+
+			if ((mean_s[iSnp] != mean_s[iSnp]) || betaNotUnitVariance && ((mean_s[iSnp] > (REAL)2.0) || (mean_s[iSnp] < (REAL)0.0)))
+			{
+				if (!seenSNC)
+				{
+					seenSNC = true;
+					fprintf(stderr, "Illegal SNP mean: %.2f for SNPs[:][%i]\n", mean_s[iSnp], iSnp);
+				}
+			}
+
+
+			REAL variance = mean2_s[iSnp] - mean_s[iSnp] * mean_s[iSnp];        //By the Cauchy Shwartz inequality this should always be positive
+			std[iSnp] = sqrt(variance);
+
+			if ((std[iSnp] != std[iSnp]) || (std[iSnp] <= (REAL)0.0))
+			{
+				// a std == 0.0 means all SNPs have the same value (no variation or Single Nucleotide Constant (SNC))
+				//   however ALL SNCs should have been removed in previous filtering steps
+				//   This test now prevents a divide by zero error below
+				std[iSnp] = std::numeric_limits<REAL>::infinity();
+				isSNC[iSnp] = true;
+				if (!seenSNC)
+				{
+					seenSNC = true;
+					fprintf(stderr, "std=.%2f has illegal value for SNPs[:][%i]\n", std[iSnp], iSnp);
+				}
+			}
+			stats[iSnp*2] = mean_s[iSnp];
+			stats[iSnp*2+1] = std[iSnp];
 		}
 	}
 
-	for( size_t ind = 0; ind < nIndividuals; ++ind)
+	if (apply_in_place)
 	{
-		size_t rowStart = ind * nSNPs;
-		for ( size_t iSnp = 0; iSnp < nSNPs; ++iSnp )
+		for (size_t ind = 0; ind < nIndividuals; ++ind)
 		{
-			REAL value = SNPs[rowStart+iSnp];
-			//check for NaN
-			if ( (value != value) || isSNC[iSnp])
+			size_t rowStart = ind * nSNPs;
+			for (size_t iSnp = 0; iSnp < nSNPs; ++iSnp)
 			{
-				value = 0.0;
-			}
-			else
-			{
-				value -= mean_s[iSnp];     //subtract the mean from the data
-				if (betaNotUnitVariance )
+				REAL value = SNPs[rowStart + iSnp];
+				//check for NaN
+				if ((value != value) || isSNC[iSnp])
 				{
-					REAL rT = SUFFIX(BetaPdf)( freq[iSnp], betaA, betaB );
-					//fprintf(stderr, "BetaPdf(%f,%f,%f)=%f\n",  freq, betaA, betaB, rT);
-					value *= rT;
+					value = 0.0;
 				}
 				else
 				{
-					value /= std[iSnp];        //unit variance as well
+					value -= mean_s[iSnp];     //subtract the mean from the data
+					if (betaNotUnitVariance)
+					{
+						//compute snp-freq as in the Visscher Height paper (Nat Gen, Yang et al 2010).
+						REAL freq = mean_s[iSnp] / 2.0;
+						if (freq > .5)
+						{
+							freq = 1.0 - freq;
+						}
+
+						REAL rT = SUFFIX(BetaPdf)(freq, betaA, betaB);
+						//fprintf(stderr, "BetaPdf(%f,%f,%f)=%f\n",  freq, betaA, betaB, rT);
+						value *= rT;
+					}
+					else
+					{
+						value /= std[iSnp];        //unit variance as well
+					}
 				}
+				SNPs[rowStart + iSnp] = value;
 			}
-			SNPs[rowStart+iSnp] = value;
 		}
 	}
 #endif

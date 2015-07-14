@@ -6,14 +6,20 @@ PySnpTools: A library for reading and manipulating genetic data.
 
 :synopsis:
 
-* :mod:`.snpreader`: Efficiently read genetic PLINK formats including \*.bed/bim/fam files. Also, efficiently read *parts* of files and standardize data.
+* :mod:`.snpreader`: Efficiently read genetic PLINK formats including \*.bed/bim/fam and phenotype files. Also, efficiently read *parts* of files and standardize data.
 
-* :mod:`.util`: In one line, intersect and re-order IIDs from :mod:`.snpreader` and other sources. Also, efficiently extract a submatrix from an ndarray.
+* :mod:`.kernelreader`: Efficiently create, read, and manipulate kernel data.
+
+* :mod:`.util`: In one line, intersect and re-order IIDs from :mod:`.snpreader`, :mod:`.kernelreader` and other sources. Also, efficiently extract a submatrix from an ndarray.
 
 * :class:`.util.IntRangeSet`: Efficiently manipulate ranges of integers -- for example, genetic position -- with set operators including
   union, intersection, and set difference. 
 
-* :mod:`.util.pheno`: Read the PLINK pheno type file format.
+* :mod:`.pstreader`: Generalizes :mod:`.snpreader` and :mod:`.kernelreader` (provides the efficiency of numpy arrays with some of the flexibility of pandas)
+
+* :mod:`.standardizer`: Specify standardizers for :class:`.SnpReaders`.
+
+
 
 .. automodule:: pysnptools
     :members:
@@ -46,59 +52,148 @@ PySnpTools: A library for reading and manipulating genetic data.
 ++++++++++++++++++++++++
 .. autoclass:: pysnptools.snpreader.Bed
     :members:
-    :inherited-members:
     :undoc-members:
 	:show-inheritance:
 	:special-members:
-    :exclude-members: copyinputs
-
+    :exclude-members: copyinputs, col, col_property, row
 
 :class:`snpreader.SnpData`
 ++++++++++++++++++++++++++
 .. autoclass:: pysnptools.snpreader.SnpData
     :members:
-    :inherited-members:
     :undoc-members:
 	:show-inheritance:
 	:special-members:
-    :exclude-members: copyinputs
+    :exclude-members: copyinputs, col, col_property, row
 
+:class:`snpreader.Pheno`
+++++++++++++++++++++++++
+.. autoclass:: pysnptools.snpreader.Pheno
+    :members:
+    :undoc-members:
+	:show-inheritance:
+	:special-members:
+    :exclude-members: copyinputs, col, col_property, row
 
 :class:`snpreader.Ped`
 +++++++++++++++++++++++++
 .. autoclass:: pysnptools.snpreader.Ped
     :members:
-    :inherited-members:
     :undoc-members:
 	:show-inheritance:
 	:special-members:
-    :exclude-members: copyinputs
+    :exclude-members: copyinputs, col, col_property, row
 
 :class:`snpreader.Dat`
 +++++++++++++++++++++++++
 .. autoclass:: pysnptools.snpreader.Dat
     :members:
-    :inherited-members:
     :undoc-members:
 	:show-inheritance:
 	:special-members:
-    :exclude-members: copyinputs
+    :exclude-members: copyinputs, col, col_property, row
 
-:class:`snpreader.Hdf5`
+:class:`snpreader.Dense`
 +++++++++++++++++++++++++
-.. autoclass:: pysnptools.snpreader.Hdf5
+.. autoclass:: pysnptools.snpreader.Dense
     :members:
-    :inherited-members:
     :undoc-members:
 	:show-inheritance:
 	:special-members:
-    :exclude-members: copyinputs
+    :exclude-members: copyinputs, col, col_property, row
+
+:class:`snpreader.SnpHdf5`
++++++++++++++++++++++++++++
+.. autoclass:: pysnptools.snpreader.SnpHdf5
+    :members:
+    :undoc-members:
+	:show-inheritance:
+	:special-members:
+    :exclude-members: copyinputs, col, col_property, row, row_property
+
+:class:`snpreader.SnpNpz`
++++++++++++++++++++++++++
+.. autoclass:: pysnptools.snpreader.SnpNpz
+    :members:
+    :undoc-members:
+	:show-inheritance:
+	:special-members:
+    :exclude-members: copyinputs, col, col_property, row, row_property
+
+****************************
+:mod:`kernelreader` Module
+****************************
+.. automodule:: pysnptools.kernelreader
+    :members:
+    :undoc-members:
+	:show-inheritance:
+	:special-members:
+
+
+:class:`kernelreader.KernelReader`
++++++++++++++++++++++++++++++++++++
+.. autoclass:: pysnptools.kernelreader.KernelReader
+    :members:
+    :undoc-members:
+	:show-inheritance:
+	:special-members: __getitem__
+    :exclude-members: copyinputs, col_property, row_property
+
+
+:class:`kernelreader.KernelData`
+++++++++++++++++++++++++++++++++++
+.. autoclass:: pysnptools.kernelreader.KernelData
+    :members:
+    :undoc-members:
+	:show-inheritance:
+	:special-members:
+    :exclude-members: copyinputs, col, col_property, row, row_property
+
+
+:class:`kernelreader.KernelNpz`
+++++++++++++++++++++++++++++++++
+.. autoclass:: pysnptools.kernelreader.KernelNpz
+    :members:
+    :undoc-members:
+	:show-inheritance:
+	:special-members:
+    :exclude-members: copyinputs, col, col_property, row, row_property
+
+:class:`kernelreader.KernelHdf5`
+++++++++++++++++++++++++++++++++++
+.. autoclass:: pysnptools.kernelreader.KernelHdf5
+    :members:
+    :undoc-members:
+	:show-inheritance:
+	:special-members:
+    :exclude-members: copyinputs, col, col_property, row, row_property
+
+
+:class:`kernelreader.Identity`
++++++++++++++++++++++++++++++++++++
+.. autoclass:: pysnptools.kernelreader.Identity
+    :members:
+    :undoc-members:
+	:show-inheritance:
+	:special-members:
+    :exclude-members: copyinputs, col, col_property, row, row_property
+
+:class:`kernelreader.SnpKernel`
++++++++++++++++++++++++++++++++++++
+.. autoclass:: pysnptools.kernelreader.SnpKernel
+    :members:
+    :undoc-members:
+	:show-inheritance:
+	:special-members:
+    :exclude-members: copyinputs, col, col_property, row, row_property
 
 
 ***********************
 :mod:`util` Module
 ***********************
 
+:mod:`util`
+++++++++++++++++++++++++++
 .. automodule:: pysnptools.util
     :members:
     :undoc-members:
@@ -113,7 +208,6 @@ PySnpTools: A library for reading and manipulating genetic data.
   :special-members:
   :exclude-members: __and__, __weakref__,__module__,__dict__, __add__
 
-
 :mod:`util.pheno`
 ++++++++++++++++++++++++++
 .. automodule:: pysnptools.util.pheno
@@ -121,10 +215,10 @@ PySnpTools: A library for reading and manipulating genetic data.
     :undoc-members:
 	:show-inheritance:
 	:special-members:
- 
-****************************
+
+***************************
 :mod:`standardizer` Module
-****************************
+***************************
 
 .. automodule:: pysnptools.standardizer
     :members:
@@ -133,60 +227,121 @@ PySnpTools: A library for reading and manipulating genetic data.
 	:special-members:
 
 
+:class:`standardizer.Standardizer`
++++++++++++++++++++++++++++++++++++++
+.. autoclass:: pysnptools.standardizer.Standardizer
+    :members:
+    :undoc-members:
+	:show-inheritance:
+	:special-members: __getitem__
+    :exclude-members: copyinputs
+
 :class:`standardizer.Unit`
-++++++++++++++++++++++++++
++++++++++++++++++++++++++++++
 .. autoclass:: pysnptools.standardizer.Unit
     :members:
     :undoc-members:
 	:show-inheritance:
 	:special-members: __getitem__
-    :exclude-members: copyinputs
-
-:class:`standardizer.Identity`
-++++++++++++++++++++++++++++++++++++++++++++++++++++
-.. autoclass:: pysnptools.standardizer.Identity
-    :members:
-    :undoc-members:
-	:show-inheritance:
-	:special-members: __getitem__
-    :exclude-members: copyinputs
-
+    :exclude-members: copyinputs,standardize
 
 :class:`standardizer.Beta`
-++++++++++++++++++++++++++++++++++++++++++++++++++++
++++++++++++++++++++++++++++++
 .. autoclass:: pysnptools.standardizer.Beta
     :members:
     :undoc-members:
 	:show-inheritance:
 	:special-members: __getitem__
-    :exclude-members: copyinputs
+    :exclude-members: copyinputs,standardize
 
-:class:`standardizer.BySidCount`
-++++++++++++++++++++++++++++++++++++++++++++++++++++
-.. autoclass:: pysnptools.standardizer.BySidCount
+:class:`standardizer.Identity`
++++++++++++++++++++++++++++++++++++++
+.. autoclass:: pysnptools.standardizer.Identity
     :members:
     :undoc-members:
 	:show-inheritance:
 	:special-members: __getitem__
-    :exclude-members: copyinputs
+    :exclude-members: copyinputs,standardize
 
-:class:`standardizer.BySqrtSidCount`
-++++++++++++++++++++++++++++++++++++++++++++++++++++
-.. autoclass:: pysnptools.standardizer.BySqrtSidCount
-    :members:
-    :undoc-members:
-	:show-inheritance:
-	:special-members: __getitem__
-    :exclude-members: copyinputs
-
-:class:`standardizer.DiagKtoN.py`
-++++++++++++++++++++++++++++++++++++++++++++++++++++
+:class:`standardizer.diag_K_to_N`
++++++++++++++++++++++++++++++++++++++
 .. autoclass:: pysnptools.standardizer.DiagKtoN
     :members:
     :undoc-members:
 	:show-inheritance:
 	:special-members: __getitem__
+    :exclude-members: copyinputs,standardize
+
+:class:`standardizer.UnitTrained`
++++++++++++++++++++++++++++++++++++++
+.. autoclass:: pysnptools.standardizer.UnitTrained
+    :members:
+    :undoc-members:
+	:show-inheritance:
+	:special-members: __getitem__
+    :exclude-members: copyinputs,standardize
+
+:class:`standardizer.UnitTrained`
++++++++++++++++++++++++++++++++++++++
+.. autoclass:: pysnptools.standardizer.UnitTrained
+    :members:
+    :undoc-members:
+	:show-inheritance:
+	:special-members: __getitem__
+    :exclude-members: copyinputs,standardize
+
+
+
+***********************
+:mod:`pstreader` Module
+***********************
+
+.. automodule:: pysnptools.pstreader
+    :members:
+    :undoc-members:
+	:show-inheritance:
+	:special-members:
+
+
+:class:`pstreader.PstReader`
++++++++++++++++++++++++++++++
+.. autoclass:: pysnptools.pstreader.PstReader
+    :members:
+    :undoc-members:
+	:show-inheritance:
+	:special-members: __getitem__
     :exclude-members: copyinputs
+
+
+:class:`pstreader.PstData`
+++++++++++++++++++++++++++
+.. autoclass:: pysnptools.pstreader.PstData
+    :members:
+    :undoc-members:
+	:show-inheritance:
+	:special-members:
+    :exclude-members: copyinputs, col, col_property, row, row_property
+
+
+:class:`pstreader.PstHdf5`
++++++++++++++++++++++++++++++++++++++
+.. autoclass:: pysnptools.pstreader.PstHdf5
+    :members:
+    :undoc-members:
+	:show-inheritance:
+	:special-members:
+    :exclude-members: copyinputs, col, col_property, row, row_property
+
+
+:class:`pstreader.PstNpz`
++++++++++++++++++++++++++
+.. autoclass:: pysnptools.pstreader.PstNpz
+    :members:
+    :undoc-members:
+	:show-inheritance:
+	:special-members:
+    :exclude-members: copyinputs, col, col_property, row, row_property
+
 
 .. only:: html 
 

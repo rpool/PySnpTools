@@ -9,7 +9,7 @@ import numpy as np
 def _testtest(data, iididx):
     return (data[0][iididx],data[1][iididx])
 
-def intersect_apply(data_list, sort_by_dataset=True):
+def intersect_apply(data_list, sort_by_dataset=True, intersect_before_standardize=True):
     """Intersects and sorts the iids from a list of datasets, returning new version of the datasets with all the same iids in the same order.
 
     :param data_list: list of datasets
@@ -17,6 +17,11 @@ def intersect_apply(data_list, sort_by_dataset=True):
     :param sort_by_dataset: optional, If True (default), the iids are ordered according to the first non-None dataset.
         If False, the order is arbitrary, but consistent.
     :type sort_by_dataset: bool
+
+    :param intersect_before_standardize: optional. Special code for :class:`.SnpKernel`, the class that postpones computing a kernel from SNP data. 
+        If True (default), :class:`.SnpKernel` will remove any iids before SNP standardization before computing the kernel.
+        If False, SNPs will be standardized with all iids, then the kernel will be computed, then any iids will be removed.
+    :type intersect_before_standardize: bool
 
     :rtype: list of datasets
 
@@ -27,31 +32,33 @@ def intersect_apply(data_list, sort_by_dataset=True):
     ============================================== ================================================================
     None                                           None
     A :class:`.SnpReader`                          A new subsetting :class:`.SnpReader` with adjusted iid
+    A :class:`.KernelReader`                       A new subsetting :class:`.KernelReader` with adjusted iid
     A dictionary with ['iid'] and ['vals'] keys    The same dictionary but with the iid and vals values adjusted
     Tuple of the form (val ndarray, iid list)      A new tuple with the val ndarray and iid list adjusted
     ============================================== ================================================================
     
     If the iids in all the datasets are already the same and in the same order, then the datasets are returned without change.
 
-    Notice that only dictionaries are processed in-place. Inputting a :class:`.SnpReader` returns a new :class:`.SnpReader` (unless its iids
+    Notice that only dictionaries are processed in-place. Inputting a :class:`.SnpReader` and :class:`.KernelReader` returns a new class of the same type (unless its iids
     are already ok). Inputting a tuple returns a new tuple (unless its iids are already ok).
 
     :Example:
 
-    >>> from pysnptools.snpreader import Bed
-    >>> from pysnptools.util.pheno import loadOnePhen,loadPhen
+    >>> from pysnptools.snpreader import Bed, Pheno
+    >>> from pysnptools.kernelreader import SnpKernel
+    >>> from pysnptools.standardizer import Unit
     >>>
     >>> #Create five datasets in different formats
     >>> ignore_in = None
-    >>> snpreader_in = Bed('../../tests/datasets/all_chr.maf0.001.N300') # Specify SNP data on disk
-    >>> pheno_dict = loadOnePhen('../../tests/datasets/phenSynthFrom22.23.N300.randcidorder.txt')
-    >>> cov = loadPhen('../../tests/datasets/all_chr.maf0.001.covariates.N300.txt')
-    >>> cov_as_tuple_in = (cov['vals'],cov['iid']) #We could do cov directly, but as an example we make it a tuple.
+    >>> kernel_in = SnpKernel(Bed('../../tests/datasets/all_chr.maf0.001.N300'),Unit()) # Create a kernel from a Bed file
+    >>> pheno_in = Pheno('../../tests/datasets/phenSynthFrom22.23.N300.randcidorder.txt',missing="")
+    >>> cov = Pheno('../../tests/datasets/all_chr.maf0.001.covariates.N300.txt',missing="").read()
+    >>> cov_as_tuple_in = (cov.val,cov.iid) #We could do cov directly, but as an example we make it a tuple.
     >>>
     >>> # Create five new datasets with consistent iids
-    >>> ignore_out, snpreader_out, pheno_dict, cov_as_tuple_out = intersect_apply([ignore_in, snpreader_in, pheno_dict, cov_as_tuple_in])
+    >>> ignore_out, kernel_out, pheno_out, cov_as_tuple_out = intersect_apply([ignore_in, kernel_in, pheno_in, cov_as_tuple_in])
     >>> # Print the first five iids from each dataset
-    >>> print ignore_out, snpreader_out.iid[:5], pheno_dict['iid'][:5], cov_as_tuple_out[1][:5]
+    >>> print ignore_out, kernel_out.iid[:5], pheno_out.iid[:5], cov_as_tuple_out[1][:5]
     None [['POP1' '0']
      ['POP1' '12']
      ['POP1' '44']
@@ -70,18 +77,30 @@ def intersect_apply(data_list, sort_by_dataset=True):
     iid_list = []
     reindex_list = []
 
+    #LATER this doesn't cover non-square kernel readers. What should it do when there are two different iid lists?
+    from pysnptools.kernelreader import SnpKernel
     for data in data_list:
         if data is None:
             iid = None
             reindex = lambda data, iididx : None
+        elif intersect_before_standardize and isinstance(data,SnpKernel):
+            assert data.test is data.snpreader, "Current code can only 'intersect_before_standardize' on a snpkernel that is square"
+            iid = data.iid0
+            reindex = lambda data, iididx : _reindex_snpkernel(data, iididx)
         else:
             try: #pheno dictionary
                 iid = data['iid'] 
                 reindex = lambda data, iididx : _reindex_phen_dict(data, iididx)
             except:
-                try: #snpreader
+                try:
                     iid = data.iid
-                    reindex = lambda data, iididx : data[iididx,:]
+                    try:
+                        if iid is data.col: #If the 'iid' shares memory with the 'col', then it's a square-kernel-like thing and should be processed with just once index
+                            reindex = lambda data, iididx : data[iididx]
+                        else:
+                            reindex = lambda data, iididx : data[iididx,:]
+                    except:
+                        reindex = lambda data, iididx : data[iididx,:]
                 except AttributeError: #tuple of (val,iid)
                     iid = data[1]
                     reindex = lambda data, iididx : _testtest(data,iididx)
@@ -105,7 +124,7 @@ def intersect_apply(data_list, sort_by_dataset=True):
                 if iid is not None:
                     #sort the indexes so that SNPs ids in their original order (and 
                     #therefore we have to move things around in memory the least amount)
-                    sortind=sp.argsort(indarr[:,i])
+                    sortind=np.argsort(indarr[:,i])
                     indarr=indarr[sortind]
                     break
 
@@ -127,17 +146,26 @@ def _reindex_phen_dict(phen_dict, iididx):
     phen_dict['iid'] = phen_dict['iid'][iididx]
     return phen_dict
 
+def _reindex_snpkernel(snpkernel, iididx):
+    assert snpkernel.test is snpkernel.snpreader, "Current code can only intersect square snpkernel"
+    from pysnptools.kernelreader import SnpKernel
+    result = SnpKernel(snpkernel.snpreader[iididx,:],snpkernel.standardizer,test=None,block_size=snpkernel.block_size)
+    return result
+
 def _all_same(iids_list):
     for i in xrange(len(iids_list)-1):
         iidA = iids_list[i]
         iidB = iids_list[i+1]
-        if iidA is not None and iidB is not None:
-            if len(iidA) != len(iidB) or not sp.all(iidA == iidB):
-                return False
+        if not np.array_equal(iidA,iidB):
+            return False
     return True
 
 def intersect_ids(idslist):
-    '''Takes a list of 2d string arrays of family and individual ids.
+    '''
+    .. deprecated::
+       Use :func:`intersect_apply` instead.    
+    
+    Takes a list of 2d string arrays of family and case ids.
     These are intersected.
 
     :rtype: indarr, an array of size N x L, where N is the number of
@@ -296,7 +324,15 @@ def sub_matrix(val, row_index_list, col_index_list, order='A', dtype=sp.float64)
     logging.debug("Back from cython matrixSubset")
     return sub_val
 
-def create_directory_if_necessary(name, isfile=True):    
+def create_directory_if_necessary(name, isfile=True):
+    '''
+    Create a directory for a file if the directory doesn't already exist.
+
+    :param name: file or directory name
+    :type name: string
+    :param isfile: If True (default), the name is a file, otherwise it is a directory.
+    :type isfile: bool
+    '''
     import os
     if isfile:
         directory_name = os.path.dirname(name)
@@ -312,6 +348,13 @@ def create_directory_if_necessary(name, isfile=True):
 
 def weighted_mean(ys, weights):
     '''
+    :param ys: The ndarray of values
+    :type ys: ndarray
+    :param weights: the weight of each value (unnormalized is fine)
+    :type weights: ndarray
+    :rtype: the weight mean
+
+
     >>> ys = np.array([103.664086,89.80645161,83.86888046,90.54141176])
     >>> weights = np.array([2.340862423,4.982888433,0.17522245,0.098562628])
     >>> round(weighted_mean(ys, weights),5)
@@ -323,6 +366,14 @@ def weighted_mean(ys, weights):
 
 def weighted_simple_linear_regression(xs, ys, weights):
     '''
+    :param xs: The ndarray of independent values
+    :type xs: ndarray
+    :param ys: The ndarray of dependent values
+    :type ys: ndarray
+    :param weights: the weight of each case (unnormalized is fine)
+    :type weights: ndarray
+    :rtype: slope, intercept, xmean, ymean
+
     >>> xs = np.array([53.8329911,57.49486653,60.07392197,60.21081451])
     >>> ys = np.array([103.664086,89.80645161,83.86888046,90.54141176])
     >>> weights = np.array([2.340862423,4.982888433,0.17522245,0.098562628])
@@ -344,7 +395,6 @@ def weighted_simple_linear_regression(xs, ys, weights):
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-
 
     # There is also a unit test case in 'pysnptools\test.py' that calls this doc test
     import doctest

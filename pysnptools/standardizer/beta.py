@@ -1,40 +1,46 @@
 import numpy as np
 import scipy as sp
 import logging
+import warnings
+from pysnptools.standardizer import Standardizer
 
-class Beta(object): #IStandardizer
-    """Beta standardize the data"""
-    def __init__(self,a=1,b=25):
+class Beta(Standardizer):
+    '''
+    A :class:`.Standardizer` to beta standardize SNP data.
+
+    See :class:`.Standardizer` for more information about standardization.
+
+    **Constructor:**
+        :Parameters: * **a** (*float*) -- The *a* parameter of the beta distribution
+                     * **b** (*float*) -- The *b* parameter of the beta distribution
+
+    >>> from pysnptools.standardizer import Beta
+    >>> from pysnptools.snpreader import Bed
+    >>> snpdata1 = Bed('../../tests/datasets/all_chr.maf0.001.N300').read().standardize(Beta(1,25))
+    >>> print snpdata1.val[0,0]
+    0.68080194805
+    '''
+    def __init__(self,a,b):
         self.a = a
         self.b = b
 
-    def standardize(self, snps, blocksize=None, force_python_only=False):
-        l = self._lambda_factory(snps, blocksize=blocksize, force_python_only=force_python_only)
-        import pysnptools.standardizer as stdizer
-        return stdizer._standardize_with_lambda(snps, l, blocksize)
-
     def __repr__(self): 
-        return "{0}()".format(self.__class__.__name__)
+        return "{0}(a={1},b={2})".format(self.__class__.__name__,self.a,self.b)
 
-    def _lambda_factory(self, snps, blocksize=None, force_python_only=False):
-        from pysnptools.snpreader import wrap_plink_parser
-        if not force_python_only:
-            if snps.dtype == np.float64:
-                if snps.flags['F_CONTIGUOUS'] and (snps.flags["OWNDATA"] or snps.base.nbytes == snps.nbytes): #!!create a method called is_single_segment
-                    return lambda s, a=self.a, b=self.b : wrap_plink_parser.standardizedoubleFAAA(s,True,a,b)
-                elif snps.flags['C_CONTIGUOUS']  and (snps.flags["OWNDATA"] or snps.base.nbytes == snps.nbytes) and blocksize is None:
-                    return lambda s, a=self.a, b=self.b  : wrap_plink_parser.standardizedoubleCAAA(s,True,a,b)
-                else:
-                    logging.info("Array is not contiguous, so will standardize with python only instead of C++")
-            elif snps.dtype == np.float32:
-                if snps.flags['F_CONTIGUOUS'] and (snps.flags["OWNDATA"] or snps.base.nbytes == snps.nbytes):
-                    return lambda s, a=self.a, b=self.b : wrap_plink_parser.standardizefloatFAAA(s,True,a,b)
-                elif snps.flags['C_CONTIGUOUS'] and (snps.flags["OWNDATA"] or snps.base.nbytes == snps.nbytes) and blocksize is None:
-                    return lambda s, a=self.a, b=self.b : wrap_plink_parser.standardizefloatCAAA(s,True,a,b)
-                else:
-                    logging.info("Array is not contiguous, so will standardize with python only instead of C++")
-            else:
-                logging.info("Array type is not float64 or float32, so will standardize with python only instead of C++")
+    #changes snpdata.val in place
+    def _train_standardizer(self,snpdata,apply_in_place,force_python_only=False):
+        from pysnptools.standardizer import BetaTrained
+        stats=self._standardize_unit_and_beta(snpdata.val, is_beta=True, a=self.a, b=self.b, apply_in_place=apply_in_place,use_stats=False,stats=None,force_python_only=force_python_only)
+        return BetaTrained(self.a,self.b,stats)
 
-        import pysnptools.standardizer as stdizer
-        return lambda s, a=self.a, b=self.b, stdizer=stdizer: stdizer._standardize_beta_python(s, a, b)
+    def standardize(self, snps, block_size=None, force_python_only=False):
+        if block_size is not None:
+            warnings.warn("block_size is deprecated (and not needed, since standardization is in-place", DeprecationWarning)
+        self._standardize_unit_and_beta(snps, is_beta=True, a=self.a, b=self.b, apply_in_place=True, use_stats=False,stats=None,force_python_only=force_python_only)
+        return snps
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+
+    import doctest
+    doctest.testmod()

@@ -143,7 +143,7 @@ class IntRangeSet(object):
                                        ``a.difference_update(b)``,
                                        ``a.discard(b)``,
     remove b from a, error if missing  ``a.remove(b)``                    :meth:`remove`
-    a 'set difference' b                ``a - b``                         :meth:`__sub__`
+    a 'set difference' b                ``a - b``,                        :meth:`__sub__`
                                         ``a.difference(b)``
     iterate integers in a, from low    ``for element in a:``              :meth:`__iter__`
     iterate integers in a, from high   ``for element in reverse(a):``     :meth:`__reversed__`
@@ -153,7 +153,7 @@ class IntRangeSet(object):
     iterate ranges in a, from low      ``for start,stop in a.ranges():``  :meth:`ranges`
     count of ranges in a               ``a.ranges_len``                   :meth:`ranges_len`
     index of range containing b        ``a.ranges_index(b)``              :meth:`ranges_index`
-    get *i*th smallest range           ``a.ranges_getitem(i)``            :meth:`ranges_getitem`
+    get *i* th smallest range          ``a.ranges_getitem(i)``            :meth:`ranges_getitem`
     a as a string                      ``str(a)``                         :meth:`__str__`
     remove all elements from a         ``a.clear()``                      :meth:`clear`
     copy a                             ``a.copy()``                       :meth:`copy`
@@ -1276,7 +1276,7 @@ class IntRangeSet(object):
         '''
         ranges_inputs = IntRangeSet._make_args_range_set(*ranges_inputs) #generator to made every ranges a IntRangeSet
         ranges_inputs = sorted(ranges_inputs,key=lambda int_range_set:len(int_range_set._start_items)) #sort so that IntRangeSet with smaller range_count is first
-        result = ranges_inputs[0] #!!!what if no args, emtpy? The universe?
+        result = ranges_inputs[0] #LATER what if no args, empty? The universe?
         for ranges in ranges_inputs[1:]:
             result = result._binary_intersection(ranges)
         return result
@@ -1651,7 +1651,7 @@ class IntRangeSet(object):
                     pass
                 else:
                     for range_string in iterable.split(","):
-                        match = IntRangeSet._rangeExpression.match(range_string) #!!! is there a good error message if it is not well formed?
+                        match = IntRangeSet._rangeExpression.match(range_string) #LATER is there a good error message if it is not well formed?
                         if match is None:
                             raise Exception("The string is not well-formed. '{0}'".format(range_string))
                         start = int(match.group("start"))
