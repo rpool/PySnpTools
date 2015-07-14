@@ -36,7 +36,7 @@ class PstData(PstReader):
 
     **Equality:**
 
-        Two PstData objects are equal if their five arrays (:attr:`.row`, :attr:`.col`, :attr:`.val`, :attr:`.row_property`, and :attr:`.col_property`) are 'array_equal'.
+        Two PstData objects are equal if their five arrays (:attr:`.row`, :attr:`.col`, :attr:`.val`, :attr:`PstReader.row_property`, and :attr:`.col_property`) are 'array_equal'.
         (Their 'parent_string' does not need to be the same).
 
         :Example:

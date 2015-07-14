@@ -9,7 +9,6 @@ import numpy as np
 def _testtest(data, iididx):
     return (data[0][iididx],data[1][iididx])
 
-#!!!cmk intersect_before_standardize isn't documented
 def intersect_apply(data_list, sort_by_dataset=True, intersect_before_standardize=True):
     """Intersects and sorts the iids from a list of datasets, returning new version of the datasets with all the same iids in the same order.
 
@@ -18,6 +17,11 @@ def intersect_apply(data_list, sort_by_dataset=True, intersect_before_standardiz
     :param sort_by_dataset: optional, If True (default), the iids are ordered according to the first non-None dataset.
         If False, the order is arbitrary, but consistent.
     :type sort_by_dataset: bool
+
+    :param intersect_before_standardize: optional. Special code for :class:`.SnpKernel`, the class that postpones computing a kernel from SNP data. 
+        If True (default), :class:`.SnpKernel` will remove any iids before SNP standardization before computing the kernel.
+        If False, SNPs will be standardized with all iids, then the kernel will be computed, then any iids will be removed.
+    :type intersect_before_standardize: bool
 
     :rtype: list of datasets
 

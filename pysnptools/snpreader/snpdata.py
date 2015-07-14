@@ -32,7 +32,7 @@ class SnpData(PstData,SnpReader):
 
     **Equality:**
 
-        Two SnpData objects are equal if their four arrays (:attr:`.iid`, :attr:`.sid`, :attr:`.val`, and :attr:`.pos_property`) are 'array_equal'.
+        Two SnpData objects are equal if their four arrays (:attr:`SnpReader.iid`, :attr:`.sid`, :attr:`.val`, and :attr:`.pos_property`) are 'array_equal'.
         (Their 'parent_string' does not need to be the same).
 
         :Example:
