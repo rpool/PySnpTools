@@ -83,7 +83,7 @@ class KernelReader(PstReader):
        
         See below for details.
 
-        :class:`.KernelData` is a KernelReader so it supports the above properties and methods. In addition, it supports property :attr:`.KernelData.val` and method :meth:`.KernelData.standardize`.
+        :class:`.KernelData` is a KernelReader so it supports the above properties and methods. In addition, it supports property :attr:`.KernelData.val`, method :meth:`.KernelData.standardize`, and equality testing.
         See below for details.
 
         Some of the classes, such as :class:`.KernelNpz`, also provide a static :meth:`KernelNpz.write` method for writing :class:`.KernelData`.

@@ -83,7 +83,7 @@ class PstReader(object):
         Every PstReader, such as :class:`.PstNpz` and :class:`.PstData`, has these properties: :attr:`row`, :attr:`row_count`, :attr:`col`, :attr:`col_count`,
         :attr:`row_property`, :attr:`col_property` and these methods: :meth:`read`, :meth:`row_to_index`, :meth:`col_to_index`. See below for details.
 
-        :class:`.PstData` is a PstReader so it supports the above properties and methods. In addition, it supports property :attr:`.PstData.val`.
+        :class:`.PstData` is a PstReader so it supports the above properties and methods. In addition, it supports property :attr:`.PstData.val` and equality testing.
         See below for details.
 
     Rows and Cols:
@@ -101,7 +101,7 @@ class PstReader(object):
         >>> print on_disk.row_to_index([['per2', 'per2'],['per1', 'per1']]) #Find the indexes for two rows.
         [2 1]
         
-    When PstData is Read:
+    When Matrix Data is Read:
 
         Matrix data can be enormous so we generally avoid reading it to the degree practical. Specifically,
         
@@ -138,7 +138,7 @@ class PstReader(object):
             >>> print data_subset.val[0,2] # print the value with subset row index 0 and col index 2 (corresponding to row index 3 and col index 4 in the full data). No data is read from disk.
             1.0
 
-    When PstData is Re-Read and Copied:
+    When Matrix Data is Re-Read and Copied:
 
         Every time you call a PstReader's :meth:`read` method, the PstReader re-reads the value data and returns a new in-memory :class:`.PstData`
         (with :attr:`.PstData.val` property containing a new ndarray of the values).

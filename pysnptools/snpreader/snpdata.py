@@ -30,6 +30,24 @@ class SnpData(PstData,SnpReader):
         >>> print snpdata.val[0,1], snpdata.iid_count, snpdata.sid_count
         2.0 2 3
 
+    **Equality:**
+
+        Two SnpData objects are equal if their four arrays (:attr:`.iid`, :attr:`.sid`, :attr:`.val`, and :attr:`.pos_property`) are 'array_equal'.
+        (Their 'parent_string' does not need to be the same).
+
+        :Example:
+
+        >>> from pysnptools.snpreader import SnpData
+        >>> snpdata1 = SnpData(iid=[['fam0','iid0'],['fam0','iid1']], sid=['snp334','snp349','snp921'], val=[[0.,2.,0.],[0.,1.,2.]], pos=[[0,0,0],[0,0,0],[0,0,0]])
+        >>> snpdata2 = SnpData(iid=[['fam0','iid0'],['fam0','iid1']], sid=['snp334','snp349','snp921'], val=[[0.,2.,0.],[0.,1.,2.]], pos=[[0,0,0],[0,0,0],[0,0,0]])
+        >>> print snpdata1 == snpdata2 #True, because all the arrays have the same values.
+        True
+        >>> print snpdata1.val is snpdata2.val #False, because the two arrays have different memory.
+        False
+        >>> snpdata3 = SnpData(iid=[['a','0'],['b','0']], sid=['snp334','snp349','snp921'], val=[[0.,2.,0.],[0.,1.,2.]], pos=[[0,0,0],[0,0,0],[0,0,0]])
+        >>> snpdata4 = SnpData(iid=[['fam0','iid0'],['fam0','iid1']], sid=['snp334','snp349','snp921'], val=[[0.,2.,0.],[0.,1.,2.]], pos=[[0,0,0],[0,0,0],[0,0,0]])
+        >>> print snpdata3 == snpdata4 #False, because the iids are different.
+        False
 
     **Methods beyond** :class:`.SnpReader`
     """

@@ -507,7 +507,7 @@ the method can save memory by reading (and standardizing) the data in blocks. Se
 
 <dl class="method">
 <dt id="pysnptools.snpreader.SnpReader.kernel">
-<tt class="descname">kernel</tt><big>(</big><em>standardizer</em>, <em>allowlowrank=False</em>, <em>block_size=10000</em><big>)</big><a class="headerlink" href="#pysnptools.snpreader.SnpReader.kernel" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">kernel</tt><big>(</big><em>standardizer</em>, <em>allowlowrank=False</em>, <em>block_size=10000</em>, <em>blocksize=None</em><big>)</big><a class="headerlink" href="#pysnptools.snpreader.SnpReader.kernel" title="Permalink to this definition">¶</a></dt>
 <dd><div class="admonition warning">
 <p class="first admonition-title">Warning</p>
 <p class="last">Deprecated. Use <a class="reference internal" href="#pysnptools.snpreader.SnpReader.read_kernel" title="pysnptools.snpreader.SnpReader.read_kernel"><tt class="xref py py-meth docutils literal"><span class="pre">read_kernel()</span></tt></a> instead.</p>
@@ -1154,7 +1154,7 @@ null_200        j       n       0       nan     1
 <h3><tt class="xref py py-class docutils literal"><span class="pre">snpreader.Dense</span></tt><a class="headerlink" href="#snpreader-dense" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="pysnptools.snpreader.Dense">
-<em class="property">class </em><tt class="descclassname">pysnptools.snpreader.</tt><tt class="descname">Dense</tt><big>(</big><em>filename</em>, <em>extract_iid_function=&lt;function zero_family at 0x0000000005B20B38&gt;</em>, <em>extract_sid_pos_function=&lt;function zero_pos at 0x0000000005C176D8&gt;</em><big>)</big><a class="headerlink" href="#pysnptools.snpreader.Dense" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">pysnptools.snpreader.</tt><tt class="descname">Dense</tt><big>(</big><em>filename</em>, <em>extract_iid_function=&lt;function zero_family at 0x0000000005B5FC88&gt;</em>, <em>extract_sid_pos_function=&lt;function zero_pos at 0x0000000005B8D828&gt;</em><big>)</big><a class="headerlink" href="#pysnptools.snpreader.Dense" title="Permalink to this definition">¶</a></dt>
 <dd><p>A <a class="reference internal" href="#pysnptools.snpreader.SnpReader" title="pysnptools.snpreader.SnpReader"><tt class="xref py py-class docutils literal"><span class="pre">SnpReader</span></tt></a> for reading *.dense.txt (0,1,2 text files) from disk.</p>
 <p>See <a class="reference internal" href="#pysnptools.snpreader.SnpReader" title="pysnptools.snpreader.SnpReader"><tt class="xref py py-class docutils literal"><span class="pre">SnpReader</span></tt></a> for general examples of using SnpReaders.</p>
 <p>This format looks like:</p>
@@ -1196,7 +1196,7 @@ Defaults to setting the <a class="reference internal" href="#pysnptools.snpreade
 <p><strong>Methods beyond</strong> <a class="reference internal" href="#pysnptools.snpreader.SnpReader" title="pysnptools.snpreader.SnpReader"><tt class="xref py py-class docutils literal"><span class="pre">SnpReader</span></tt></a></p>
 <dl class="staticmethod">
 <dt id="pysnptools.snpreader.Dense.write">
-<em class="property">static </em><tt class="descname">write</tt><big>(</big><em>filename</em>, <em>snpdata</em>, <em>join_iid_function=&lt;function just_case at 0x0000000005C17748&gt;</em>, <em>join_sid_pos_function=&lt;function just_sid at 0x0000000005C177B8&gt;</em><big>)</big><a class="headerlink" href="#pysnptools.snpreader.Dense.write" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><tt class="descname">write</tt><big>(</big><em>filename</em>, <em>snpdata</em>, <em>join_iid_function=&lt;function just_case at 0x0000000005B8D898&gt;</em>, <em>join_sid_pos_function=&lt;function just_sid at 0x0000000005B8D908&gt;</em><big>)</big><a class="headerlink" href="#pysnptools.snpreader.Dense.write" title="Permalink to this definition">¶</a></dt>
 <dd><p>Writes a <a class="reference internal" href="#pysnptools.snpreader.SnpData" title="pysnptools.snpreader.SnpData"><tt class="xref py py-class docutils literal"><span class="pre">SnpData</span></tt></a> to Dense format. The values must be 0,1,2 (or missing).</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1819,7 +1819,7 @@ it also returns the SnpData.</p>
 <dt id="pysnptools.kernelreader.KernelNpz">
 <em class="property">class </em><tt class="descclassname">pysnptools.kernelreader.</tt><tt class="descname">KernelNpz</tt><big>(</big><em>filename</em><big>)</big><a class="headerlink" href="#pysnptools.kernelreader.KernelNpz" title="Permalink to this definition">¶</a></dt>
 <dd><p>A <a class="reference internal" href="#pysnptools.kernelreader.KernelReader" title="pysnptools.kernelreader.KernelReader"><tt class="xref py py-class docutils literal"><span class="pre">KernelReader</span></tt></a> for reading *.kernel.npz files from disk.</p>
-<p>See <a class="reference internal" href="#pysnptools.snpreader.SnpReader" title="pysnptools.snpreader.SnpReader"><tt class="xref py py-class docutils literal"><span class="pre">SnpReader</span></tt></a> for general examples of using SnpReaders.</p>
+<p>See <a class="reference internal" href="#pysnptools.kernelreader.KernelReader" title="pysnptools.kernelreader.KernelReader"><tt class="xref py py-class docutils literal"><span class="pre">KernelReader</span></tt></a> for general examples of using KernelReaders.</p>
 <p>The general NPZ format is described in <a class="reference external" href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.savez.html">http://docs.scipy.org/doc/numpy/reference/generated/numpy.savez.html</a>. The KernelNpz format stores
 val, iid0, and iid1 information in NPZ format.</p>
 <dl class="docutils">
@@ -1829,7 +1829,7 @@ val, iid0, and iid1 information in NPZ format.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>filename</strong> (<em>string</em>) &#8211; The SnpNpz file to read.</li>
+<li><strong>filename</strong> (<em>string</em>) &#8211; The KernelNpz file to read.</li>
 </ul>
 </td>
 </tr>
@@ -3875,7 +3875,7 @@ NaN values are then filled with zero, the mean (consequently, if there are NaN v
 <h3><tt class="xref py py-class docutils literal"><span class="pre">standardizer.diag_K_to_N</span></tt><a class="headerlink" href="#standardizer-diag-k-to-n" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="pysnptools.standardizer.DiagKtoN">
-<em class="property">class </em><tt class="descclassname">pysnptools.standardizer.</tt><tt class="descname">DiagKtoN</tt><a class="headerlink" href="#pysnptools.standardizer.DiagKtoN" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">pysnptools.standardizer.</tt><tt class="descname">DiagKtoN</tt><big>(</big><em>deprecated_iid_count=None</em><big>)</big><a class="headerlink" href="#pysnptools.standardizer.DiagKtoN" title="Permalink to this definition">¶</a></dt>
 <dd><p>A <a class="reference internal" href="#pysnptools.standardizer.Standardizer" title="pysnptools.standardizer.Standardizer"><tt class="xref py py-class docutils literal"><span class="pre">Standardizer</span></tt></a> that multiplies the SNP values by a factor such that a kernel
 constructed from the SNP values will have a diagonal that sums to iid_count. This class thus
 standardizes the kernel before it is even constructed.</p>
@@ -4687,6 +4687,33 @@ It is usually created by calling the <a class="reference internal" href="#pysnpt
 </div>
 </dd>
 </dl>
+<p><strong>Equality:</strong></p>
+<blockquote>
+<div><p>Two PstData objects are equal if there five arrays (<a class="reference internal" href="#pysnptools.pstreader.PstReader.row" title="pysnptools.pstreader.PstReader.row"><tt class="xref py py-attr docutils literal"><span class="pre">row</span></tt></a>, <a class="reference internal" href="#pysnptools.pstreader.PstReader.col" title="pysnptools.pstreader.PstReader.col"><tt class="xref py py-attr docutils literal"><span class="pre">col</span></tt></a>, <a class="reference internal" href="#pysnptools.pstreader.PstData.val" title="pysnptools.pstreader.PstData.val"><tt class="xref py py-attr docutils literal"><span class="pre">val</span></tt></a>, <a class="reference internal" href="#pysnptools.pstreader.PstReader.row_property" title="pysnptools.pstreader.PstReader.row_property"><tt class="xref py py-attr docutils literal"><span class="pre">row_property</span></tt></a>, and <a class="reference internal" href="#pysnptools.pstreader.PstReader.col_property" title="pysnptools.pstreader.PstReader.col_property"><tt class="xref py py-attr docutils literal"><span class="pre">col_property</span></tt></a>) are &#8216;array_equal&#8217;.
+(Their &#8216;parent_string&#8217; does not need to be the same).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pysnptools.pstreader</span> <span class="kn">import</span> <span class="n">PstData</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pstdata1</span> <span class="o">=</span> <span class="n">PstData</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="p">[[</span><span class="s">&#39;fam0&#39;</span><span class="p">,</span><span class="s">&#39;iid0&#39;</span><span class="p">],[</span><span class="s">&#39;fam0&#39;</span><span class="p">,</span><span class="s">&#39;iid1&#39;</span><span class="p">]],</span> <span class="n">col</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;snp334&#39;</span><span class="p">,</span><span class="s">&#39;snp349&#39;</span><span class="p">,</span><span class="s">&#39;snp921&#39;</span><span class="p">],</span> <span class="n">val</span><span class="o">=</span><span class="p">[[</span><span class="mf">0.</span><span class="p">,</span><span class="mf">2.</span><span class="p">,</span><span class="mf">0.</span><span class="p">],[</span><span class="mf">0.</span><span class="p">,</span><span class="mf">1.</span><span class="p">,</span><span class="mf">2.</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pstdata2</span> <span class="o">=</span> <span class="n">PstData</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="p">[[</span><span class="s">&#39;fam0&#39;</span><span class="p">,</span><span class="s">&#39;iid0&#39;</span><span class="p">],[</span><span class="s">&#39;fam0&#39;</span><span class="p">,</span><span class="s">&#39;iid1&#39;</span><span class="p">]],</span> <span class="n">col</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;snp334&#39;</span><span class="p">,</span><span class="s">&#39;snp349&#39;</span><span class="p">,</span><span class="s">&#39;snp921&#39;</span><span class="p">],</span> <span class="n">val</span><span class="o">=</span><span class="p">[[</span><span class="mf">0.</span><span class="p">,</span><span class="mf">2.</span><span class="p">,</span><span class="mf">0.</span><span class="p">],[</span><span class="mf">0.</span><span class="p">,</span><span class="mf">1.</span><span class="p">,</span><span class="mf">2.</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">pstdata1</span> <span class="o">==</span> <span class="n">pstdata2</span> <span class="c">#True, because all the arrays have the same values.</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">pstdata1</span><span class="o">.</span><span class="n">val</span> <span class="ow">is</span> <span class="n">pstdata2</span><span class="o">.</span><span class="n">val</span> <span class="c">#False, because the two arrays have different memory.</span>
+<span class="go">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pstdata3</span> <span class="o">=</span> <span class="n">PstData</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;a&#39;</span><span class="p">,</span><span class="s">&#39;b&#39;</span><span class="p">],</span> <span class="n">col</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;snp334&#39;</span><span class="p">,</span><span class="s">&#39;snp349&#39;</span><span class="p">,</span><span class="s">&#39;snp921&#39;</span><span class="p">],</span> <span class="n">val</span><span class="o">=</span><span class="p">[[</span><span class="mf">0.</span><span class="p">,</span><span class="mf">2.</span><span class="p">,</span><span class="mf">0.</span><span class="p">],[</span><span class="mf">0.</span><span class="p">,</span><span class="mf">1.</span><span class="p">,</span><span class="mf">2.</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pstdata4</span> <span class="o">=</span> <span class="n">PstData</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="p">[[</span><span class="s">&#39;fam0&#39;</span><span class="p">,</span><span class="s">&#39;iid0&#39;</span><span class="p">],[</span><span class="s">&#39;fam0&#39;</span><span class="p">,</span><span class="s">&#39;iid1&#39;</span><span class="p">]],</span> <span class="n">col</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;snp334&#39;</span><span class="p">,</span><span class="s">&#39;snp349&#39;</span><span class="p">,</span><span class="s">&#39;snp921&#39;</span><span class="p">],</span> <span class="n">val</span><span class="o">=</span><span class="p">[[</span><span class="mf">0.</span><span class="p">,</span><span class="mf">2.</span><span class="p">,</span><span class="mf">0.</span><span class="p">],[</span><span class="mf">0.</span><span class="p">,</span><span class="mf">1.</span><span class="p">,</span><span class="mf">2.</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">pstdata3</span> <span class="o">==</span> <span class="n">pstdata4</span> <span class="c">#False, because the rows have different ids.</span>
+<span class="go">False</span>
+</pre></div>
+</div>
+</div></blockquote>
 <p><strong>Methods beyond</strong> <a class="reference internal" href="#pysnptools.pstreader.PstReader" title="pysnptools.pstreader.PstReader"><tt class="xref py py-class docutils literal"><span class="pre">PstReader</span></tt></a></p>
 <dl class="attribute">
 <dt id="pysnptools.pstreader.PstData.val">
@@ -4729,8 +4756,8 @@ val, row, col, row_property, and col_property information in Hdf5 format.</p>
 </table>
 <div class="last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pysnptools.pstreader</span> <span class="kn">import</span> <span class="n">PstHdf5</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">on_disk</span> <span class="o">=</span> <span class="n">PstHdf5</span><span class="p">(</span><span class="s">&#39;../examples/toydata.iidmajor.snp.hdf5&#39;</span><span class="p">)</span> <span class="c"># PstHdf5 can load .pst.hdf5, .snp.hdf5, and kernel.hdf5</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">on_disk</span><span class="o">.</span><span class="n">iid_count</span>
-<span class="go">300</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">on_disk</span><span class="o">.</span><span class="n">row_count</span>
+<span class="go">500</span>
 </pre></div>
 </div>
 </dd>
@@ -4755,10 +4782,11 @@ val, row, col, row_property, and col_property information in Hdf5 format.</p>
 </tbody>
 </table>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pysnptools.pstreader</span> <span class="kn">import</span> <span class="n">PstData</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pysnptools.pstreader</span> <span class="kn">import</span> <span class="n">PstData</span><span class="p">,</span> <span class="n">PstHdf5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pysnptools.util</span> <span class="kn">as</span> <span class="nn">pstutil</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">data1</span> <span class="o">=</span> <span class="n">PstData</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;a&#39;</span><span class="p">,</span><span class="s">&#39;b&#39;</span><span class="p">,</span><span class="s">&#39;c&#39;</span><span class="p">],</span><span class="n">col</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;y&#39;</span><span class="p">,</span><span class="s">&#39;z&#39;</span><span class="p">],</span><span class="n">val</span><span class="o">=</span><span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">],[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span><span class="mi">6</span><span class="p">]],</span><span class="n">row_property</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;A&#39;</span><span class="p">,</span><span class="s">&#39;B&#39;</span><span class="p">,</span><span class="s">&#39;C&#39;</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">pstutil</span><span class="o">.</span><span class="n">create_directory_if_necessary</span><span class="p">(</span><span class="s">&quot;tempdir/little.pst.hdf5&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">PstHdf5</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;tempdir/little.pst.hdf5&quot;</span><span class="p">,</span><span class="n">data1</span><span class="p">)</span>          <span class="c"># Write data in PstHdf5 format</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pstutil</span><span class="o">.</span><span class="n">create_directory_if_necessary</span><span class="p">(</span><span class="s">&quot;tempdir/tiny.pst.hdf5&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">PstHdf5</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;tempdir/tiny.pst.hdf5&quot;</span><span class="p">,</span><span class="n">data1</span><span class="p">)</span>          <span class="c"># Write data in PstHdf5 format</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -4820,8 +4848,8 @@ val, row, col, row_property, and col_property information in NPZ format.</p>
 </tr>
 </tbody>
 </table>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pysnptools.pstreader</span> <span class="kn">import</span> <span class="n">PstData</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pysnptools.pstreader</span> <span class="kn">import</span> <span class="n">PstData</span><span class="p">,</span> <span class="n">PstNpz</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pysnptools.util</span> <span class="kn">as</span> <span class="nn">pstutil</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">data1</span> <span class="o">=</span> <span class="n">PstData</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;a&#39;</span><span class="p">,</span><span class="s">&#39;b&#39;</span><span class="p">,</span><span class="s">&#39;c&#39;</span><span class="p">],</span><span class="n">col</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;y&#39;</span><span class="p">,</span><span class="s">&#39;z&#39;</span><span class="p">],</span><span class="n">val</span><span class="o">=</span><span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">],[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span><span class="mi">6</span><span class="p">]],</span><span class="n">row_property</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;A&#39;</span><span class="p">,</span><span class="s">&#39;B&#39;</span><span class="p">,</span><span class="s">&#39;C&#39;</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">pstutil</span><span class="o">.</span><span class="n">create_directory_if_necessary</span><span class="p">(</span><span class="s">&quot;tempdir/tiny.pst.npz&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">PstNpz</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;tempdir/tiny.pst.npz&quot;</span><span class="p">,</span><span class="n">data1</span><span class="p">)</span>          <span class="c"># Write data in PstNz format</span>

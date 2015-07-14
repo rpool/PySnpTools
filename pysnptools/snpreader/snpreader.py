@@ -71,7 +71,7 @@ class SnpReader(PstReader):
         Every SnpReader, such as :class:`.Bed` and :class:`.SnpData`, has these properties: :attr:`iid`, :attr:`iid_count`, :attr:`sid`, :attr:`sid_count`,
         :attr:`pos` and these methods: :meth:`read`, :meth:`iid_to_index`, :meth:`sid_to_index`, :meth:`read_kernel`. See below for details.
 
-        :class:`.SnpData` is a SnpReader so it supports the above properties and methods. In addition, it supports property :attr:`.SnpData.val` and method :meth:`.SnpData.standardize`.
+        :class:`.SnpData` is a SnpReader so it supports the above properties and methods. In addition, it supports property :attr:`.SnpData.val`, method :meth:`.SnpData.standardize`, and equality testing.
         See below for details.
 
         Many of the classes, such as :class:`.Bed`, also provide a static :meth:`Bed.write` method for writing :class:`.SnpData`.
@@ -397,6 +397,7 @@ class SnpReader(PstReader):
         if not hasattr(self,'_row_property'):
             self._row_property = np.empty((self.row_count,0))
         return self._row_property
+
 
     def _read(self, iid_index_or_none, sid_index_or_none, order, dtype, force_python_only, view_ok):
         raise NotImplementedError

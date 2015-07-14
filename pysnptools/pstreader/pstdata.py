@@ -34,8 +34,29 @@ class PstData(PstReader):
         >>> print pstdata.val[0,1], pstdata.row_count, pstdata.col_count
         2.0 2 3
 
+    **Equality:**
+
+        Two PstData objects are equal if their five arrays (:attr:`.row`, :attr:`.col`, :attr:`.val`, :attr:`.row_property`, and :attr:`.col_property`) are 'array_equal'.
+        (Their 'parent_string' does not need to be the same).
+
+        :Example:
+
+        >>> from pysnptools.pstreader import PstData
+        >>> pstdata1 = PstData(row=[['fam0','iid0'],['fam0','iid1']], col=['snp334','snp349','snp921'], val=[[0.,2.,0.],[0.,1.,2.]])
+        >>> pstdata2 = PstData(row=[['fam0','iid0'],['fam0','iid1']], col=['snp334','snp349','snp921'], val=[[0.,2.,0.],[0.,1.,2.]])
+        >>> print pstdata1 == pstdata2 #True, because all the arrays have the same values.
+        True
+        >>> print pstdata1.val is pstdata2.val #False, because the two arrays have different memory.
+        False
+        >>> pstdata3 = PstData(row=['a','b'], col=['snp334','snp349','snp921'], val=[[0.,2.,0.],[0.,1.,2.]])
+        >>> pstdata4 = PstData(row=[['fam0','iid0'],['fam0','iid1']], col=['snp334','snp349','snp921'], val=[[0.,2.,0.],[0.,1.,2.]])
+        >>> print pstdata3 == pstdata4 #False, because the rows have different ids.
+        False
+
 
     **Methods beyond** :class:`.PstReader`
+
+
     '''
     def __init__(self, row, col, val, row_property=None, col_property=None, parent_string="",copyinputs_function=None):
         self._row = PstData._fixup_input(row)
@@ -55,9 +76,6 @@ class PstData(PstReader):
     """
 
     def __eq__(a,b):
-        """
-        !!!cmk document that equal if have same arrays. The parent string doesn't need to be the same
-        """
         try:
             return (np.array_equal(a.row,b.row) and
                     np.array_equal(a.col,b.col) and
