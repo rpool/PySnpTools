@@ -47,8 +47,8 @@ class SnpReader(PstReader):
         >>> snpdata_subset = subset_on_disk.read() # efficiently reads the specified subset of values from the disk
         >>> print snpdata_subset # prints the specification of the in-memory SNP information
         SnpData(Bed('../../tests/datasets/all_chr.maf0.001.N300')[[3,4],::2])
-        >>> print snpdata_subset.val.shape # The dimensions of the ndarray of SNP values
-        (2L, 508L)
+        >>> print int(snpdata_subset.val.shape[0]), int(snpdata_subset.val.shape[1]) # The dimensions of the ndarray of SNP values
+        2 508
 
 
     The SnpReaders Classes
