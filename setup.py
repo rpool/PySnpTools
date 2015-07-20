@@ -7,7 +7,7 @@ from distutils.command.clean import clean as Clean
 import numpy
 
 # Version number
-version = '0.3.0'
+version = '0.3.1'
 
 def readme():
     with open('README.md') as f:
@@ -110,6 +110,8 @@ setup(
     license='Apache 2.0',
     packages=[
         "pysnptools/snpreader",
+        "pysnptools/kernelreader",
+        "pysnptools/pstreader",
         "pysnptools/standardizer",
         "pysnptools/util",
         "pysnptools"

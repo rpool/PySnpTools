@@ -76,7 +76,7 @@ class KernelReader(PstReader):
     Methods & Properties:
 
         Every KernelReader, such as :class:`.KernelNpz` and :class:`.KernelData`, when square has these properties: :attr:`iid`, :attr:`iid_count`, 
-        and these methods: :meth:`read`, and :meth:`iid_to_index`. A square kernel is one has the same iid list for both its rows and columns.
+        and these methods: :meth:`read`, and :meth:`iid_to_index`. A square kernel is one that has the same iid list for both its rows and columns.
 
         More generally, KernelReaders can have one iid list for its rows and a different iid list for its columns, so these properties and methods are also defined: :attr:`iid0`, :attr:`iid1`, :attr:`iid0_count`, 
         :attr:`iid1_count`, :meth:`iid0_to_index`, and :meth:`iid1_to_index`.
