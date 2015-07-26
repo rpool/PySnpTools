@@ -6,6 +6,7 @@ import logging
 from pstreader import PstReader
 from pstdata import PstData
 
+#!!Should handle negatives as index and arrays of index, but doesn't
 class _Subset(PstReader):
 
     def __init__(self, internal, row_indexer, col_indexer):
