@@ -85,6 +85,7 @@ class Dat(_OneShot,SnpReader):
 
         SnpReader._write_fam(snpdata, filename, remove_suffix="dat")
         SnpReader._write_map_or_bim(snpdata, filename, remove_suffix="dat", add_suffix="map")
+        filename = SnpReader._name_of_other_file(filename,remove_suffix="dat", add_suffix="dat")
 
         snpsarray = snpdata.val
         with open(filename,"w") as dat_filepointer:

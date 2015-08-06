@@ -9,7 +9,7 @@ import numpy as np
 def _testtest(data, iididx):
     return (data[0][iididx],data[1][iididx])
 
-def intersect_apply(data_list, sort_by_dataset=True, intersect_before_standardize=True):
+def intersect_apply(data_list, sort_by_dataset=True, intersect_before_standardize=True, is_test=False): #!!!cmk add doc and tests for is_test
     """Intersects and sorts the iids from a list of datasets, returning new version of the datasets with all the same iids in the same order.
 
     :param data_list: list of datasets
@@ -92,18 +92,22 @@ def intersect_apply(data_list, sort_by_dataset=True, intersect_before_standardiz
                 iid = data['iid'] 
                 reindex = lambda data, iididx : _reindex_phen_dict(data, iididx)
             except:
-                try:
-                    iid = data.iid
+                if hasattr(data,'iid1') and is_test: #test kernel
+                    iid = data.iid1
+                    reindex = lambda data, iididx : data[:,iididx]
+                else:
                     try:
-                        if iid is data.col: #If the 'iid' shares memory with the 'col', then it's a square-kernel-like thing and should be processed with just once index
-                            reindex = lambda data, iididx : data[iididx]
-                        else:
+                        iid = data.iid
+                        try:
+                            if iid is data.col: #If the 'iid' shares memory with the 'col', then it's a square-kernel-like thing and should be processed with just once index
+                                reindex = lambda data, iididx : data[iididx]
+                            else:
+                                reindex = lambda data, iididx : data[iididx,:]
+                        except:
                             reindex = lambda data, iididx : data[iididx,:]
-                    except:
-                        reindex = lambda data, iididx : data[iididx,:]
-                except AttributeError: #tuple of (val,iid)
-                    iid = data[1]
-                    reindex = lambda data, iididx : _testtest(data,iididx)
+                    except AttributeError: #tuple of (val,iid)
+                        iid = data[1]
+                        reindex = lambda data, iididx : _testtest(data,iididx)
 
         iid_list.append(iid)
         reindex_list.append(reindex)

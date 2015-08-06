@@ -83,7 +83,7 @@ class KernelData(KernelReader,PstData):
     def standardize(self):
         """Does in-place standardization of the in-memory
         kernel data. The method multiples the values with a scalar factor such that the diagonal sums to iid_count. Although it works in place, for convenience
-        it also returns the SnpData.
+        it also returns the KernelData.
 
         :rtype: :class:`.KernelData` (standardizes in place, but for convenience, returns 'self')
 
