@@ -332,7 +332,7 @@ class TestLoader(unittest.TestCase):
         iid = np.array([[str(i),str(i)] for i in xrange(iid_count)])
         sid = np.array(["sid_{0}".format(i) for i in xrange(sid_count)])
         pos = np.array([[i,i,i] for i in xrange(sid_count)])
-        np.random.seed = 0
+        np.random.seed(0)
         snpdata = SnpData(iid,sid,np.zeros((iid_count,sid_count)),pos=pos) #random.choice((0.0,1.0,2.0,float("nan")),size=(iid_count,sid_count)))
         output = "tempdir/bedbig.{0}.{1}".format(iid_count,sid_count)
         create_directory_if_necessary(output)

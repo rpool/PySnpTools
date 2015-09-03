@@ -482,11 +482,19 @@ class PstReader(object):
         """
         if not hasattr(self, "_col_to_index"):
             logging.debug("Creating _col_to_index")
-            self._col_to_index = {}
-            for index, item in enumerate(self.col):
-                key = PstReader._makekey(item)
-                assert key not in self._col_to_index, "Expect col to appear in data only once. ({0})".format(key)
-                self._col_to_index[key] = index
+            col_set = None
+            try:
+                col_set = set(self.col)
+            except:
+                pass
+
+            if col_set is not None:
+                assert len(col_set) == self.col_count, "Expect col to appear in data only once."
+                self._col_to_index = {item : index for index, item in enumerate(self.col)}
+            else:
+                col_list = [PstReader._makekey(item) for item in self.col]
+                assert len(set(col_list)) == self.col_count, "Expect col to appear in data only once."
+                self._col_to_index = {item : index for index, item in enumerate(col_list)}
             logging.debug("Finished creating _col_to_index")
         index = np.fromiter((self._col_to_index[PstReader._makekey(item1)] for item1 in list),np.int)
         return index
@@ -603,4 +611,4 @@ if __name__ == "__main__":
     import doctest
     doctest.testmod()
     # There is also a unit test case in 'pysnptools\test.py' that calls this doc test
-    print "done" #!!!make sure doctests get run
+    print "done"

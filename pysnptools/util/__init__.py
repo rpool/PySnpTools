@@ -9,7 +9,7 @@ import numpy as np
 def _testtest(data, iididx):
     return (data[0][iididx],data[1][iididx])
 
-def intersect_apply(data_list, sort_by_dataset=True, intersect_before_standardize=True, is_test=False): #!!!cmk add doc and tests for is_test
+def intersect_apply(data_list, sort_by_dataset=True, intersect_before_standardize=True, is_test=False): #!!!add doc and tests for is_test
     """Intersects and sorts the iids from a list of datasets, returning new version of the datasets with all the same iids in the same order.
 
     :param data_list: list of datasets
@@ -84,9 +84,8 @@ def intersect_apply(data_list, sort_by_dataset=True, intersect_before_standardiz
             iid = None
             reindex = lambda data, iididx : None
         elif intersect_before_standardize and isinstance(data,SnpKernel):
-            assert data.test is data.snpreader, "Current code can only 'intersect_before_standardize' on a snpkernel that is square"
-            iid = data.iid0
-            reindex = lambda data, iididx : _reindex_snpkernel(data, iididx)
+            iid = data.iid1 if is_test else data.iid0
+            reindex = lambda data, iididx,is_test=is_test : _reindex_snpkernel(data, iididx,is_test)
         else:
             try: #pheno dictionary
                 iid = data['iid'] 
@@ -150,10 +149,14 @@ def _reindex_phen_dict(phen_dict, iididx):
     phen_dict['iid'] = phen_dict['iid'][iididx]
     return phen_dict
 
-def _reindex_snpkernel(snpkernel, iididx):
+def _reindex_snpkernel(snpkernel, iididx,is_test=False):
     assert snpkernel.test is snpkernel.snpreader, "Current code can only intersect square snpkernel"
     from pysnptools.kernelreader import SnpKernel
-    result = SnpKernel(snpkernel.snpreader[iididx,:],snpkernel.standardizer,test=None,block_size=snpkernel.block_size)
+    if not is_test:
+        new_reader = snpkernel.snpreader[iididx,:]
+    else:
+        new_reader = snpkernel.snpreader[:,iididx]
+    result = SnpKernel(new_reader,snpkernel.standardizer,test=None,block_size=snpkernel.block_size)
     return result
 
 def _all_same(iids_list):

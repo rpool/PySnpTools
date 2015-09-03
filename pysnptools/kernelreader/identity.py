@@ -35,7 +35,7 @@ class Identity(KernelReader):
          [ 0.  0.]]
 
     '''
-    def __init__(self, iid, test=None): #!!!cmk add docs and test for test
+    def __init__(self, iid, test=None): #!!! add docs and test for test
 
         if test is None:
             test = iid
@@ -70,11 +70,11 @@ class Identity(KernelReader):
         elif (row_index_or_none is col_index_or_none or np.array_equal(row_index_or_none, col_index_or_none)) and self._row0 is self._row1:
             return np.identity(len(row_index_or_none),dtype=dtype)
         elif self._row0 is self._row1:
-            #!!!cmk This is less efficient than it could be because it create a big identity matrix and then slices it.
+            #!!! This is less efficient than it could be because it create a big identity matrix and then slices it.
             val, shares_memory = self._apply_sparray_or_slice_to_val(np.identity(self.row_count,dtype=dtype), row_index_or_none, col_index_or_none, order, dtype, force_python_only)
             return val
         else:
-            #!!!cmk This is also less efficient than it could be because it create a big identity matrix and then slices it.
+            #!!! This is also less efficient than it could be because it create a big identity matrix and then slices it.
 
             #In about O(col_count + row_count) fill in zeros
             big = np.zeros([self.row_count,self.col_count],dtype=dtype)
