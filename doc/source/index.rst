@@ -19,7 +19,14 @@ PySnpTools: A library for reading and manipulating genetic data.
 
 * :mod:`.standardizer`: Specify standardizers for :class:`.SnpReaders`.
 
+:Tutorial:
 
+*From PyData Conference, Seattle, 2015*
+
+* `Slides <https://onedrive.live.com/view.aspx?cid=b89ee402873f0f4a&page=view&resid=B89EE402873F0F4A!209845&parId=B89EE402873F0F4A!209839&authkey=!AMAMALlp0TiNuDg&app=PowerPoint&wacqt=undefined>`_
+* `Video <https://www.youtube.com/watch?v=KPI6479ctAQ>`_
+* `Notebook <https://github.com/MicrosoftGenomics/PySnpTools/blob/master/doc/ipynb/tutorial.ipynb>`_
+* `Data file <http://research.microsoft.com/en-us/um/redmond/projects/MSCompBio/PySnpTools/psttutorial.zip>`_
 
 .. automodule:: pysnptools
     :members:

@@ -7,7 +7,7 @@ from distutils.command.clean import clean as Clean
 import numpy
 
 # Version number
-version = '0.3.1'
+version = '0.3.2'
 
 def readme():
     with open('README.md') as f:
@@ -124,7 +124,7 @@ setup(
         "tests/datasets/all_chr.maf0.001.covariates.N300.txt"
         ]
                  },
-    install_requires = ['scipy>=0.13', 'numpy>=1.6', 'pandas>=0.15.2'],
+    install_requires = ['scipy>=0.15.1', 'numpy>=1.9.2', 'pandas>=0.16.2'],
 
     # extensions
     cmdclass = cmdclass,

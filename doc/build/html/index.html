@@ -64,6 +64,21 @@ union, intersection, and set difference.</li>
 <li><a class="reference internal" href="#module-pysnptools.pstreader" title="pysnptools.pstreader"><code class="xref py py-mod docutils literal"><span class="pre">pstreader</span></code></a>: Generalizes <a class="reference internal" href="#module-pysnptools.snpreader" title="pysnptools.snpreader"><code class="xref py py-mod docutils literal"><span class="pre">snpreader</span></code></a> and <a class="reference internal" href="#module-pysnptools.kernelreader" title="pysnptools.kernelreader"><code class="xref py py-mod docutils literal"><span class="pre">kernelreader</span></code></a> (provides the efficiency of numpy arrays with some of the flexibility of pandas)</li>
 <li><a class="reference internal" href="#module-pysnptools.standardizer" title="pysnptools.standardizer"><code class="xref py py-mod docutils literal"><span class="pre">standardizer</span></code></a>: Specify standardizers for <code class="xref py py-class docutils literal"><span class="pre">SnpReaders</span></code>.</li>
 </ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Tutorial:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+<p><em>From PyData Conference, Seattle, 2015</em></p>
+<ul class="simple">
+<li><a class="reference external" href="https://onedrive.live.com/view.aspx?cid=b89ee402873f0f4a&amp;page=view&amp;resid=B89EE402873F0F4A!209845&amp;parId=B89EE402873F0F4A!209839&amp;authkey=!AMAMALlp0TiNuDg&amp;app=PowerPoint&amp;wacqt=undefined">Slides</a></li>
+<li><a class="reference external" href="https://www.youtube.com/watch?v=KPI6479ctAQ">Video</a></li>
+<li><a class="reference external" href="https://github.com/MicrosoftGenomics/PySnpTools/blob/master/doc/ipynb/tutorial.ipynb">Notebook</a></li>
+<li><a class="reference external" href="http://research.microsoft.com/en-us/um/redmond/projects/MSCompBio/PySnpTools/psttutorial.zip">Data file</a></li>
+</ul>
 <span class="target" id="module-pysnptools"></span><div class="section" id="module-pysnptools.snpreader">
 <span id="snpreader-module"></span><h2><code class="xref py py-mod docutils literal"><span class="pre">snpreader</span></code> Module<a class="headerlink" href="#module-pysnptools.snpreader" title="Permalink to this headline">¶</a></h2>
 <p>Tools for reading and manipulating SNP data.</p>
@@ -107,8 +122,8 @@ also be used to re-order the values.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">snpdata_subset</span> <span class="o">=</span> <span class="n">subset_on_disk</span><span class="o">.</span><span class="n">read</span><span class="p">()</span> <span class="c"># efficiently reads the specified subset of values from the disk</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">snpdata_subset</span> <span class="c"># prints the specification of the in-memory SNP information</span>
 <span class="go">SnpData(Bed(&#39;../../tests/datasets/all_chr.maf0.001.N300&#39;)[[3,4],::2])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">snpdata_subset</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">shape</span> <span class="c"># The dimensions of the ndarray of SNP values</span>
-<span class="go">(2L, 508L)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="nb">int</span><span class="p">(</span><span class="n">snpdata_subset</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">snpdata_subset</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="c"># The dimensions of the ndarray of SNP values</span>
+<span class="go">2 508</span>
 </pre></div>
 </div>
 </li>
@@ -1180,7 +1195,7 @@ null_200        j       n       0       nan     1
 <h3><code class="xref py py-class docutils literal"><span class="pre">snpreader.Dense</span></code><a class="headerlink" href="#snpreader-dense" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="pysnptools.snpreader.Dense">
-<em class="property">class </em><code class="descclassname">pysnptools.snpreader.</code><code class="descname">Dense</code><span class="sig-paren">(</span><em>filename</em>, <em>extract_iid_function=&lt;function zero_family at 0x0000000009C6D198&gt;</em>, <em>extract_sid_pos_function=&lt;function zero_pos at 0x0000000009C6DCF8&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#pysnptools.snpreader.Dense" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">pysnptools.snpreader.</code><code class="descname">Dense</code><span class="sig-paren">(</span><em>filename</em>, <em>extract_iid_function=&lt;function zero_family at 0x000000000A02C278&gt;</em>, <em>extract_sid_pos_function=&lt;function zero_pos at 0x000000000A02CDD8&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#pysnptools.snpreader.Dense" title="Permalink to this definition">¶</a></dt>
 <dd><p>A <a class="reference internal" href="#pysnptools.snpreader.SnpReader" title="pysnptools.snpreader.SnpReader"><code class="xref py py-class docutils literal"><span class="pre">SnpReader</span></code></a> for reading *.dense.txt (0,1,2 text files) from disk.</p>
 <p>See <a class="reference internal" href="#pysnptools.snpreader.SnpReader" title="pysnptools.snpreader.SnpReader"><code class="xref py py-class docutils literal"><span class="pre">SnpReader</span></code></a> for general examples of using SnpReaders.</p>
 <p>This format looks like:</p>
@@ -1222,7 +1237,7 @@ Defaults to setting the <a class="reference internal" href="#pysnptools.snpreade
 <p><strong>Methods beyond</strong> <a class="reference internal" href="#pysnptools.snpreader.SnpReader" title="pysnptools.snpreader.SnpReader"><code class="xref py py-class docutils literal"><span class="pre">SnpReader</span></code></a></p>
 <dl class="staticmethod">
 <dt id="pysnptools.snpreader.Dense.write">
-<em class="property">static </em><code class="descname">write</code><span class="sig-paren">(</span><em>filename</em>, <em>snpdata</em>, <em>join_iid_function=&lt;function just_case at 0x0000000009C6DD68&gt;</em>, <em>join_sid_pos_function=&lt;function just_sid at 0x0000000009C6DDD8&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#pysnptools.snpreader.Dense.write" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="descname">write</code><span class="sig-paren">(</span><em>filename</em>, <em>snpdata</em>, <em>join_iid_function=&lt;function just_case at 0x000000000A02CE48&gt;</em>, <em>join_sid_pos_function=&lt;function just_sid at 0x000000000A02CEB8&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#pysnptools.snpreader.Dense.write" title="Permalink to this definition">¶</a></dt>
 <dd><p>Writes a <a class="reference internal" href="#pysnptools.snpreader.SnpData" title="pysnptools.snpreader.SnpData"><code class="xref py py-class docutils literal"><span class="pre">SnpData</span></code></a> to Dense format. The values must be 0,1,2 (or missing).</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1430,8 +1445,8 @@ also be used to re-order the values.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">kerneldata_subset</span> <span class="o">=</span> <span class="n">subset_on_disk1</span><span class="o">.</span><span class="n">read</span><span class="p">()</span> <span class="c"># efficiently (if possible) reads the specified subset of values from the disk</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">kerneldata_subset</span> <span class="c"># prints the specification of the in-memory kernel information</span>
 <span class="go">KernelData(KernelNpz(&#39;../examples/toydata.kernel.npz&#39;)[[3,4],[3,4]])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">kerneldata_subset</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">shape</span> <span class="c"># The dimensions of the ndarray of kernel values</span>
-<span class="go">(2L, 2L)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="nb">int</span><span class="p">(</span><span class="n">kerneldata_subset</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">kerneldata_subset</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="c"># The dimensions of the ndarray of kernel values</span>
+<span class="go">2 2</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">subset_on_disk2</span> <span class="o">=</span> <span class="n">kernel_on_disk</span><span class="p">[[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">],::</span><span class="mi">2</span><span class="p">]</span> <span class="c"># specification for a subset of the data on disk. No kernel values are read yet.</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">subset_on_disk2</span><span class="o">.</span><span class="n">iid0_count</span><span class="p">,</span> <span class="n">subset_on_disk2</span><span class="o">.</span><span class="n">iid1_count</span>
 <span class="go">2 250</span>
@@ -1492,7 +1507,7 @@ also be used to re-order the values.</p>
 <p>Methods &amp; Properties:</p>
 <blockquote>
 <div><p>Every KernelReader, such as <a class="reference internal" href="#pysnptools.kernelreader.KernelNpz" title="pysnptools.kernelreader.KernelNpz"><code class="xref py py-class docutils literal"><span class="pre">KernelNpz</span></code></a> and <a class="reference internal" href="#pysnptools.kernelreader.KernelData" title="pysnptools.kernelreader.KernelData"><code class="xref py py-class docutils literal"><span class="pre">KernelData</span></code></a>, when square has these properties: <a class="reference internal" href="#pysnptools.kernelreader.KernelReader.iid" title="pysnptools.kernelreader.KernelReader.iid"><code class="xref py py-attr docutils literal"><span class="pre">iid</span></code></a>, <a class="reference internal" href="#pysnptools.kernelreader.KernelReader.iid_count" title="pysnptools.kernelreader.KernelReader.iid_count"><code class="xref py py-attr docutils literal"><span class="pre">iid_count</span></code></a>, 
-and these methods: <a class="reference internal" href="#pysnptools.kernelreader.KernelReader.read" title="pysnptools.kernelreader.KernelReader.read"><code class="xref py py-meth docutils literal"><span class="pre">read()</span></code></a>, and <a class="reference internal" href="#pysnptools.kernelreader.KernelReader.iid_to_index" title="pysnptools.kernelreader.KernelReader.iid_to_index"><code class="xref py py-meth docutils literal"><span class="pre">iid_to_index()</span></code></a>. A square kernel is one has the same iid list for both its rows and columns.</p>
+and these methods: <a class="reference internal" href="#pysnptools.kernelreader.KernelReader.read" title="pysnptools.kernelreader.KernelReader.read"><code class="xref py py-meth docutils literal"><span class="pre">read()</span></code></a>, and <a class="reference internal" href="#pysnptools.kernelreader.KernelReader.iid_to_index" title="pysnptools.kernelreader.KernelReader.iid_to_index"><code class="xref py py-meth docutils literal"><span class="pre">iid_to_index()</span></code></a>. A square kernel is one that has the same iid list for both its rows and columns.</p>
 <p>More generally, KernelReaders can have one iid list for its rows and a different iid list for its columns, so these properties and methods are also defined: <a class="reference internal" href="#pysnptools.kernelreader.KernelReader.iid0" title="pysnptools.kernelreader.KernelReader.iid0"><code class="xref py py-attr docutils literal"><span class="pre">iid0</span></code></a>, <a class="reference internal" href="#pysnptools.kernelreader.KernelReader.iid1" title="pysnptools.kernelreader.KernelReader.iid1"><code class="xref py py-attr docutils literal"><span class="pre">iid1</span></code></a>, <a class="reference internal" href="#pysnptools.kernelreader.KernelReader.iid0_count" title="pysnptools.kernelreader.KernelReader.iid0_count"><code class="xref py py-attr docutils literal"><span class="pre">iid0_count</span></code></a>, 
 <a class="reference internal" href="#pysnptools.kernelreader.KernelReader.iid1_count" title="pysnptools.kernelreader.KernelReader.iid1_count"><code class="xref py py-attr docutils literal"><span class="pre">iid1_count</span></code></a>, <a class="reference internal" href="#pysnptools.kernelreader.KernelReader.iid0_to_index" title="pysnptools.kernelreader.KernelReader.iid0_to_index"><code class="xref py py-meth docutils literal"><span class="pre">iid0_to_index()</span></code></a>, and <a class="reference internal" href="#pysnptools.kernelreader.KernelReader.iid1_to_index" title="pysnptools.kernelreader.KernelReader.iid1_to_index"><code class="xref py py-meth docutils literal"><span class="pre">iid1_to_index()</span></code></a>.</p>
 <p>See below for details.</p>
@@ -1824,7 +1839,7 @@ It can also be constructed.</p>
 <code class="descname">standardize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pysnptools.kernelreader.KernelData.standardize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Does in-place standardization of the in-memory
 kernel data. The method multiples the values with a scalar factor such that the diagonal sums to iid_count. Although it works in place, for convenience
-it also returns the SnpData.</p>
+it also returns the KernelData.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1995,7 +2010,7 @@ val, iid, sid, and pos information in Hdf5 format.</p>
 <h3><code class="xref py py-class docutils literal"><span class="pre">kernelreader.Identity</span></code><a class="headerlink" href="#kernelreader-identity" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="pysnptools.kernelreader.Identity">
-<em class="property">class </em><code class="descclassname">pysnptools.kernelreader.</code><code class="descname">Identity</code><span class="sig-paren">(</span><em>iid</em><span class="sig-paren">)</span><a class="headerlink" href="#pysnptools.kernelreader.Identity" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">pysnptools.kernelreader.</code><code class="descname">Identity</code><span class="sig-paren">(</span><em>iid</em>, <em>test=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pysnptools.kernelreader.Identity" title="Permalink to this definition">¶</a></dt>
 <dd><p>A <a class="reference internal" href="#pysnptools.kernelreader.KernelReader" title="pysnptools.kernelreader.KernelReader"><code class="xref py py-class docutils literal"><span class="pre">KernelReader</span></code></a> for that represents an identity matrix. No memory for the values is allocated until <code class="xref py py-meth docutils literal"><span class="pre">Identity.read()</span></code> is called.</p>
 <p>See <a class="reference internal" href="#pysnptools.kernelreader.KernelReader" title="pysnptools.kernelreader.KernelReader"><code class="xref py py-class docutils literal"><span class="pre">KernelReader</span></code></a> for general examples of using KernelReaders.</p>
 <dl class="docutils">
@@ -2013,13 +2028,22 @@ val, iid, sid, and pos information in Hdf5 format.</p>
 </tr>
 </tbody>
 </table>
-<div class="last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pysnptools.kernelreader</span> <span class="kn">import</span> <span class="n">Identity</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pysnptools.kernelreader</span> <span class="kn">import</span> <span class="n">Identity</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">identity</span> <span class="o">=</span> <span class="n">Identity</span><span class="p">(</span><span class="n">iid</span><span class="o">=</span><span class="p">[[</span><span class="s">&#39;fam0&#39;</span><span class="p">,</span><span class="s">&#39;iid0&#39;</span><span class="p">],[</span><span class="s">&#39;fam0&#39;</span><span class="p">,</span><span class="s">&#39;iid1&#39;</span><span class="p">]])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">identity</span><span class="o">.</span><span class="n">iid_count</span>
 <span class="go">2</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">identity</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">val</span>
 <span class="go">[[ 1.  0.]</span>
 <span class="go"> [ 0.  1.]]</span>
+</pre></div>
+</div>
+<div class="last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">identity</span> <span class="o">=</span> <span class="n">Identity</span><span class="p">(</span><span class="n">iid</span><span class="o">=</span><span class="p">[[</span><span class="s">&#39;fam0&#39;</span><span class="p">,</span><span class="s">&#39;iid0&#39;</span><span class="p">],[</span><span class="s">&#39;fam0&#39;</span><span class="p">,</span><span class="s">&#39;iid1&#39;</span><span class="p">],[</span><span class="s">&#39;fam0&#39;</span><span class="p">,</span><span class="s">&#39;iid2&#39;</span><span class="p">]],</span><span class="n">test</span><span class="o">=</span><span class="p">[[</span><span class="s">&#39;fam0&#39;</span><span class="p">,</span><span class="s">&#39;iid1&#39;</span><span class="p">],[</span><span class="s">&#39;fam0&#39;</span><span class="p">,</span><span class="s">&#39;iid3&#39;</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">identity</span><span class="o">.</span><span class="n">iid0_count</span><span class="p">,</span> <span class="n">identity</span><span class="o">.</span><span class="n">iid1_count</span>
+<span class="go">3 2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">identity</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">val</span>
+<span class="go">[[ 0.  0.]</span>
+<span class="go"> [ 1.  0.]</span>
+<span class="go"> [ 0.  0.]]</span>
 </pre></div>
 </div>
 </dd>
@@ -2105,7 +2129,7 @@ If <strong>block_size</strong> is not given, then all SNP data will be read at o
 
 <dl class="function">
 <dt id="pysnptools.util.intersect_apply">
-<code class="descclassname">pysnptools.util.</code><code class="descname">intersect_apply</code><span class="sig-paren">(</span><em>data_list</em>, <em>sort_by_dataset=True</em>, <em>intersect_before_standardize=True</em><span class="sig-paren">)</span><a class="headerlink" href="#pysnptools.util.intersect_apply" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pysnptools.util.</code><code class="descname">intersect_apply</code><span class="sig-paren">(</span><em>data_list</em>, <em>sort_by_dataset=True</em>, <em>intersect_before_standardize=True</em>, <em>is_test=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pysnptools.util.intersect_apply" title="Permalink to this definition">¶</a></dt>
 <dd><p>Intersects and sorts the iids from a list of datasets, returning new version of the datasets with all the same iids in the same order.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
