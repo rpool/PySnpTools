@@ -39,6 +39,13 @@
 #include <math.h> 
 #include <stdlib.h>
 
+#ifdef _WIN32
+#define isinf(x) (!_finite(x))
+#else
+#define isinf(x) (!isfinite(x))
+#endif
+
+
 // 0 and 2 are flipped (wrt C++ fastlmm) in order to agree to python code
 REAL SUFFIX(unknownOrMissing) = std::numeric_limits<REAL>::quiet_NaN();  // now used by SnpInfo
 REAL SUFFIX(homozygousPrimaryAllele) = 2;                // Major Allele
@@ -333,7 +340,7 @@ void SUFFIX(ImputeAndZeroMeanSNPs)(
 		{
 			mean_s = stats[iSnp];
 			std = stats[iSnp + nSNPs];
-			isSNC = !isfinite(std);
+			isSNC = isinf(std);
 		}
 		else
 		{
@@ -440,7 +447,7 @@ void SUFFIX(ImputeAndZeroMeanSNPs)(
 		{
 			mean_s[iSnp] = stats[iSnp*2];
 			std[iSnp] = stats[iSnp * 2+1];
-			isSNC[iSnp] = !isfinite(std[iSnp]);
+			isSNC[iSnp] = isinf(std[iSnp]);
 		}
 	}
 	else
