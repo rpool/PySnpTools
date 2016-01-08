@@ -79,6 +79,7 @@ def intersect_apply(data_list, sort_by_dataset=True, intersect_before_standardiz
 
     #LATER this doesn't cover non-square kernel readers. What should it do when there are two different iid lists?
     from pysnptools.kernelreader import SnpKernel
+    from pysnptools.kernelreader import Identity as IdentityKernel
     for data in data_list:
         if data is None:
             iid = None
@@ -86,6 +87,9 @@ def intersect_apply(data_list, sort_by_dataset=True, intersect_before_standardiz
         elif intersect_before_standardize and isinstance(data,SnpKernel):
             iid = data.iid1 if is_test else data.iid0
             reindex = lambda data, iididx,is_test=is_test : _reindex_snpkernel(data, iididx,is_test)
+        elif intersect_before_standardize and isinstance(data,IdentityKernel):
+            iid = data.iid
+            reindex = lambda data, iididx : _reindex_identitykernel(data, iididx)
         else:
             try: #pheno dictionary
                 iid = data['iid'] 
@@ -157,6 +161,13 @@ def _reindex_snpkernel(snpkernel, iididx,is_test=False):
     else:
         new_reader = snpkernel.snpreader[:,iididx]
     result = SnpKernel(new_reader,snpkernel.standardizer,test=None,block_size=snpkernel.block_size)
+    return result
+
+def _reindex_identitykernel(identitykernel, iididx):
+    assert identitykernel.iid0 is identitykernel.iid1, "Current code can only intersect square identity kernel"
+    from pysnptools.kernelreader import Identity as IdentityKernel
+    iid = identitykernel.iid[iididx]
+    result = IdentityKernel(iid)
     return result
 
 def _all_same(iids_list):

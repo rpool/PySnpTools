@@ -87,6 +87,21 @@ class SnpKernel(KernelReader):
             val, shares_memory = self._apply_sparray_or_slice_to_val(whole, row_index_or_none, col_index_or_none, order, dtype, force_python_only)
             return val
 
+    @property
+    def sid(self):
+        return self.snpreader.sid
+
+    @property
+    def sid_count(self):
+        return self.snpreader.sid_count
+
+    @property
+    def pos(self):
+        return self.snpreader.pos
+
+    def read_snps(self, order='F', dtype=np.float64, force_python_only=False, view_ok=False):
+        return self.snpreader.read(order=order, dtype=dtype, force_python_only=force_python_only, view_ok=view_ok).standardize(self.standardizer)
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 

@@ -59,7 +59,6 @@ class Standardizer(object):
     def _train_standardizer(self,snpdata,apply_in_place,force_python_only=False):
         if apply_in_place:
             self.standardize(snpdata.val, force_python_only=force_python_only)
-        from pysnptools.standardizer._cannotbetrained import _CannotBeTrained
         return _CannotBeTrained(self.__class__.__name__)
 
     @staticmethod
@@ -176,6 +175,19 @@ class Standardizer(object):
             snps[imissX] = 0.0
             if use_stats: #If we're applying to test data, set any variables with to 0 if they have no variation in the training data.
                 snps[:,snp_std==np.inf] = 0.0
+
+class _CannotBeTrained(Standardizer):
+
+    def __init__(self, name):
+        self.name=name
+
+    def __repr__(self): 
+        return "{0}({1})".format(self.__class__.__name__,self.name)
+
+    def standardize(self, snps, block_size=None, force_python_only=False):
+        if block_size is not None:
+            warnings.warn("block_size is deprecated (and not needed, since standardization is in-place", DeprecationWarning)
+        raise Exception("Standardizer '{0}' cannot be trained",self)
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)

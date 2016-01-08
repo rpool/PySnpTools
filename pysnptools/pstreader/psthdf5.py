@@ -122,22 +122,23 @@ class PstHdf5(PstReader):
         if self._h5 != None:  # we need to test this because Python doesn't guarantee that __init__ was fully run
             self._h5.close()
 
-    def _read_direct(self, val, selection=np.s_[:,:]):
+    def _read_direct(self, val, val_order, selection=np.s_[:,:]):
         if self.is_col_major:
             selection = tuple(reversed(selection))
 
-        if val.flags["F_CONTIGUOUS"]:
+        if val_order == "F":
             self.val_in_file.read_direct(val.T,selection)
         else:
+            assert val_order == "C", "real assert"
             self.val_in_file.read_direct(val,selection)
 
     def _create_block(self, block_size, order, dtype):
         matches_order = self.is_col_major == (order =="F")
         opposite_order = "C" if order == "F" else "F"
         if matches_order:
-            return np.empty([len(self._row),block_size], dtype=dtype, order=order)
+            return np.empty([len(self._row),block_size], dtype=dtype, order=order), order
         else:
-            return np.empty([len(self._row),block_size], dtype=dtype, order=opposite_order)
+            return np.empty([len(self._row),block_size], dtype=dtype, order=opposite_order), opposite_order
 
     def _read(self, row_index_or_none, col_index_or_none, order, dtype, force_python_only, view_ok):
         self._run_once()
@@ -183,20 +184,20 @@ class PstHdf5(PstReader):
 
         # case 1 - all cols & all rows requested
         elif is_simple and col_index_count == self.col_count and row_index_count == self.row_count:
-            self._read_direct(val)
+            self._read_direct(val, order)
 
         # case 2 - some cols and all rows
         elif is_simple and row_index_count == self.row_count:
-            self._read_direct(val, np.s_[:,col_index_list])
+            self._read_direct(val, order, np.s_[:,col_index_list])
 
         # case 3 all cols and some row
         elif is_simple and col_index_count == self.col_count:
-            self._read_direct(val, np.s_[row_index_list,:])
+            self._read_direct(val, order, np.s_[row_index_list,:])
 
         # case 4 some cols and some rows -- use blocks
         else:
             block_size = min(self._block_size, col_index_count)
-            block = self._create_block(block_size, order, dtype)
+            block, block_order = self._create_block(block_size, order, dtype)
 
             if not col_are_sorted:
                 col_index_index_list = np.argsort(col_index_list).tolist()
@@ -209,10 +210,10 @@ class PstHdf5(PstReader):
                 #print start
                 end = min(start+block_size,col_index_count)
                 if end-start < block_size:  #On the last loop, the buffer might be too big, so make it smaller
-                    block = self._create_block(end-start, order, dtype)
+                    block, block_order = self._create_block(end-start, order, dtype)
                 col_index_list_forblock = col_index_list_sorted[start:end]
                 col_index_index_list_forblock = col_index_index_list[start:end]
-                self._read_direct(block, np.s_[:,col_index_list_forblock])
+                self._read_direct(block, block_order, np.s_[:,col_index_list_forblock])
                 val[:,col_index_index_list_forblock] = block[row_index_list,:]
 
         #!!LATER does this test work when the size is 1 x 1 and order if F? iid_index_or_none=[0], sid_index_or_none=[1000] (based on test_blocking_hdf5)
