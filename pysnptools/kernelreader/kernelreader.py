@@ -7,6 +7,7 @@ import logging
 import time
 import pysnptools.util as pstutil
 from pysnptools.pstreader import PstReader
+from pysnptools.kernelstandardizer import DiagKtoN
 
 class KernelReader(PstReader):
     """A KernelReader is one of three things:
@@ -274,7 +275,7 @@ class KernelReader(PstReader):
         """
         val = self._read(None, None, order, dtype, force_python_only, view_ok)
         from kerneldata import KernelData
-        ret = KernelData(iid0=self.iid0,iid1=self.iid1, val=val, parent_string=str(self))
+        ret = KernelData(iid0=self.iid0, iid1=self.iid1, val=val, name=str(self))
         return ret
 
     def iid_to_index(self, list):
@@ -321,6 +322,15 @@ class KernelReader(PstReader):
     def _assert_iid0_iid1(self):
         assert np.issubdtype(self._row.dtype, str) and len(self._row.shape)==2 and self._row.shape[1]==2, "iid0 should be dtype str, have two dimensions, and the second dimension should be size 2"
         assert np.issubdtype(self._col.dtype, str) and len(self._col.shape)==2 and self._col.shape[1]==2, "iid1 should be dtype str, have two dimensions, and the second dimension should be size 2"
+
+    def _read_with_standardizing(self, to_kerneldata, snp_standardizer=None, kernel_standardizer=DiagKtoN(), return_trained=False):
+        assert to_kerneldata, "When working with non-SnpKernels, to_kerneldata must be 'True'"
+        kernel, kernel_trained = self.read().standardize(kernel_standardizer,return_trained=True)
+
+        if return_trained:
+            return kernel, None, kernel_trained
+        else:
+            return kernel
 
 
 if __name__ == "__main__":

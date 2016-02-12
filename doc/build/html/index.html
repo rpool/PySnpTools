@@ -62,7 +62,8 @@
 <li><a class="reference internal" href="#pysnptools.util.IntRangeSet" title="pysnptools.util.IntRangeSet"><code class="xref py py-class docutils literal"><span class="pre">util.IntRangeSet</span></code></a>: Efficiently manipulate ranges of integers &#8211; for example, genetic position &#8211; with set operators including
 union, intersection, and set difference.</li>
 <li><a class="reference internal" href="#module-pysnptools.pstreader" title="pysnptools.pstreader"><code class="xref py py-mod docutils literal"><span class="pre">pstreader</span></code></a>: Generalizes <a class="reference internal" href="#module-pysnptools.snpreader" title="pysnptools.snpreader"><code class="xref py py-mod docutils literal"><span class="pre">snpreader</span></code></a> and <a class="reference internal" href="#module-pysnptools.kernelreader" title="pysnptools.kernelreader"><code class="xref py py-mod docutils literal"><span class="pre">kernelreader</span></code></a> (provides the efficiency of numpy arrays with some of the flexibility of pandas)</li>
-<li><a class="reference internal" href="#module-pysnptools.standardizer" title="pysnptools.standardizer"><code class="xref py py-mod docutils literal"><span class="pre">standardizer</span></code></a>: Specify standardizers for <code class="xref py py-class docutils literal"><span class="pre">SnpReaders</span></code>.</li>
+<li><a class="reference internal" href="#module-pysnptools.standardizer" title="pysnptools.standardizer"><code class="xref py py-mod docutils literal"><span class="pre">standardizer</span></code></a>: Specify standardizers for <a class="reference internal" href="#module-pysnptools.snpreader" title="pysnptools.snpreader"><code class="xref py py-mod docutils literal"><span class="pre">snpreader</span></code></a>.</li>
+<li><code class="xref py py-mod docutils literal"><span class="pre">kernelstandardizer</span></code>: Specify standardizers for <a class="reference internal" href="#module-pysnptools.kernelreader" title="pysnptools.kernelreader"><code class="xref py py-mod docutils literal"><span class="pre">kernelreader</span></code></a>.</li>
 </ul>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -655,7 +656,7 @@ share memory and so it may ignore your suggestion and allocate a new ndarray any
 
 <dl class="method">
 <dt id="pysnptools.snpreader.SnpReader.read_kernel">
-<code class="descname">read_kernel</code><span class="sig-paren">(</span><em>standardizer=None</em>, <em>test=None</em>, <em>block_size=None</em>, <em>order='A'</em>, <em>dtype=&lt;type 'numpy.float64'&gt;</em>, <em>force_python_only=False</em>, <em>view_ok=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pysnptools.snpreader.SnpReader.read_kernel" title="Permalink to this definition">¶</a></dt>
+<code class="descname">read_kernel</code><span class="sig-paren">(</span><em>standardizer=None</em>, <em>block_size=None</em>, <em>order='A'</em>, <em>dtype=&lt;type 'numpy.float64'&gt;</em>, <em>force_python_only=False</em>, <em>view_ok=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pysnptools.snpreader.SnpReader.read_kernel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a <code class="xref py py-class docutils literal"><span class="pre">KernelData</span></code> such that the <code class="xref py py-meth docutils literal"><span class="pre">KernelData.val()</span></code> property will be a ndarray of the standardized SNP values multiplied with their transposed selves.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -664,8 +665,6 @@ share memory and so it may ignore your suggestion and allocate a new ndarray any
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>standardizer</strong> (<a class="reference internal" href="#pysnptools.standardizer.Standardizer" title="pysnptools.standardizer.Standardizer"><code class="xref py py-class docutils literal"><span class="pre">Standardizer</span></code></a>) &#8211; &#8211; (required) Specify standardization to be applied before the matrix multiply. Any <a class="reference internal" href="#pysnptools.standardizer.Standardizer" title="pysnptools.standardizer.Standardizer"><code class="xref py py-class docutils literal"><span class="pre">Standardizer</span></code></a> may be used. Some choices include <code class="xref py py-class docutils literal"><span class="pre">Standardizer.Identity</span></code> 
 (do nothing), <a class="reference internal" href="#pysnptools.standardizer.Unit" title="pysnptools.standardizer.Unit"><code class="xref py py-class docutils literal"><span class="pre">Unit</span></code></a> (make values for each SNP have mean zero and standard deviation 1.0) and <code class="xref py py-class docutils literal"><span class="pre">Beta</span></code>.</li>
-<li><strong>test</strong> (<a class="reference internal" href="#pysnptools.snpreader.SnpReader" title="pysnptools.snpreader.SnpReader"><code class="xref py py-class docutils literal"><span class="pre">SnpReader</span></code></a>) &#8211; optional (defaults to &#8216;self&#8217;) &#8211; Instead of the usual square kernel, create a rectangular kernel from this set of SNPs to a second set of test SNPs. Any standardizer will be
-trained on these SNPs and then applied to the test SNPs. The resulting <code class="xref py py-class docutils literal"><span class="pre">KernelData</span></code> will have dimensions self.iid_count x test.iidcount.</li>
 <li><strong>block_size</strong> (<em>int or None</em>) &#8211; optional &#8211; Default of None (meaning to load all). Suggested number of sids to read into memory at a time.</li>
 </ul>
 </td>
@@ -691,9 +690,6 @@ trained on these SNPs and then applied to the test SNPs. The resulting <code cla
 <span class="gp">&gt;&gt;&gt; </span><span class="n">kerneldata1</span> <span class="o">=</span> <span class="n">snp_on_disk</span><span class="o">.</span><span class="n">read_kernel</span><span class="p">(</span><span class="n">Unit</span><span class="p">())</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="nb">int</span><span class="p">(</span><span class="n">kerneldata1</span><span class="o">.</span><span class="n">iid_count</span><span class="p">),</span> <span class="n">kerneldata1</span><span class="o">.</span><span class="n">val</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
 <span class="go">300 901.421835903</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">kerneldata2</span> <span class="o">=</span> <span class="n">snp_on_disk</span><span class="p">[</span><span class="mi">10</span><span class="p">:,:]</span><span class="o">.</span><span class="n">read_kernel</span><span class="p">(</span><span class="n">Unit</span><span class="p">(),</span><span class="n">test</span><span class="o">=</span><span class="n">snp_on_disk</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">,:])</span> <span class="c">#train on all-but-1st-10 &amp; test on first 10</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">kerneldata2</span><span class="o">.</span><span class="n">iid0_count</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">kerneldata2</span><span class="o">.</span><span class="n">iid1_count</span><span class="p">)),</span> <span class="n">kerneldata2</span><span class="o">.</span><span class="n">val</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
-<span class="go">(290, 10) -17.1978350849</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -838,7 +834,7 @@ trained on these SNPs and then applied to the test SNPs. The resulting <code cla
 <h3><code class="xref py py-class docutils literal"><span class="pre">snpreader.SnpData</span></code><a class="headerlink" href="#snpreader-snpdata" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="pysnptools.snpreader.SnpData">
-<em class="property">class </em><code class="descclassname">pysnptools.snpreader.</code><code class="descname">SnpData</code><span class="sig-paren">(</span><em>iid</em>, <em>sid</em>, <em>val</em>, <em>pos=None</em>, <em>parent_string=''</em>, <em>copyinputs_function=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pysnptools.snpreader.SnpData" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">pysnptools.snpreader.</code><code class="descname">SnpData</code><span class="sig-paren">(</span><em>iid</em>, <em>sid</em>, <em>val</em>, <em>pos=None</em>, <em>name=None</em>, <em>parent_string=None</em>, <em>copyinputs_function=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pysnptools.snpreader.SnpData" title="Permalink to this definition">¶</a></dt>
 <dd><p>A <a class="reference internal" href="#pysnptools.snpreader.SnpReader" title="pysnptools.snpreader.SnpReader"><code class="xref py py-class docutils literal"><span class="pre">SnpReader</span></code></a> for holding SNP values (or similar values) in-memory, along with related iid and sid information.
 It is usually created by calling the <a class="reference internal" href="#pysnptools.snpreader.SnpReader.read" title="pysnptools.snpreader.SnpReader.read"><code class="xref py py-meth docutils literal"><span class="pre">SnpReader.read()</span></code></a> method on another <a class="reference internal" href="#pysnptools.snpreader.SnpReader" title="pysnptools.snpreader.SnpReader"><code class="xref py py-class docutils literal"><span class="pre">SnpReader</span></code></a>, for example, <a class="reference internal" href="#pysnptools.snpreader.Bed" title="pysnptools.snpreader.Bed"><code class="xref py py-class docutils literal"><span class="pre">Bed</span></code></a>. It can also be constructed.</p>
 <p>See <a class="reference internal" href="#pysnptools.snpreader.SnpReader" title="pysnptools.snpreader.SnpReader"><code class="xref py py-class docutils literal"><span class="pre">SnpReader</span></code></a> for details and examples.</p>
@@ -850,10 +846,10 @@ It is usually created by calling the <a class="reference internal" href="#pysnpt
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>iid</strong> (an array of strings) &#8211; The <a class="reference internal" href="#pysnptools.snpreader.SnpReader.iid" title="pysnptools.snpreader.SnpReader.iid"><code class="xref py py-attr docutils literal"><span class="pre">SnpReader.iid</span></code></a> information</li>
-<li><strong>sid</strong> (an array of strings) &#8211; The <a class="reference internal" href="#pysnptools.snpreader.SnpReader.sid" title="pysnptools.snpreader.SnpReader.sid"><code class="xref py py-attr docutils literal"><span class="pre">sid</span></code></a> information</li>
+<li><strong>sid</strong> (an array of strings) &#8211; The <a class="reference internal" href="#pysnptools.snpreader.SnpReader.sid" title="pysnptools.snpreader.SnpReader.sid"><code class="xref py py-attr docutils literal"><span class="pre">SnpReader.sid</span></code></a> information</li>
 <li><strong>val</strong> (a 2-D array of floats) &#8211; The SNP values</li>
-<li><strong>pos</strong> (optional, an array of strings) &#8211; The <a class="reference internal" href="#pysnptools.snpreader.SnpReader.pos" title="pysnptools.snpreader.SnpReader.pos"><code class="xref py py-attr docutils literal"><span class="pre">pos</span></code></a> information</li>
-<li><strong>parent_string</strong> (optional, string) &#8211; Information to be display about the origin of this data</li>
+<li><strong>pos</strong> (optional, an array of strings) &#8211; The <a class="reference internal" href="#pysnptools.snpreader.SnpReader.pos" title="pysnptools.snpreader.SnpReader.pos"><code class="xref py py-attr docutils literal"><span class="pre">SnpReader.pos</span></code></a> information</li>
+<li><strong>name</strong> (optional, string) &#8211; Information to be display about the origin of this data</li>
 <li><strong>copyinputs_function</strong> (optional, function) &#8211; <em>Used internally by optional clustering code</em></li>
 </ul>
 </td>
@@ -872,8 +868,8 @@ It is usually created by calling the <a class="reference internal" href="#pysnpt
 </dl>
 <p><strong>Equality:</strong></p>
 <blockquote>
-<div><p>Two SnpData objects are equal if their four arrays (<a class="reference internal" href="#pysnptools.snpreader.SnpReader.iid" title="pysnptools.snpreader.SnpReader.iid"><code class="xref py py-attr docutils literal"><span class="pre">SnpReader.iid</span></code></a>, <a class="reference internal" href="#pysnptools.snpreader.SnpReader.sid" title="pysnptools.snpreader.SnpReader.sid"><code class="xref py py-attr docutils literal"><span class="pre">sid</span></code></a>, <a class="reference internal" href="#pysnptools.snpreader.SnpData.val" title="pysnptools.snpreader.SnpData.val"><code class="xref py py-attr docutils literal"><span class="pre">val</span></code></a>, and <code class="xref py py-attr docutils literal"><span class="pre">pos_property</span></code>) are &#8216;array_equal&#8217;.
-(Their &#8216;parent_string&#8217; does not need to be the same).</p>
+<div><p>Two SnpData objects are equal if their four arrays (<a class="reference internal" href="#pysnptools.snpreader.SnpReader.iid" title="pysnptools.snpreader.SnpReader.iid"><code class="xref py py-attr docutils literal"><span class="pre">SnpReader.iid</span></code></a>, <a class="reference internal" href="#pysnptools.snpreader.SnpReader.sid" title="pysnptools.snpreader.SnpReader.sid"><code class="xref py py-attr docutils literal"><span class="pre">SnpReader.sid</span></code></a>, <code class="xref py py-attr docutils literal"><span class="pre">SnpReader.val</span></code>, and <code class="xref py py-attr docutils literal"><span class="pre">SnpReader.pos_property</span></code>) are &#8216;array_equal&#8217;.
+(Their &#8216;name&#8217; does not need to be the same).</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -899,7 +895,7 @@ It is usually created by calling the <a class="reference internal" href="#pysnpt
 <p><strong>Methods beyond</strong> <a class="reference internal" href="#pysnptools.snpreader.SnpReader" title="pysnptools.snpreader.SnpReader"><code class="xref py py-class docutils literal"><span class="pre">SnpReader</span></code></a></p>
 <dl class="method">
 <dt id="pysnptools.snpreader.SnpData.standardize">
-<code class="descname">standardize</code><span class="sig-paren">(</span><em>standardizer=Unit()</em>, <em>block_size=None</em>, <em>force_python_only=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pysnptools.snpreader.SnpData.standardize" title="Permalink to this definition">¶</a></dt>
+<code class="descname">standardize</code><span class="sig-paren">(</span><em>standardizer=Unit()</em>, <em>block_size=None</em>, <em>return_trained=False</em>, <em>force_python_only=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pysnptools.snpreader.SnpData.standardize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Does in-place standardization of the in-memory
 SNP data. By default, it applies &#8216;Unit&#8217; standardization, that is: the values for each SNP will have mean zero and standard deviation 1.0.
 NaN values are then filled with zero, the mean (consequently, if there are NaN values, the final standard deviation will not be zero.
@@ -914,6 +910,7 @@ it also returns the SnpData.</p>
 Any <a class="reference internal" href="#pysnptools.standardizer.Standardizer" title="pysnptools.standardizer.Standardizer"><code class="xref py py-class docutils literal"><span class="pre">Standardizer</span></code></a> may be used. Some choices include <a class="reference internal" href="#pysnptools.standardizer.Unit" title="pysnptools.standardizer.Unit"><code class="xref py py-class docutils literal"><span class="pre">Unit</span></code></a> (default, makes values for each SNP have mean zero and
 standard deviation 1.0) and <a class="reference internal" href="#pysnptools.standardizer.Beta" title="pysnptools.standardizer.Beta"><code class="xref py py-class docutils literal"><span class="pre">Beta</span></code></a>.</li>
 <li><strong>block_size</strong> (<em>None</em>) &#8211; optional &#8211; Deprecated.</li>
+<li><strong>return_trained</strong> (<em>boolean</em>) &#8211; If true, returns a second value containing a constant <a class="reference internal" href="#pysnptools.standardizer.Standardizer" title="pysnptools.standardizer.Standardizer"><code class="xref py py-class docutils literal"><span class="pre">Standardizer</span></code></a> trained on this data.</li>
 <li><strong>force_python_only</strong> (<em>bool</em>) &#8211; optional &#8211; If true, will use pure Python instead of faster C++ libraries.</li>
 </ul>
 </td>
@@ -944,31 +941,8 @@ standard deviation 1.0) and <a class="reference internal" href="#pysnptools.stan
 <dl class="method">
 <dt id="pysnptools.snpreader.SnpData.train_standardizer">
 <code class="descname">train_standardizer</code><span class="sig-paren">(</span><em>apply_in_place</em>, <em>standardizer=Unit()</em>, <em>force_python_only=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pysnptools.snpreader.SnpData.train_standardizer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Trains a standardizer on the current in-memory SnpData that can be applied on other SNP data.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>apply_in_place</strong> (<em>bool</em>) &#8211; Tells if the current SnpData should be standardized.</li>
-<li><strong>standardizer</strong> (<a class="reference internal" href="#pysnptools.standardizer.Standardizer" title="pysnptools.standardizer.Standardizer"><code class="xref py py-class docutils literal"><span class="pre">Standardizer</span></code></a>) &#8211; optional &#8211; Specify standardization to be applied. 
-Any trainable <a class="reference internal" href="#pysnptools.standardizer.Standardizer" title="pysnptools.standardizer.Standardizer"><code class="xref py py-class docutils literal"><span class="pre">Standardizer</span></code></a> may be used. Some choices include <a class="reference internal" href="#pysnptools.standardizer.Unit" title="pysnptools.standardizer.Unit"><code class="xref py py-class docutils literal"><span class="pre">Unit</span></code></a> (default, makes values for each SNP have mean zero and
-standard deviation 1.0), <a class="reference internal" href="#pysnptools.standardizer.Beta" title="pysnptools.standardizer.Beta"><code class="xref py py-class docutils literal"><span class="pre">Beta</span></code></a>, and <code class="xref py py-class docutils literal"><span class="pre">standardizer.Identity</span></code> (do nothing)</li>
-<li><strong>force_python_only</strong> (<em>bool</em>) &#8211; optional &#8211; If true, will use pure Python instead of faster C++ libraries.</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#pysnptools.standardizer.Standardizer" title="pysnptools.standardizer.Standardizer"><code class="xref py py-class docutils literal"><span class="pre">Standardizer</span></code></a> &#8211; A trained standardizer</p>
-</td>
-</tr>
-</tbody>
-</table>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pysnptools.snpreader</span> <span class="kn">import</span> <span class="n">Bed</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">train</span> <span class="o">=</span> <span class="n">Bed</span><span class="p">(</span><span class="s">&#39;../../tests/datasets/all_chr.maf0.001.N300&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">:,:]</span><span class="o">.</span><span class="n">read</span><span class="p">()</span> <span class="c"># read SNP values for all but the first iid</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">train_stder</span> <span class="o">=</span> <span class="n">train</span><span class="o">.</span><span class="n">train_standardizer</span><span class="p">(</span><span class="n">apply_in_place</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="c">#Unit standardize and remember the mean and stddev of each SNP</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">test</span> <span class="o">=</span> <span class="n">Bed</span><span class="p">(</span><span class="s">&#39;../../tests/datasets/all_chr.maf0.001.N300&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">,:]</span><span class="o">.</span><span class="n">read</span><span class="p">()</span> <span class="c"># read SNP values for the first iid</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">test</span> <span class="o">=</span> <span class="n">test</span><span class="o">.</span><span class="n">standardize</span><span class="p">(</span><span class="n">train_stder</span><span class="p">)</span> <span class="c"># Use the mean and stddev of the train data to unit standardize the test data.</span>
-</pre></div>
+<dd><div class="deprecated">
+<p><span class="versionmodified">Deprecated since version 0.2.23: </span>Use <a class="reference internal" href="#pysnptools.snpreader.SnpData.standardize" title="pysnptools.snpreader.SnpData.standardize"><code class="xref py py-meth docutils literal"><span class="pre">standardize()</span></code></a> with return_trained=True instead.</p>
 </div>
 </dd></dl>
 
@@ -1195,7 +1169,7 @@ null_200        j       n       0       nan     1
 <h3><code class="xref py py-class docutils literal"><span class="pre">snpreader.Dense</span></code><a class="headerlink" href="#snpreader-dense" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="pysnptools.snpreader.Dense">
-<em class="property">class </em><code class="descclassname">pysnptools.snpreader.</code><code class="descname">Dense</code><span class="sig-paren">(</span><em>filename</em>, <em>extract_iid_function=&lt;function zero_family at 0x000000000A02C278&gt;</em>, <em>extract_sid_pos_function=&lt;function zero_pos at 0x000000000A02CDD8&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#pysnptools.snpreader.Dense" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">pysnptools.snpreader.</code><code class="descname">Dense</code><span class="sig-paren">(</span><em>filename</em>, <em>extract_iid_function=&lt;function zero_family&gt;</em>, <em>extract_sid_pos_function=&lt;function zero_pos at 0x000000000507C2E8&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#pysnptools.snpreader.Dense" title="Permalink to this definition">¶</a></dt>
 <dd><p>A <a class="reference internal" href="#pysnptools.snpreader.SnpReader" title="pysnptools.snpreader.SnpReader"><code class="xref py py-class docutils literal"><span class="pre">SnpReader</span></code></a> for reading *.dense.txt (0,1,2 text files) from disk.</p>
 <p>See <a class="reference internal" href="#pysnptools.snpreader.SnpReader" title="pysnptools.snpreader.SnpReader"><code class="xref py py-class docutils literal"><span class="pre">SnpReader</span></code></a> for general examples of using SnpReaders.</p>
 <p>This format looks like:</p>
@@ -1218,7 +1192,7 @@ null_200        j       n       0       nan     1
 <li><strong>extract_iid_function</strong> (<em>string</em>) &#8211; A function that breaks the row id from the file into a family id and an case id. Defaults to
 setting the family id to 0 and using the whole row id as the iid.</li>
 <li><strong>extract_sid_pos_function</strong> (<em>string</em>) &#8211; A function that breaks the column id from the file into (chromosome, sid, genetic distance, basepair distance).
-Defaults to setting the <a class="reference internal" href="#pysnptools.snpreader.SnpReader.pos" title="pysnptools.snpreader.SnpReader.pos"><code class="xref py py-attr docutils literal"><span class="pre">pos</span></code></a> information to 0 and using the whole column id as the sid.</li>
+Defaults to setting the <a class="reference internal" href="#pysnptools.snpreader.SnpReader.pos" title="pysnptools.snpreader.SnpReader.pos"><code class="xref py py-attr docutils literal"><span class="pre">SnpReader.pos</span></code></a> information to 0 and using the whole column id as the sid.</li>
 </ul>
 </td>
 </tr>
@@ -1237,7 +1211,7 @@ Defaults to setting the <a class="reference internal" href="#pysnptools.snpreade
 <p><strong>Methods beyond</strong> <a class="reference internal" href="#pysnptools.snpreader.SnpReader" title="pysnptools.snpreader.SnpReader"><code class="xref py py-class docutils literal"><span class="pre">SnpReader</span></code></a></p>
 <dl class="staticmethod">
 <dt id="pysnptools.snpreader.Dense.write">
-<em class="property">static </em><code class="descname">write</code><span class="sig-paren">(</span><em>filename</em>, <em>snpdata</em>, <em>join_iid_function=&lt;function just_case at 0x000000000A02CE48&gt;</em>, <em>join_sid_pos_function=&lt;function just_sid at 0x000000000A02CEB8&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#pysnptools.snpreader.Dense.write" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="descname">write</code><span class="sig-paren">(</span><em>filename</em>, <em>snpdata</em>, <em>join_iid_function=&lt;function just_case at 0x000000000507C358&gt;</em>, <em>join_sid_pos_function=&lt;function just_sid at 0x000000000507C3C8&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#pysnptools.snpreader.Dense.write" title="Permalink to this definition">¶</a></dt>
 <dd><p>Writes a <a class="reference internal" href="#pysnptools.snpreader.SnpData" title="pysnptools.snpreader.SnpData"><code class="xref py py-class docutils literal"><span class="pre">SnpData</span></code></a> to Dense format. The values must be 0,1,2 (or missing).</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1249,7 +1223,7 @@ Defaults to setting the <a class="reference internal" href="#pysnptools.snpreade
 <li><strong>join_iid_function</strong> (<em>a function</em>) &#8211; function to turn a family id and case id into a file id for columns.
 Defaults ignoring the family id and using the case id as the column id.</li>
 <li><strong>join_sid_pos_function</strong> (<em>a function</em>) &#8211; function to turn a sid and pos data into a file id for rows.
-Defaults ignoring the <a class="reference internal" href="#pysnptools.snpreader.SnpReader.pos" title="pysnptools.snpreader.SnpReader.pos"><code class="xref py py-attr docutils literal"><span class="pre">pos</span></code></a> information and using the sid id as the row id.</li>
+Defaults ignoring the <a class="reference internal" href="#pysnptools.snpreader.SnpReader.pos" title="pysnptools.snpreader.SnpReader.pos"><code class="xref py py-attr docutils literal"><span class="pre">SnpReader.pos</span></code></a> information and using the sid id as the row id.</li>
 </ul>
 </td>
 </tr>
@@ -1767,7 +1741,7 @@ share memory and so it may ignore your suggestion and allocate a new ndarray any
 <h3><code class="xref py py-class docutils literal"><span class="pre">kernelreader.KernelData</span></code><a class="headerlink" href="#kernelreader-kerneldata" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="pysnptools.kernelreader.KernelData">
-<em class="property">class </em><code class="descclassname">pysnptools.kernelreader.</code><code class="descname">KernelData</code><span class="sig-paren">(</span><em>iid=None</em>, <em>iid0=None</em>, <em>iid1=None</em>, <em>val=None</em>, <em>parent_string=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pysnptools.kernelreader.KernelData" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">pysnptools.kernelreader.</code><code class="descname">KernelData</code><span class="sig-paren">(</span><em>iid=None</em>, <em>iid0=None</em>, <em>iid1=None</em>, <em>val=None</em>, <em>name=None</em>, <em>parent_string=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pysnptools.kernelreader.KernelData" title="Permalink to this definition">¶</a></dt>
 <dd><p>A <a class="reference internal" href="#pysnptools.kernelreader.KernelReader" title="pysnptools.kernelreader.KernelReader"><code class="xref py py-class docutils literal"><span class="pre">KernelReader</span></code></a> for holding kernel values in-memory, along with related iid information.
 It is usually created by calling the <a class="reference internal" href="#pysnptools.snpreader.SnpReader.read_kernel" title="pysnptools.snpreader.SnpReader.read_kernel"><code class="xref py py-meth docutils literal"><span class="pre">SnpReader.read_kernel()</span></code></a> method on a <a class="reference internal" href="#pysnptools.snpreader.SnpReader" title="pysnptools.snpreader.SnpReader"><code class="xref py py-class docutils literal"><span class="pre">SnpReader</span></code></a>, for example, <a class="reference internal" href="#pysnptools.snpreader.Bed" title="pysnptools.snpreader.Bed"><code class="xref py py-class docutils literal"><span class="pre">Bed</span></code></a>.
 It can also be created by calling the <a class="reference internal" href="#pysnptools.kernelreader.KernelReader.read" title="pysnptools.kernelreader.KernelReader.read"><code class="xref py py-meth docutils literal"><span class="pre">KernelReader.read()</span></code></a> method on <a class="reference internal" href="#pysnptools.kernelreader.SnpKernel" title="pysnptools.kernelreader.SnpKernel"><code class="xref py py-class docutils literal"><span class="pre">SnpKernel</span></code></a>, for example, <a class="reference internal" href="#pysnptools.kernelreader.KernelNpz" title="pysnptools.kernelreader.KernelNpz"><code class="xref py py-class docutils literal"><span class="pre">KernelNpz</span></code></a>.
@@ -1784,7 +1758,7 @@ It can also be constructed.</p>
 <li><strong>iid0</strong> (an array of strings) &#8211; The <a class="reference internal" href="#pysnptools.kernelreader.KernelReader.iid0" title="pysnptools.kernelreader.KernelReader.iid0"><code class="xref py py-attr docutils literal"><span class="pre">KernelReader.iid0</span></code></a> information</li>
 <li><strong>iid1</strong> (an array of strings) &#8211; The <a class="reference internal" href="#pysnptools.kernelreader.KernelReader.iid1" title="pysnptools.kernelreader.KernelReader.iid1"><code class="xref py py-attr docutils literal"><span class="pre">KernelReader.iid1</span></code></a> information</li>
 <li><strong>val</strong> (a 2-D array of floats) &#8211; The SNP values</li>
-<li><strong>parent_string</strong> (optional, string) &#8211; Information to be display about the origin of this data</li>
+<li><strong>name</strong> (optional, string) &#8211; Information to be display about the origin of this data</li>
 </ul>
 </td>
 </tr>
@@ -1810,7 +1784,7 @@ It can also be constructed.</p>
 <p><strong>Equality:</strong></p>
 <blockquote>
 <div><p>Two KernelData objects are equal if their three arrays (<a class="reference internal" href="#pysnptools.kernelreader.KernelReader.iid0" title="pysnptools.kernelreader.KernelReader.iid0"><code class="xref py py-attr docutils literal"><span class="pre">iid0</span></code></a>, <a class="reference internal" href="#pysnptools.kernelreader.KernelReader.iid1" title="pysnptools.kernelreader.KernelReader.iid1"><code class="xref py py-attr docutils literal"><span class="pre">iid1</span></code></a>, and <a class="reference internal" href="#pysnptools.kernelreader.KernelData.val" title="pysnptools.kernelreader.KernelData.val"><code class="xref py py-attr docutils literal"><span class="pre">val</span></code></a>) are &#8216;array_equal&#8217;.
-(Their &#8216;parent_string&#8217; does not need to be the same).</p>
+(Their &#8216;string&#8217; does not need to be the same).</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1836,7 +1810,7 @@ It can also be constructed.</p>
 <p><strong>Methods beyond</strong> <a class="reference internal" href="#pysnptools.kernelreader.KernelReader" title="pysnptools.kernelreader.KernelReader"><code class="xref py py-class docutils literal"><span class="pre">KernelReader</span></code></a></p>
 <dl class="method">
 <dt id="pysnptools.kernelreader.KernelData.standardize">
-<code class="descname">standardize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pysnptools.kernelreader.KernelData.standardize" title="Permalink to this definition">¶</a></dt>
+<code class="descname">standardize</code><span class="sig-paren">(</span><em>standardizer=DiagKtoN()</em>, <em>return_trained=False</em>, <em>force_python_only=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pysnptools.kernelreader.KernelData.standardize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Does in-place standardization of the in-memory
 kernel data. The method multiples the values with a scalar factor such that the diagonal sums to iid_count. Although it works in place, for convenience
 it also returns the KernelData.</p>
@@ -2055,7 +2029,7 @@ val, iid, sid, and pos information in Hdf5 format.</p>
 <h3><code class="xref py py-class docutils literal"><span class="pre">kernelreader.SnpKernel</span></code><a class="headerlink" href="#kernelreader-snpkernel" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="pysnptools.kernelreader.SnpKernel">
-<em class="property">class </em><code class="descclassname">pysnptools.kernelreader.</code><code class="descname">SnpKernel</code><span class="sig-paren">(</span><em>snpreader</em>, <em>standardizer=None</em>, <em>test=None</em>, <em>block_size=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pysnptools.kernelreader.SnpKernel" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">pysnptools.kernelreader.</code><code class="descname">SnpKernel</code><span class="sig-paren">(</span><em>snpreader</em>, <em>standardizer=None</em>, <em>block_size=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pysnptools.kernelreader.SnpKernel" title="Permalink to this definition">¶</a></dt>
 <dd><p>A <a class="reference internal" href="#pysnptools.kernelreader.KernelReader" title="pysnptools.kernelreader.KernelReader"><code class="xref py py-class docutils literal"><span class="pre">KernelReader</span></code></a> that creates a kernel from a <a class="reference internal" href="#pysnptools.snpreader.SnpReader" title="pysnptools.snpreader.SnpReader"><code class="xref py py-class docutils literal"><span class="pre">SnpReader</span></code></a>. No SNP data will be read until
 the <code class="xref py py-meth docutils literal"><span class="pre">SnpKernel.read()</span></code> method is called. Use block_size to avoid ever reading all the SNP data into memory
 at once.</p>
@@ -2069,15 +2043,13 @@ at once.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>snpreader</strong> (<code class="xref py py-class docutils literal"><span class="pre">SnpReader</span></code>) &#8211; The SNP data</li>
 <li><strong>standardizer</strong> (<code class="xref py py-class docutils literal"><span class="pre">Standardizer</span></code>) &#8211; How the SNP data should be standardized</li>
-<li><strong>test</strong> (optional, <code class="xref py py-class docutils literal"><span class="pre">SnpReader</span></code>) &#8211; SNP data for test iids.</li>
 <li><strong>block_size</strong> (optional, int) &#8211; The number of SNPs to read at a time.</li>
 </ul>
 </td>
 </tr>
 </tbody>
 </table>
-<p>If <strong>test</strong> is not given, then the kernel will be for the iids in <strong>snpreader</strong>.
-If <strong>block_size</strong> is not given, then all SNP data will be read at once.</p>
+<p>If <strong>block_size</strong> is not given, then all SNP data will be read at once.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -2101,6 +2073,58 @@ If <strong>block_size</strong> is not given, then all SNP data will be read at o
 </div>
 </dd>
 </dl>
+<dl class="attribute">
+<dt id="pysnptools.kernelreader.SnpKernel.pos">
+<code class="descname">pos</code><a class="headerlink" href="#pysnptools.kernelreader.SnpKernel.pos" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <a class="reference internal" href="#pysnptools.snpreader.SnpReader.pos" title="pysnptools.snpreader.SnpReader.pos"><code class="xref py py-attr docutils literal"><span class="pre">SnpReader.pos</span></code></a> property of the SNP data.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysnptools.kernelreader.SnpKernel.read_snps">
+<code class="descname">read_snps</code><span class="sig-paren">(</span><em>order='F'</em>, <em>dtype=&lt;type 'numpy.float64'&gt;</em>, <em>force_python_only=False</em>, <em>view_ok=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pysnptools.kernelreader.SnpKernel.read_snps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the SNP values, applies the standardizer, and returns a <a class="reference internal" href="#pysnptools.snpreader.SnpData" title="pysnptools.snpreader.SnpData"><code class="xref py py-class docutils literal"><span class="pre">SnpData</span></code></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>order</strong> (<em>string or None</em>) &#8211; {&#8216;F&#8217; (default), &#8216;C&#8217;, &#8216;A&#8217;}, optional &#8211; Specify the order of the ndarray. If order is &#8216;F&#8217; (default),
+then the array will be in F-contiguous order (iid-index varies the fastest).
+If order is &#8216;C&#8217;, then the returned array will be in C-contiguous order (sid-index varies the fastest).
+If order is &#8216;A&#8217;, then the <a class="reference internal" href="#pysnptools.snpreader.SnpData.val" title="pysnptools.snpreader.SnpData.val"><code class="xref py py-attr docutils literal"><span class="pre">SnpData.val</span></code></a>
+ndarray may be in any order (either C-, Fortran-contiguous).</li>
+<li><strong>dtype</strong> (<em>data-type</em>) &#8211; {scipy.float64 (default), scipy.float32}, optional &#8211; The data-type for the <a class="reference internal" href="#pysnptools.snpreader.SnpData.val" title="pysnptools.snpreader.SnpData.val"><code class="xref py py-attr docutils literal"><span class="pre">SnpData.val</span></code></a> ndarray.</li>
+<li><strong>force_python_only</strong> (<em>bool</em>) &#8211; optional &#8211; If False (default), may use outside library code. If True, requests that the read
+be done without outside library code.</li>
+<li><strong>view_ok</strong> (<em>bool</em>) &#8211; optional &#8211; If False (default), allocates new memory for the <a class="reference internal" href="#pysnptools.snpreader.SnpData.val" title="pysnptools.snpreader.SnpData.val"><code class="xref py py-attr docutils literal"><span class="pre">SnpData.val</span></code></a>&#8216;s ndarray. If True,
+if practical and reading from a <code class="xref py py-class docutils literal"><span class="pre">SnpData</span></code>, will return a new 
+<code class="xref py py-class docutils literal"><span class="pre">SnpData</span></code> with a ndarray shares memory with the original <code class="xref py py-class docutils literal"><span class="pre">SnpData</span></code>.
+Typically, you&#8217;ll also wish to use &#8220;order=&#8217;A&#8217;&#8221; to increase the chance that sharing will be possible.
+Use these parameters with care because any change to either ndarray (for example, via <a class="reference internal" href="#pysnptools.snpreader.SnpData.standardize" title="pysnptools.snpreader.SnpData.standardize"><code class="xref py py-meth docutils literal"><span class="pre">SnpData.standardize()</span></code></a>) will effect
+the others. Also keep in mind that <code class="xref py py-meth docutils literal"><span class="pre">read()</span></code> relies on ndarray&#8217;s mechanisms to decide whether to actually
+share memory and so it may ignore your suggestion and allocate a new ndarray anyway.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#pysnptools.snpreader.SnpData" title="pysnptools.snpreader.SnpData"><code class="xref py py-class docutils literal"><span class="pre">SnpData</span></code></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pysnptools.kernelreader.SnpKernel.sid">
+<code class="descname">sid</code><a class="headerlink" href="#pysnptools.kernelreader.SnpKernel.sid" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <a class="reference internal" href="#pysnptools.snpreader.SnpReader.sid" title="pysnptools.snpreader.SnpReader.sid"><code class="xref py py-attr docutils literal"><span class="pre">SnpReader.sid</span></code></a> property of the SNP data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pysnptools.kernelreader.SnpKernel.sid_count">
+<code class="descname">sid_count</code><a class="headerlink" href="#pysnptools.kernelreader.SnpKernel.sid_count" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <a class="reference internal" href="#pysnptools.snpreader.SnpReader.sid_count" title="pysnptools.snpreader.SnpReader.sid_count"><code class="xref py py-attr docutils literal"><span class="pre">SnpReader.sid_count</span></code></a> property of the SNP data.</p>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -3843,6 +3867,19 @@ in time linear in the number of ranges, rather than integer elements.</p>
 <span class="go">9923.06992842</span>
 </pre></div>
 </div>
+<p>Can also return a constant SNP standardizer that can be applied to other <a class="reference internal" href="#pysnptools.snpreader.SnpData" title="pysnptools.snpreader.SnpData"><code class="xref py py-class docutils literal"><span class="pre">SnpData</span></code></a>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">snp_whole</span> <span class="o">=</span> <span class="n">Bed</span><span class="p">(</span><span class="s">&#39;../../tests/datasets/all_chr.maf0.001.N300&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">train_idx</span><span class="p">,</span> <span class="n">test_idx</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="n">snp_whole</span><span class="o">.</span><span class="n">iid_count</span><span class="p">),</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span> <span class="c">#test on the first 10, train on the rest</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">snp_train</span><span class="p">,</span> <span class="n">trained_standardizer</span> <span class="o">=</span> <span class="n">Unit</span><span class="p">()</span><span class="o">.</span><span class="n">standardize</span><span class="p">(</span><span class="n">snp_whole</span><span class="p">[</span><span class="n">train_idx</span><span class="p">,:]</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span><span class="n">return_trained</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">snp_train</span><span class="o">.</span><span class="n">val</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+<span class="go">0.233549683248</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">trained_standardizer</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="mi">0</span><span class="p">,:]</span> <span class="c">#The mean and stddev of the 1st SNP on the training data</span>
+<span class="go">[ 1.94827586  0.22146953]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">snp_test</span> <span class="o">=</span> <span class="n">snp_whole</span><span class="p">[</span><span class="n">test_idx</span><span class="p">,:]</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">standardize</span><span class="p">(</span><span class="n">trained_standardizer</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">snp_test</span><span class="o">.</span><span class="n">val</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+<span class="go">0.23354968324845735</span>
+</pre></div>
+</div>
 <p>Standardize any Numpy array.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">val</span> <span class="o">=</span> <span class="n">Bed</span><span class="p">(</span><span class="s">&#39;../../tests/datasets/all_chr.maf0.001.N300&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">val</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">val</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
@@ -3853,23 +3890,39 @@ in time linear in the number of ranges, rather than integer elements.</p>
 </pre></div>
 </div>
 <p>Details of Methods &amp; Properties:</p>
+<dl class="attribute">
+<dt id="pysnptools.standardizer.Standardizer.is_constant">
+<code class="descname">is_constant</code><a class="headerlink" href="#pysnptools.standardizer.Standardizer.is_constant" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tell if a standardizer&#8217;s statistics are constant. For example, <code class="xref py py-class docutils literal"><span class="pre">Unit_Trained</span></code> contains a pre-specified mean and stddev for each SNP, so <code class="xref py py-attr docutils literal"><span class="pre">Unit_Trained.is_constant</span></code> is True.
+<a class="reference internal" href="#pysnptools.standardizer.Unit" title="pysnptools.standardizer.Unit"><code class="xref py py-class docutils literal"><span class="pre">Unit</span></code></a>, on the other hand, measures the mean and stddev for each SNP, so <code class="xref py py-attr docutils literal"><span class="pre">Unit.is_constant</span></code> is False.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="method">
 <dt id="pysnptools.standardizer.Standardizer.standardize">
-<code class="descname">standardize</code><span class="sig-paren">(</span><em>snps</em>, <em>block_size=None</em>, <em>force_python_only=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pysnptools.standardizer.Standardizer.standardize" title="Permalink to this definition">¶</a></dt>
-<dd><p>Applies standardization, in place, to an NumPy array of SNP data. For convenience also returns the array.</p>
+<code class="descname">standardize</code><span class="sig-paren">(</span><em>snps</em>, <em>block_size=None</em>, <em>return_trained=False</em>, <em>force_python_only=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pysnptools.standardizer.Standardizer.standardize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies standardization, in place, to <a class="reference internal" href="#pysnptools.snpreader.SnpData" title="pysnptools.snpreader.SnpData"><code class="xref py py-class docutils literal"><span class="pre">SnpData</span></code></a> (or a NumPy array). For convenience also returns the <a class="reference internal" href="#pysnptools.snpreader.SnpData" title="pysnptools.snpreader.SnpData"><code class="xref py py-class docutils literal"><span class="pre">SnpData</span></code></a> (or a NumPy array).</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>snps</strong> (<em>NumPy array</em>) &#8211; An array of snp data.</li>
+<li><strong>snps</strong> (<a class="reference internal" href="#pysnptools.snpreader.SnpData" title="pysnptools.snpreader.SnpData"><code class="xref py py-class docutils literal"><span class="pre">SnpData</span></code></a> (or a NumPy array)) &#8211; SNP values to standardize</li>
 <li><strong>block_size</strong> (<em>None</em>) &#8211; <em>Not used</em></li>
+<li><strong>return_trained</strong> (<em>boolean</em>) &#8211; If true, returns a second value containing a constant standardizer trained on this data.</li>
 <li><strong>force_python_only</strong> (<em>bool</em>) &#8211; optional &#8211; If False (default), may use outside library code. If True, requests that the read
 be done without outside library code.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">NumPy array</p>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#pysnptools.snpreader.SnpData" title="pysnptools.snpreader.SnpData"><code class="xref py py-class docutils literal"><span class="pre">SnpData</span></code></a> (or a NumPy array), (optional) constant <a class="reference internal" href="#pysnptools.standardizer.Standardizer" title="pysnptools.standardizer.Standardizer"><code class="xref py py-class docutils literal"><span class="pre">Standardizer</span></code></a></p>
 </td>
 </tr>
 </tbody>
@@ -3950,22 +4003,43 @@ NaN values are then filled with zero, the mean (consequently, if there are NaN v
 </dd></dl>
 
 </div>
-<div class="section" id="standardizer-diag-k-to-n">
-<h3><code class="xref py py-class docutils literal"><span class="pre">standardizer.diag_K_to_N</span></code><a class="headerlink" href="#standardizer-diag-k-to-n" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="standardizer-diagkton">
+<h3><code class="xref py py-class docutils literal"><span class="pre">standardizer.DiagKtoN</span></code><a class="headerlink" href="#standardizer-diagkton" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="pysnptools.standardizer.DiagKtoN">
 <em class="property">class </em><code class="descclassname">pysnptools.standardizer.</code><code class="descname">DiagKtoN</code><span class="sig-paren">(</span><em>deprecated_iid_count=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pysnptools.standardizer.DiagKtoN" title="Permalink to this definition">¶</a></dt>
-<dd><p>A <a class="reference internal" href="#pysnptools.standardizer.Standardizer" title="pysnptools.standardizer.Standardizer"><code class="xref py py-class docutils literal"><span class="pre">Standardizer</span></code></a> that multiplies the SNP values by a factor such that a kernel
+<dd><p>Both a <a class="reference internal" href="#pysnptools.standardizer.Standardizer" title="pysnptools.standardizer.Standardizer"><code class="xref py py-class docutils literal"><span class="pre">Standardizer</span></code></a> and a A <a class="reference internal" href="#pysnptools.kernelstandardizer.KernelStandardizer" title="pysnptools.kernelstandardizer.KernelStandardizer"><code class="xref py py-class docutils literal"><span class="pre">KernelStandardizer</span></code></a>.</p>
+<p>When applied to a <a class="reference internal" href="#pysnptools.snpreader.SnpData" title="pysnptools.snpreader.SnpData"><code class="xref py py-class docutils literal"><span class="pre">SnpData</span></code></a>, it multiplies the SNP values by the square root of a factor such that a kernel
 constructed from the SNP values will have a diagonal that sums to iid_count. This class thus
 standardizes the kernel before it is even constructed.</p>
-<table class="docutils field-list" frame="void" rules="none">
+<p>When applied to a <a class="reference internal" href="#pysnptools.kernelreader.KernelData" title="pysnptools.kernelreader.KernelData"><code class="xref py py-class docutils literal"><span class="pre">KernelData</span></code></a>, it multiplies the kernel values by the a factor such that a kernel
+will have a diagonal that sums to iid_count.</p>
+<p>See <a class="reference internal" href="#pysnptools.standardizer.Standardizer" title="pysnptools.standardizer.Standardizer"><code class="xref py py-class docutils literal"><span class="pre">Standardizer</span></code></a> for more information about standardization.</p>
+<dl class="docutils">
+<dt><strong>Constructor:</strong></dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Warning:</th><td class="field-body">This standardizer must run on all the SNPs values at once. If block_size is used, the wrong answer will result.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>deprecated_iid_count</strong> (<em>int</em>) (optional) &#8211; Deprecated.</li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
+</dd>
+</dl>
+<p>Example of DiagKtoN to <a class="reference internal" href="#pysnptools.snpreader.SnpData" title="pysnptools.snpreader.SnpData"><code class="xref py py-class docutils literal"><span class="pre">SnpData</span></code></a>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pysnptools.standardizer</span> <span class="kn">import</span> <span class="n">DiagKtoN</span><span class="p">,</span> <span class="n">Unit</span><span class="p">,</span> <span class="n">Identity</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pysnptools.snpreader</span> <span class="kn">import</span> <span class="n">Bed</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">snpdata1</span> <span class="o">=</span> <span class="n">Bed</span><span class="p">(</span><span class="s">&#39;../../tests/datasets/all_chr.maf0.001.N300&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">standardize</span><span class="p">(</span><span class="n">Unit</span><span class="p">())</span><span class="o">.</span><span class="n">standardize</span><span class="p">(</span><span class="n">DiagKtoN</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">kernel1</span> <span class="o">=</span> <span class="n">snpdata1</span><span class="o">.</span><span class="n">read_kernel</span><span class="p">(</span><span class="n">Identity</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">kernel1</span><span class="o">.</span><span class="n">val</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+<span class="go">300.0</span>
+</pre></div>
+</div>
+<p>Example of DiagKtoN to <a class="reference internal" href="#pysnptools.kernelreader.KernelData" title="pysnptools.kernelreader.KernelData"><code class="xref py py-class docutils literal"><span class="pre">KernelData</span></code></a>:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pysnptools.standardizer</span> <span class="kn">import</span> <span class="n">DiagKtoN</span><span class="p">,</span> <span class="n">Unit</span><span class="p">,</span> <span class="n">Identity</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pysnptools.snpreader</span> <span class="kn">import</span> <span class="n">Bed</span>
@@ -3982,8 +4056,8 @@ standardizes the kernel before it is even constructed.</p>
 <h3><code class="xref py py-class docutils literal"><span class="pre">standardizer.UnitTrained</span></code><a class="headerlink" href="#standardizer-unittrained" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="pysnptools.standardizer.UnitTrained">
-<em class="property">class </em><code class="descclassname">pysnptools.standardizer.</code><code class="descname">UnitTrained</code><span class="sig-paren">(</span><em>stats</em><span class="sig-paren">)</span><a class="headerlink" href="#pysnptools.standardizer.UnitTrained" title="Permalink to this definition">¶</a></dt>
-<dd><p>A <a class="reference internal" href="#pysnptools.standardizer.Standardizer" title="pysnptools.standardizer.Standardizer"><code class="xref py py-class docutils literal"><span class="pre">Standardizer</span></code></a> to unit standardize one set of SNP data based on the mean and stddev of another set of SNP data
+<em class="property">class </em><code class="descclassname">pysnptools.standardizer.</code><code class="descname">UnitTrained</code><span class="sig-paren">(</span><em>sid</em>, <em>stats</em><span class="sig-paren">)</span><a class="headerlink" href="#pysnptools.standardizer.UnitTrained" title="Permalink to this definition">¶</a></dt>
+<dd><p>A <a class="reference internal" href="#pysnptools.standardizer.Standardizer" title="pysnptools.standardizer.Standardizer"><code class="xref py py-class docutils literal"><span class="pre">Standardizer</span></code></a> to unit standardize one set of SNP data based on the mean and stddev of another set of SNP data.
 NaN values are then filled with zero.</p>
 <p>See <a class="reference internal" href="#pysnptools.standardizer.Standardizer" title="pysnptools.standardizer.Standardizer"><code class="xref py py-class docutils literal"><span class="pre">Standardizer</span></code></a> for more information about standardization.</p>
 <dl class="docutils">
@@ -4004,7 +4078,7 @@ NaN values are then filled with zero.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pysnptools.standardizer</span> <span class="kn">import</span> <span class="n">Unit</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pysnptools.snpreader</span> <span class="kn">import</span> <span class="n">Bed</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">train</span> <span class="o">=</span> <span class="n">Bed</span><span class="p">(</span><span class="s">&#39;../../tests/datasets/all_chr.maf0.001.N300&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">:,:]</span><span class="o">.</span><span class="n">read</span><span class="p">()</span> <span class="c"># read SNP values for all but the first iid</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">unittrained</span> <span class="o">=</span> <span class="n">train</span><span class="o">.</span><span class="n">train_standardizer</span><span class="p">(</span><span class="n">apply_in_place</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span><span class="n">standardizer</span><span class="o">=</span><span class="n">Unit</span><span class="p">())</span> <span class="c">#Unit standardize and remember the mean and stddev of each sid</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">_</span><span class="p">,</span> <span class="n">unittrained</span> <span class="o">=</span> <span class="n">train</span><span class="o">.</span><span class="n">standardize</span><span class="p">(</span><span class="n">Unit</span><span class="p">(),</span><span class="n">return_trained</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="c">#Unit standardize and remember the mean and stddev of each sid</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">unittrained</span><span class="o">.</span><span class="n">stats</span><span class="p">[:</span><span class="mi">5</span><span class="p">,:]</span> <span class="c">#Print the means and stddev of the first five sids</span>
 <span class="go">[[ 1.94983278  0.21828988]</span>
 <span class="go"> [ 1.96989967  0.17086341]</span>
@@ -4020,13 +4094,14 @@ NaN values are then filled with zero.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="id1">
-<h3><code class="xref py py-class docutils literal"><span class="pre">standardizer.UnitTrained</span></code><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="standardizer-diagktontrained">
+<h3><code class="xref py py-class docutils literal"><span class="pre">standardizer.DiagKtoNTrained</span></code><a class="headerlink" href="#standardizer-diagktontrained" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
-<dt>
-<em class="property">class </em><code class="descclassname">pysnptools.standardizer.</code><code class="descname">UnitTrained</code><span class="sig-paren">(</span><em>stats</em><span class="sig-paren">)</span></dt>
-<dd><p>A <a class="reference internal" href="#pysnptools.standardizer.Standardizer" title="pysnptools.standardizer.Standardizer"><code class="xref py py-class docutils literal"><span class="pre">Standardizer</span></code></a> to unit standardize one set of SNP data based on the mean and stddev of another set of SNP data
-NaN values are then filled with zero.</p>
+<dt id="pysnptools.standardizer.DiagKtoNTrained">
+<em class="property">class </em><code class="descclassname">pysnptools.standardizer.</code><code class="descname">DiagKtoNTrained</code><span class="sig-paren">(</span><em>factor</em><span class="sig-paren">)</span><a class="headerlink" href="#pysnptools.standardizer.DiagKtoNTrained" title="Permalink to this definition">¶</a></dt>
+<dd><p>Both a <a class="reference internal" href="#pysnptools.standardizer.Standardizer" title="pysnptools.standardizer.Standardizer"><code class="xref py py-class docutils literal"><span class="pre">Standardizer</span></code></a> and a A <a class="reference internal" href="#pysnptools.kernelstandardizer.KernelStandardizer" title="pysnptools.kernelstandardizer.KernelStandardizer"><code class="xref py py-class docutils literal"><span class="pre">KernelStandardizer</span></code></a>.</p>
+<p>When applied to a <a class="reference internal" href="#pysnptools.snpreader.SnpData" title="pysnptools.snpreader.SnpData"><code class="xref py py-class docutils literal"><span class="pre">SnpData</span></code></a>, DiagKtoN standardizes one set of SNP data based on another set of SNP data.</p>
+<p>When applied to a <a class="reference internal" href="#pysnptools.kernelreader.KernelData" title="pysnptools.kernelreader.KernelData"><code class="xref py py-class docutils literal"><span class="pre">KernelData</span></code></a>, DiagKtoN standardizes one kernel data based on another kernel data.</p>
 <p>See <a class="reference internal" href="#pysnptools.standardizer.Standardizer" title="pysnptools.standardizer.Standardizer"><code class="xref py py-class docutils literal"><span class="pre">Standardizer</span></code></a> for more information about standardization.</p>
 <dl class="docutils">
 <dt><strong>Constructor:</strong></dt>
@@ -4035,7 +4110,7 @@ NaN values are then filled with zero.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>stats</strong> (<em>ndarray of float</em>) &#8211; The mean and stddev of each sid</li>
+<li><strong>factor</strong> (<em>float</em>) &#8211; The number what when multiplied into the kernel values will make the diagonal of the kernel values to  sum to iid_count.</li>
 </ul>
 </td>
 </tr>
@@ -4043,20 +4118,169 @@ NaN values are then filled with zero.</p>
 </table>
 </dd>
 </dl>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pysnptools.standardizer</span> <span class="kn">import</span> <span class="n">Unit</span>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="kernelstandardizer-module">
+<h2><code class="xref py py-mod docutils literal"><span class="pre">kernelstandardizer</span></code> Module<a class="headerlink" href="#kernelstandardizer-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="kernelstandardizer-kernelstandardizer">
+<h3><code class="xref py py-class docutils literal"><span class="pre">kernelstandardizer.KernelStandardizer</span></code><a class="headerlink" href="#kernelstandardizer-kernelstandardizer" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="pysnptools.kernelstandardizer.KernelStandardizer">
+<em class="property">class </em><code class="descclassname">pysnptools.kernelstandardizer.</code><code class="descname">KernelStandardizer</code><a class="headerlink" href="#pysnptools.kernelstandardizer.KernelStandardizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>A KernelStandardizer is a class such as <a class="reference internal" href="#pysnptools.standardizer.DiagKtoN" title="pysnptools.standardizer.DiagKtoN"><code class="xref py py-class docutils literal"><span class="pre">DiagKtoN</span></code></a> and <a class="reference internal" href="#pysnptools.standardizer.Identity" title="pysnptools.standardizer.Identity"><code class="xref py py-class docutils literal"><span class="pre">Identity</span></code></a> to be used by the <a class="reference internal" href="#pysnptools.kernelreader.KernelData.standardize" title="pysnptools.kernelreader.KernelData.standardize"><code class="xref py py-meth docutils literal"><span class="pre">KernelData.standardize()</span></code></a> to standardize Kernel data.
+It always works in-place <em>and</em> returns the <a class="reference internal" href="#pysnptools.kernelreader.KernelData" title="pysnptools.kernelreader.KernelData"><code class="xref py py-class docutils literal"><span class="pre">KernelData</span></code></a> on which it works.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+<p>Read and standardize Kernel data.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pysnptools.kernelstandardizer</span> <span class="kn">import</span> <span class="n">DiagKtoN</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pysnptools.kernelreader</span> <span class="kn">import</span> <span class="n">KernelNpz</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">kerneldata1</span> <span class="o">=</span> <span class="n">KernelNpz</span><span class="p">(</span><span class="s">&#39;../examples/toydata.kernel.npz&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">kerneldata1</span><span class="o">.</span><span class="n">val</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+<span class="go">5000000.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">kerneldata1</span> <span class="o">=</span> <span class="n">kerneldata1</span><span class="o">.</span><span class="n">standardize</span><span class="p">(</span><span class="n">DiagKtoN</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">kerneldata1</span><span class="o">.</span><span class="n">val</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+<span class="go">500.0</span>
+</pre></div>
+</div>
+<p>Can also return a constant kernel standardizer that be applied to other <a class="reference internal" href="#pysnptools.kernelreader.KernelData" title="pysnptools.kernelreader.KernelData"><code class="xref py py-class docutils literal"><span class="pre">KernelData</span></code></a>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">kernel_whole</span> <span class="o">=</span> <span class="n">KernelNpz</span><span class="p">(</span><span class="s">&#39;../examples/toydata.kernel.npz&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">train_idx</span><span class="p">,</span> <span class="n">test_idx</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="n">kernel_whole</span><span class="o">.</span><span class="n">iid_count</span><span class="p">),</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>  <span class="c">#test on the first 10, train on the rest</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">kernel_train</span><span class="p">,</span> <span class="n">trained_standardizer</span> <span class="o">=</span> <span class="n">DiagKtoN</span><span class="p">()</span><span class="o">.</span><span class="n">standardize</span><span class="p">(</span><span class="n">kernel_whole</span><span class="p">[</span><span class="n">train_idx</span><span class="p">]</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span><span class="n">return_trained</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">kernel_train</span><span class="o">.</span><span class="n">val</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+<span class="go">490.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">trained_standardizer</span><span class="o">.</span><span class="n">factor</span>
+<span class="go">9.99909752089e-05</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">kernel_whole_test</span> <span class="o">=</span> <span class="n">kernel_whole</span><span class="p">[:,</span><span class="n">test_idx</span><span class="p">]</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">standardize</span><span class="p">(</span><span class="n">trained_standardizer</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">kernel_whole_test</span><span class="o">.</span><span class="n">val</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+<span class="go">0.99221743920965288</span>
+</pre></div>
+</div>
+<p>Details of Methods &amp; Properties:</p>
+<dl class="method">
+<dt id="pysnptools.kernelstandardizer.KernelStandardizer.standardize">
+<code class="descname">standardize</code><span class="sig-paren">(</span><em>kerneldata</em>, <em>return_trained=False</em>, <em>force_python_only=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pysnptools.kernelstandardizer.KernelStandardizer.standardize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies standardization, in place, to <a class="reference internal" href="#pysnptools.kernelreader.KernelData" title="pysnptools.kernelreader.KernelData"><code class="xref py py-class docutils literal"><span class="pre">KernelData</span></code></a>. For convenience also returns the <code class="xref py py-class docutils literal"><span class="pre">KernelData</span></code>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>snps</strong> (<a class="reference internal" href="#pysnptools.kernelreader.KernelData" title="pysnptools.kernelreader.KernelData"><code class="xref py py-class docutils literal"><span class="pre">KernelData</span></code></a>) &#8211; kernel values to standardize</li>
+<li><strong>return_trained</strong> (<em>boolean</em>) &#8211; If true, returns a second value containing a constant <a class="reference internal" href="#pysnptools.kernelstandardizer.KernelStandardizer" title="pysnptools.kernelstandardizer.KernelStandardizer"><code class="xref py py-class docutils literal"><span class="pre">KernelStandardizer</span></code></a> trained on this data.</li>
+<li><strong>force_python_only</strong> (<em>bool</em>) &#8211; optional &#8211; If False (default), may use outside library code. If True, requests that the read
+be done without outside library code.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#pysnptools.kernelreader.KernelData" title="pysnptools.kernelreader.KernelData"><code class="xref py py-class docutils literal"><span class="pre">KernelData</span></code></a>, (optional) constant <a class="reference internal" href="#pysnptools.kernelstandardizer.KernelStandardizer" title="pysnptools.kernelstandardizer.KernelStandardizer"><code class="xref py py-class docutils literal"><span class="pre">KernelStandardizer</span></code></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="kernelstandardizer-diagkton">
+<h3><code class="xref py py-class docutils literal"><span class="pre">kernelstandardizer.DiagKtoN</span></code><a class="headerlink" href="#kernelstandardizer-diagkton" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="pysnptools.kernelstandardizer.DiagKtoN">
+<em class="property">class </em><code class="descclassname">pysnptools.kernelstandardizer.</code><code class="descname">DiagKtoN</code><span class="sig-paren">(</span><em>deprecated_iid_count=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pysnptools.kernelstandardizer.DiagKtoN" title="Permalink to this definition">¶</a></dt>
+<dd><p>Both a <a class="reference internal" href="#pysnptools.standardizer.Standardizer" title="pysnptools.standardizer.Standardizer"><code class="xref py py-class docutils literal"><span class="pre">Standardizer</span></code></a> and a A <a class="reference internal" href="#pysnptools.kernelstandardizer.KernelStandardizer" title="pysnptools.kernelstandardizer.KernelStandardizer"><code class="xref py py-class docutils literal"><span class="pre">KernelStandardizer</span></code></a>.</p>
+<p>When applied to a <a class="reference internal" href="#pysnptools.snpreader.SnpData" title="pysnptools.snpreader.SnpData"><code class="xref py py-class docutils literal"><span class="pre">SnpData</span></code></a>, it multiplies the SNP values by the square root of a factor such that a kernel
+constructed from the SNP values will have a diagonal that sums to iid_count. This class thus
+standardizes the kernel before it is even constructed.</p>
+<p>When applied to a <a class="reference internal" href="#pysnptools.kernelreader.KernelData" title="pysnptools.kernelreader.KernelData"><code class="xref py py-class docutils literal"><span class="pre">KernelData</span></code></a>, it multiplies the kernel values by the a factor such that a kernel
+will have a diagonal that sums to iid_count.</p>
+<p>See <a class="reference internal" href="#pysnptools.standardizer.Standardizer" title="pysnptools.standardizer.Standardizer"><code class="xref py py-class docutils literal"><span class="pre">Standardizer</span></code></a> for more information about standardization.</p>
+<dl class="docutils">
+<dt><strong>Constructor:</strong></dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>deprecated_iid_count</strong> (<em>int</em>) (optional) &#8211; Deprecated.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+<p>Example of DiagKtoN to <a class="reference internal" href="#pysnptools.snpreader.SnpData" title="pysnptools.snpreader.SnpData"><code class="xref py py-class docutils literal"><span class="pre">SnpData</span></code></a>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pysnptools.standardizer</span> <span class="kn">import</span> <span class="n">DiagKtoN</span><span class="p">,</span> <span class="n">Unit</span><span class="p">,</span> <span class="n">Identity</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pysnptools.snpreader</span> <span class="kn">import</span> <span class="n">Bed</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">train</span> <span class="o">=</span> <span class="n">Bed</span><span class="p">(</span><span class="s">&#39;../../tests/datasets/all_chr.maf0.001.N300&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">:,:]</span><span class="o">.</span><span class="n">read</span><span class="p">()</span> <span class="c"># read SNP values for all but the first iid</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">unittrained</span> <span class="o">=</span> <span class="n">train</span><span class="o">.</span><span class="n">train_standardizer</span><span class="p">(</span><span class="n">apply_in_place</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span><span class="n">standardizer</span><span class="o">=</span><span class="n">Unit</span><span class="p">())</span> <span class="c">#Unit standardize and remember the mean and stddev of each sid</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">unittrained</span><span class="o">.</span><span class="n">stats</span><span class="p">[:</span><span class="mi">5</span><span class="p">,:]</span> <span class="c">#Print the means and stddev of the first five sids</span>
-<span class="go">[[ 1.94983278  0.21828988]</span>
-<span class="go"> [ 1.96989967  0.17086341]</span>
-<span class="go"> [ 1.84280936  0.39057474]</span>
-<span class="go"> [ 1.99665552  0.0577347 ]</span>
-<span class="go"> [ 1.97658863  0.15120608]]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">test</span> <span class="o">=</span> <span class="n">Bed</span><span class="p">(</span><span class="s">&#39;../../tests/datasets/all_chr.maf0.001.N300&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">,:]</span><span class="o">.</span><span class="n">read</span><span class="p">()</span> <span class="c"># read SNP values for the first iid</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">test</span> <span class="o">=</span> <span class="n">test</span><span class="o">.</span><span class="n">standardize</span><span class="p">(</span><span class="n">unittrained</span><span class="p">)</span> <span class="c"># Use the mean and stddev of the train data to unit standardize the test data.</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">test</span><span class="o">.</span><span class="n">val</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
-<span class="go">0.229819279888</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">snpdata1</span> <span class="o">=</span> <span class="n">Bed</span><span class="p">(</span><span class="s">&#39;../../tests/datasets/all_chr.maf0.001.N300&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">standardize</span><span class="p">(</span><span class="n">Unit</span><span class="p">())</span><span class="o">.</span><span class="n">standardize</span><span class="p">(</span><span class="n">DiagKtoN</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">kernel1</span> <span class="o">=</span> <span class="n">snpdata1</span><span class="o">.</span><span class="n">read_kernel</span><span class="p">(</span><span class="n">Identity</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">kernel1</span><span class="o">.</span><span class="n">val</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+<span class="go">300.0</span>
+</pre></div>
+</div>
+<p>Example of DiagKtoN to <a class="reference internal" href="#pysnptools.kernelreader.KernelData" title="pysnptools.kernelreader.KernelData"><code class="xref py py-class docutils literal"><span class="pre">KernelData</span></code></a>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pysnptools.standardizer</span> <span class="kn">import</span> <span class="n">DiagKtoN</span><span class="p">,</span> <span class="n">Unit</span><span class="p">,</span> <span class="n">Identity</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pysnptools.snpreader</span> <span class="kn">import</span> <span class="n">Bed</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">snpdata1</span> <span class="o">=</span> <span class="n">Bed</span><span class="p">(</span><span class="s">&#39;../../tests/datasets/all_chr.maf0.001.N300&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">standardize</span><span class="p">(</span><span class="n">Unit</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">kernel1</span> <span class="o">=</span> <span class="n">snpdata1</span><span class="o">.</span><span class="n">read_kernel</span><span class="p">(</span><span class="n">DiagKtoN</span><span class="p">(),</span><span class="n">block_size</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">kernel1</span><span class="o">.</span><span class="n">val</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+<span class="go">300.0</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="kernelstandardizer-diagktontrained">
+<h3><code class="xref py py-class docutils literal"><span class="pre">kernelstandardizer.DiagKtoNTrained</span></code><a class="headerlink" href="#kernelstandardizer-diagktontrained" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="pysnptools.kernelstandardizer.DiagKtoNTrained">
+<em class="property">class </em><code class="descclassname">pysnptools.kernelstandardizer.</code><code class="descname">DiagKtoNTrained</code><span class="sig-paren">(</span><em>factor</em><span class="sig-paren">)</span><a class="headerlink" href="#pysnptools.kernelstandardizer.DiagKtoNTrained" title="Permalink to this definition">¶</a></dt>
+<dd><p>Both a <a class="reference internal" href="#pysnptools.standardizer.Standardizer" title="pysnptools.standardizer.Standardizer"><code class="xref py py-class docutils literal"><span class="pre">Standardizer</span></code></a> and a A <a class="reference internal" href="#pysnptools.kernelstandardizer.KernelStandardizer" title="pysnptools.kernelstandardizer.KernelStandardizer"><code class="xref py py-class docutils literal"><span class="pre">KernelStandardizer</span></code></a>.</p>
+<p>When applied to a <a class="reference internal" href="#pysnptools.snpreader.SnpData" title="pysnptools.snpreader.SnpData"><code class="xref py py-class docutils literal"><span class="pre">SnpData</span></code></a>, DiagKtoN standardizes one set of SNP data based on another set of SNP data.</p>
+<p>When applied to a <a class="reference internal" href="#pysnptools.kernelreader.KernelData" title="pysnptools.kernelreader.KernelData"><code class="xref py py-class docutils literal"><span class="pre">KernelData</span></code></a>, DiagKtoN standardizes one kernel data based on another kernel data.</p>
+<p>See <a class="reference internal" href="#pysnptools.standardizer.Standardizer" title="pysnptools.standardizer.Standardizer"><code class="xref py py-class docutils literal"><span class="pre">Standardizer</span></code></a> for more information about standardization.</p>
+<dl class="docutils">
+<dt><strong>Constructor:</strong></dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>factor</strong> (<em>float</em>) &#8211; The number what when multiplied into the kernel values will make the diagonal of the kernel values to  sum to iid_count.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="kernelstandardizer-identity">
+<h3><code class="xref py py-class docutils literal"><span class="pre">kernelstandardizer.Identity</span></code><a class="headerlink" href="#kernelstandardizer-identity" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="pysnptools.kernelstandardizer.Identity">
+<em class="property">class </em><code class="descclassname">pysnptools.kernelstandardizer.</code><code class="descname">Identity</code><a class="headerlink" href="#pysnptools.kernelstandardizer.Identity" title="Permalink to this definition">¶</a></dt>
+<dd><p>A <a class="reference internal" href="#pysnptools.kernelstandardizer.KernelStandardizer" title="pysnptools.kernelstandardizer.KernelStandardizer"><code class="xref py py-class docutils literal"><span class="pre">KernelStandardizer</span></code></a> that does nothing to kernel data.</p>
+<p>See <a class="reference internal" href="#pysnptools.kernelstandardizer.KernelStandardizer" title="pysnptools.kernelstandardizer.KernelStandardizer"><code class="xref py py-class docutils literal"><span class="pre">KernelStandardizer</span></code></a> for more information about standardization.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pysnptools.kernelstandardizer</span> <span class="kn">import</span> <span class="n">Identity</span> <span class="k">as</span> <span class="n">KS_Identity</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pysnptools.kernelreader</span> <span class="kn">import</span> <span class="n">KernelNpz</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">kerneldata1</span> <span class="o">=</span> <span class="n">KernelNpz</span><span class="p">(</span><span class="s">&#39;../examples/toydata.kernel.npz&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">kerneldata1</span><span class="o">.</span><span class="n">val</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+<span class="go">5000000.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">kerneldata1</span> <span class="o">=</span> <span class="n">kerneldata1</span><span class="o">.</span><span class="n">standardize</span><span class="p">(</span><span class="n">KS_Identity</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">kerneldata1</span><span class="o">.</span><span class="n">val</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+<span class="go">5000000.0</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -4733,7 +4957,7 @@ Moreover, the row and col data is read from file only once.</p>
 <h3><code class="xref py py-class docutils literal"><span class="pre">pstreader.PstData</span></code><a class="headerlink" href="#pstreader-pstdata" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="pysnptools.pstreader.PstData">
-<em class="property">class </em><code class="descclassname">pysnptools.pstreader.</code><code class="descname">PstData</code><span class="sig-paren">(</span><em>row</em>, <em>col</em>, <em>val</em>, <em>row_property=None</em>, <em>col_property=None</em>, <em>parent_string=''</em>, <em>copyinputs_function=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pysnptools.pstreader.PstData" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">pysnptools.pstreader.</code><code class="descname">PstData</code><span class="sig-paren">(</span><em>row</em>, <em>col</em>, <em>val</em>, <em>row_property=None</em>, <em>col_property=None</em>, <em>name=None</em>, <em>parent_string=None</em>, <em>copyinputs_function=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pysnptools.pstreader.PstData" title="Permalink to this definition">¶</a></dt>
 <dd><p>A <a class="reference internal" href="#pysnptools.pstreader.PstReader" title="pysnptools.pstreader.PstReader"><code class="xref py py-class docutils literal"><span class="pre">PstReader</span></code></a> for holding values in-memory, along with related row and col information.
 It is usually created by calling the <a class="reference internal" href="#pysnptools.pstreader.PstReader.read" title="pysnptools.pstreader.PstReader.read"><code class="xref py py-meth docutils literal"><span class="pre">PstReader.read()</span></code></a> method on another <a class="reference internal" href="#pysnptools.pstreader.PstReader" title="pysnptools.pstreader.PstReader"><code class="xref py py-class docutils literal"><span class="pre">PstReader</span></code></a>, for example, <a class="reference internal" href="#pysnptools.pstreader.PstNpz" title="pysnptools.pstreader.PstNpz"><code class="xref py py-class docutils literal"><span class="pre">PstNpz</span></code></a>. It can also be constructed.</p>
 <p>See <a class="reference internal" href="#pysnptools.pstreader.PstReader" title="pysnptools.pstreader.PstReader"><code class="xref py py-class docutils literal"><span class="pre">PstReader</span></code></a> for details and examples.</p>
@@ -4749,7 +4973,7 @@ It is usually created by calling the <a class="reference internal" href="#pysnpt
 <li><strong>val</strong> (a 2-D array of floats) &#8211; The values</li>
 <li><strong>row_property</strong> (optional, an array of anything) &#8211; Additional information associated with each row.</li>
 <li><strong>col_property</strong> (optional, an array of strings) &#8211; Additional information associated with each col.</li>
-<li><strong>parent_string</strong> (optional, string) &#8211; Information to be display about the origin of this data</li>
+<li><strong>name</strong> (optional, string) &#8211; Information to be display about the origin of this data</li>
 <li><strong>copyinputs_function</strong> (optional, function) &#8211; <em>Used internally by optional clustering code</em></li>
 </ul>
 </td>
@@ -4769,7 +4993,7 @@ It is usually created by calling the <a class="reference internal" href="#pysnpt
 <p><strong>Equality:</strong></p>
 <blockquote>
 <div><p>Two PstData objects are equal if their five arrays (<a class="reference internal" href="#pysnptools.pstreader.PstReader.row" title="pysnptools.pstreader.PstReader.row"><code class="xref py py-attr docutils literal"><span class="pre">row</span></code></a>, <a class="reference internal" href="#pysnptools.pstreader.PstReader.col" title="pysnptools.pstreader.PstReader.col"><code class="xref py py-attr docutils literal"><span class="pre">col</span></code></a>, <a class="reference internal" href="#pysnptools.pstreader.PstData.val" title="pysnptools.pstreader.PstData.val"><code class="xref py py-attr docutils literal"><span class="pre">val</span></code></a>, <a class="reference internal" href="#pysnptools.pstreader.PstReader.row_property" title="pysnptools.pstreader.PstReader.row_property"><code class="xref py py-attr docutils literal"><span class="pre">PstReader.row_property</span></code></a>, and <a class="reference internal" href="#pysnptools.pstreader.PstReader.col_property" title="pysnptools.pstreader.PstReader.col_property"><code class="xref py py-attr docutils literal"><span class="pre">col_property</span></code></a>) are &#8216;array_equal&#8217;.
-(Their &#8216;parent_string&#8217; does not need to be the same).</p>
+(Their &#8216;name&#8217; does not need to be the same).</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -4992,9 +5216,16 @@ val, row, col, row_property, and col_property information in NPZ format.</p>
 <li><a class="reference internal" href="#standardizer-unit"><code class="docutils literal"><span class="pre">standardizer.Unit</span></code></a></li>
 <li><a class="reference internal" href="#standardizer-beta"><code class="docutils literal"><span class="pre">standardizer.Beta</span></code></a></li>
 <li><a class="reference internal" href="#standardizer-identity"><code class="docutils literal"><span class="pre">standardizer.Identity</span></code></a></li>
-<li><a class="reference internal" href="#standardizer-diag-k-to-n"><code class="docutils literal"><span class="pre">standardizer.diag_K_to_N</span></code></a></li>
+<li><a class="reference internal" href="#standardizer-diagkton"><code class="docutils literal"><span class="pre">standardizer.DiagKtoN</span></code></a></li>
 <li><a class="reference internal" href="#standardizer-unittrained"><code class="docutils literal"><span class="pre">standardizer.UnitTrained</span></code></a></li>
-<li><a class="reference internal" href="#id1"><code class="docutils literal"><span class="pre">standardizer.UnitTrained</span></code></a></li>
+<li><a class="reference internal" href="#standardizer-diagktontrained"><code class="docutils literal"><span class="pre">standardizer.DiagKtoNTrained</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#kernelstandardizer-module"><code class="docutils literal"><span class="pre">kernelstandardizer</span></code> Module</a><ul>
+<li><a class="reference internal" href="#kernelstandardizer-kernelstandardizer"><code class="docutils literal"><span class="pre">kernelstandardizer.KernelStandardizer</span></code></a></li>
+<li><a class="reference internal" href="#kernelstandardizer-diagkton"><code class="docutils literal"><span class="pre">kernelstandardizer.DiagKtoN</span></code></a></li>
+<li><a class="reference internal" href="#kernelstandardizer-diagktontrained"><code class="docutils literal"><span class="pre">kernelstandardizer.DiagKtoNTrained</span></code></a></li>
+<li><a class="reference internal" href="#kernelstandardizer-identity"><code class="docutils literal"><span class="pre">kernelstandardizer.Identity</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#module-pysnptools.pstreader"><code class="docutils literal"><span class="pre">pstreader</span></code> Module</a><ul>

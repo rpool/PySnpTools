@@ -22,19 +22,23 @@ class Identity(Standardizer):
     def __init__(self):
         pass
 
-    def standardize(self, snps, block_size=None, force_python_only=False):
+    def standardize(self, snps, block_size=None, return_trained=False, force_python_only=False):
         if block_size is not None:
             warnings.warn("block_size is deprecated (and not needed, since standardization is in-place", DeprecationWarning)
-        return snps
+        if return_trained:
+            return snps, self
+        else:
+            return snps
 
-    #changes snpdata.val in place
-    def _train_standardizer(self,snpdata,apply_in_place,force_python_only=False):
-        return self
-
+    @property
+    def is_constant(self):
+        return True        
 
     def __repr__(self): 
         return "{0}()".format(self.__class__.__name__)
 
+    def _merge_trained(self, trained_list):
+        return self
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)

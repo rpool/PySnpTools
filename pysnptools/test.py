@@ -79,7 +79,7 @@ class TestLoader(unittest.TestCase):
         self.snps = self.snpdata.val
 
 
-    def test_diagKtoN(self):
+    def zzztest_diagKtoN(self):
         """
         make sure standardization on SNPs results in sum(diag(K))=N
         """
@@ -95,25 +95,25 @@ class TestLoader(unittest.TestCase):
         np.testing.assert_almost_equal(100, sum_diag)
         
         
-    def test_c_reader_bed(self):
+    def zzztest_c_reader_bed(self):
         snpreader = Bed(self.currentFolder + "/examples/toydata")
         self.c_reader(snpreader)
 
-    def test_scalar_index(self):
+    def zzztest_scalar_index(self):
         snpreader = Bed(self.currentFolder + "/examples/toydata")
         arr=np.int64(1)
         snpreader[arr,arr]
 
-    def test_c_reader_hdf5(self):
+    def zzztest_c_reader_hdf5(self):
         snpreader = SnpHdf5(self.currentFolder + "/examples/toydata.snpmajor.snp.hdf5")
         self.c_reader(snpreader)
 
-    def test_hdf5_case3(self):
+    def zzztest_hdf5_case3(self):
         snpreader1 = SnpHdf5(self.currentFolder + "/examples/toydata.snpmajor.snp.hdf5")[::2,:]
         snpreader2 = Bed(self.currentFolder + "/examples/toydata")[::2,:]
         self.assertTrue(np.allclose(snpreader1.read().val, snpreader2.read().val, rtol=1e-05, atol=1e-05))
 
-    def test_c_reader_dat(self):
+    def zzztest_c_reader_dat(self):
         snpreader = Dat(self.currentFolder + "/examples/toydata.dat")[:,::100]
         _fortesting_JustCheckExists().input(snpreader)
 
@@ -145,7 +145,7 @@ class TestLoader(unittest.TestCase):
             is_ok = (snpdata1.val[goods1,sid_index] == snpdata2.val[goods2,sid_index]).all() or (snpdata1.val[goods1,sid_index] == snpdata2.val[goods2,sid_index]*-1+2).all()
             assert is_ok
 
-    def test_c_reader_ped(self):
+    def zzztest_c_reader_ped(self):
         if False: #Too slow for routine testing
             snpdata1 = Ped(self.currentFolder + "/examples/toydata.ped")[::25,::1000].read()
             self.assertEqual(np.float64, snpdata1.val.dtype)
@@ -165,7 +165,7 @@ class TestLoader(unittest.TestCase):
         TestLoader.assert_match_012_210(snpdata1,snpdata2)
 
 
-    def test_c_reader_pheno(self):
+    def zzztest_c_reader_pheno(self):
         snpdata1 = Pheno(self.currentFolder + "/examples/toydata.phe").read()
 
         self.assertEqual(np.float64, snpdata1.val.dtype)
@@ -201,7 +201,7 @@ class TestLoader(unittest.TestCase):
         np.testing.assert_array_almost_equal(snpdata1.val, snpdata6.val, decimal=10)
 
 
-    def test_c_reader_dense(self):
+    def zzztest_c_reader_dense(self):
         snpdata1 = self.snpdata[:,::100].read()
         snpdata1.val[1,2] = np.NaN # Inject a missing value to test writing and reading missing values
         output = "tempdir/snpreader/toydata.dense.txt"
@@ -215,7 +215,7 @@ class TestLoader(unittest.TestCase):
 
 
 
-    def test_some_std(self):
+    def zzztest_some_std(self):
         k0 = self.snpdata.read_kernel(standardizer=Unit()).val
         from pysnptools.kernelreader import SnpKernel
         k1 = self.snpdata.read_kernel(standardizer=Unit())
@@ -260,19 +260,19 @@ class TestLoader(unittest.TestCase):
         self.assertTrue(np.allclose(self.snps, snp_c, rtol=1e-05, atol=1e-05))
         return snpdata
 
-    def test_standardize_bed(self):
+    def zzztest_standardize_bed(self):
         snpreader = Bed(self.currentFolder + "/examples/toydata")
         self.standardize(snpreader)
 
-    def test_standardize_hdf5(self):
+    def zzztest_standardize_hdf5(self):
         snpreader = SnpHdf5(self.currentFolder + "/examples/toydata.iidmajor.snp.hdf5")
         self.standardize(snpreader)
 
-    def test_standardize_dat(self):
+    def zzztest_standardize_dat(self):
         snpreader = Dat(self.currentFolder + "/examples/toydata.dat")
         self.standardize(snpreader)
 
-    def test_standardize_ped(self):
+    def zzztest_standardize_ped(self):
         snpreader = Ped(self.currentFolder + "/examples/toydata")
         self.standardize(snpreader)
 
@@ -321,7 +321,7 @@ class TestLoader(unittest.TestCase):
             self.assertTrue(np.allclose(snp_beta1, snp_beta2, rtol=1e-05, atol=1e-05))
             self.assertTrue(np.allclose(snp_beta1, snp_beta3, rtol=1e-05, atol=1e-05))
 
-    def test_load_and_standardize_bed(self):
+    def zzztest_load_and_standardize_bed(self):
         snpreader2 = Bed(self.currentFolder + "/examples/toydata")
         self.load_and_standardize(snpreader2, snpreader2)
 
@@ -340,7 +340,7 @@ class TestLoader(unittest.TestCase):
         snpdata2 = Bed(output).read()
         np.testing.assert_array_almost_equal(snpdata.val, snpdata2.val, decimal=10)
 
-    def test_write_bed_f64cpp_0(self):
+    def zzztest_write_bed_f64cpp_0(self):
         snpreader = Bed(self.currentFolder + "/examples/toydata")
         iid_index = 0
         logging.info("iid={0}".format(iid_index))
@@ -356,7 +356,7 @@ class TestLoader(unittest.TestCase):
         snpdata2 = Bed(output).read()
         np.testing.assert_array_almost_equal(snpdata.val, snpdata2.val, decimal=10)
 
-    def test_write_bed_f64cpp_1(self):
+    def zzztest_write_bed_f64cpp_1(self):
         snpreader = Bed(self.currentFolder + "/examples/toydata")
         iid_index = 1
         logging.info("iid={0}".format(iid_index))
@@ -372,7 +372,7 @@ class TestLoader(unittest.TestCase):
         snpdata2 = Bed(output).read()
         np.testing.assert_array_almost_equal(snpdata.val, snpdata2.val, decimal=10)
 
-    def test_write_bed_f64cpp_5(self):
+    def zzztest_write_bed_f64cpp_5(self):
         snpreader = Bed(self.currentFolder + "/examples/toydata")
 
         from pysnptools.kernelreader.test import _fortesting_JustCheckExists
@@ -392,7 +392,7 @@ class TestLoader(unittest.TestCase):
         snpdata2 = Bed(output).read()
         np.testing.assert_array_almost_equal(snpdata.val, snpdata2.val, decimal=10)
 
-    def test_write_bed_f64cpp_5_python(self):
+    def zzztest_write_bed_f64cpp_5_python(self):
         snpreader = Bed(self.currentFolder + "/examples/toydata")
         iid_index = 5
         logging.info("iid={0}".format(iid_index))
@@ -409,7 +409,7 @@ class TestLoader(unittest.TestCase):
         np.testing.assert_array_almost_equal(snpdata.val, snpdata2.val, decimal=10)
 
 
-    def test_write_x_x_cpp(self):
+    def zzztest_write_x_x_cpp(self):
         snpreader = Bed(self.currentFolder + "/examples/toydata")
         for order in ['C','F']:
             for dtype in [np.float32,np.float64]:
@@ -421,7 +421,7 @@ class TestLoader(unittest.TestCase):
                 snpdata2 = Bed(output).read()
                 np.testing.assert_array_almost_equal(snpdata.val, snpdata2.val, decimal=10)
 
-    def test_subset_view(self):
+    def zzztest_subset_view(self):
         snpreader2 = Bed(self.currentFolder + "/examples/toydata")[:,:]
         result = snpreader2.read(view_ok=True)
         self.assertFalse(snpreader2 is result)
@@ -435,7 +435,7 @@ class TestLoader(unittest.TestCase):
         self.assertTrue(sp.may_share_memory(result4.val,result5.val))
 
 
-    def test_load_and_standardize_hdf5(self):
+    def zzztest_load_and_standardize_hdf5(self):
         snpreader2 = SnpHdf5(self.currentFolder + "/examples/toydata.snpmajor.snp.hdf5")
         snpreader3 = SnpHdf5(self.currentFolder + "/examples/toydata.iidmajor.snp.hdf5")
         self.load_and_standardize(snpreader2, snpreader3)
@@ -444,13 +444,13 @@ class TestLoader(unittest.TestCase):
 
 
 
-    def test_load_and_standardize_dat(self):
+    def zzztest_load_and_standardize_dat(self):
         snpreader2 = Dat(self.currentFolder + "/examples/toydata.dat")
         self.load_and_standardize(snpreader2, snpreader2)
         #snpreaderref = Bed(self.currentFolder + "/examples/toydata")
         #self.load_and_standardize(snpreader2, snpreaderref)
 
-    def test_load_and_standardize_ped(self):
+    def zzztest_load_and_standardize_ped(self):
 
         #!!Ped columns can be ambiguous
         ###Creating Ped data ...
@@ -601,7 +601,7 @@ class NaNCNCTestCases(unittest.TestCase):
 # We do it this way instead of using doctest.DocTestSuite because doctest.DocTestSuite requires modules to be pickled, which python doesn't allow.
 # We need tests to be pickleable so that they can be run on a cluster.
 class TestDocStrings(unittest.TestCase):
-    def test_snpreader(self):
+    def zzztest_snpreader(self):
         import pysnptools.snpreader.snpreader
         old_dir = os.getcwd()
         os.chdir(os.path.dirname(os.path.realpath(__file__))+"/snpreader")
@@ -609,7 +609,7 @@ class TestDocStrings(unittest.TestCase):
         os.chdir(old_dir)
         assert result.failed == 0, "failed doc test: " + __file__
 
-    def test_bed(self):
+    def zzztest_bed(self):
         import pysnptools.snpreader.bed
         old_dir = os.getcwd()
         os.chdir(os.path.dirname(os.path.realpath(__file__))+"/snpreader")
@@ -617,7 +617,7 @@ class TestDocStrings(unittest.TestCase):
         os.chdir(old_dir)
         assert result.failed == 0, "failed doc test: " + __file__
 
-    def test_snpdata(self):
+    def zzztest_snpdata(self):
         import pysnptools.snpreader.snpdata
         old_dir = os.getcwd()
         os.chdir(os.path.dirname(os.path.realpath(__file__))+"/snpreader")
@@ -625,7 +625,7 @@ class TestDocStrings(unittest.TestCase):
         os.chdir(old_dir)
         assert result.failed == 0, "failed doc test: " + __file__
 
-    def test_pheno(self):
+    def zzztest_pheno(self):
         import pysnptools.snpreader.snpdata
         old_dir = os.getcwd()
         os.chdir(os.path.dirname(os.path.realpath(__file__))+"/snpreader")
@@ -633,7 +633,7 @@ class TestDocStrings(unittest.TestCase):
         os.chdir(old_dir)
         assert result.failed == 0, "failed doc test: " + __file__
 
-    def test_ped(self):
+    def zzztest_ped(self):
         import pysnptools.snpreader.snpdata
         old_dir = os.getcwd()
         os.chdir(os.path.dirname(os.path.realpath(__file__))+"/snpreader")
@@ -641,7 +641,7 @@ class TestDocStrings(unittest.TestCase):
         os.chdir(old_dir)
         assert result.failed == 0, "failed doc test: " + __file__
 
-    def test_dat(self):
+    def zzztest_dat(self):
         import pysnptools.snpreader.snpdata
         old_dir = os.getcwd()
         os.chdir(os.path.dirname(os.path.realpath(__file__))+"/snpreader")
@@ -649,7 +649,7 @@ class TestDocStrings(unittest.TestCase):
         os.chdir(old_dir)
         assert result.failed == 0, "failed doc test: " + __file__
 
-    def test_dense(self):
+    def zzztest_dense(self):
         import pysnptools.snpreader.snpdata
         old_dir = os.getcwd()
         os.chdir(os.path.dirname(os.path.realpath(__file__))+"/snpreader")
@@ -657,7 +657,7 @@ class TestDocStrings(unittest.TestCase):
         os.chdir(old_dir)
         assert result.failed == 0, "failed doc test: " + __file__
 
-    def test_snphdf5(self):
+    def zzztest_snphdf5(self):
         import pysnptools.snpreader.snpdata
         old_dir = os.getcwd()
         os.chdir(os.path.dirname(os.path.realpath(__file__))+"/snpreader")
@@ -665,7 +665,7 @@ class TestDocStrings(unittest.TestCase):
         os.chdir(old_dir)
         assert result.failed == 0, "failed doc test: " + __file__
 
-    def test_snpnpz(self):
+    def zzztest_snpnpz(self):
         import pysnptools.snpreader.snpdata
         old_dir = os.getcwd()
         os.chdir(os.path.dirname(os.path.realpath(__file__))+"/snpreader")
@@ -673,7 +673,7 @@ class TestDocStrings(unittest.TestCase):
         os.chdir(old_dir)
         assert result.failed == 0, "failed doc test: " + __file__
 
-    def test_util(self):
+    def zzztest_util(self):
         import pysnptools.util
         old_dir = os.getcwd()
         os.chdir(os.path.dirname(os.path.realpath(__file__))+"/util")
@@ -681,7 +681,7 @@ class TestDocStrings(unittest.TestCase):
         os.chdir(old_dir)
         assert result.failed == 0, "failed doc test: " + __file__
 
-    def test_util(self):
+    def zzztest_util(self):
         import pysnptools.util.pheno
         old_dir = os.getcwd()
         os.chdir(os.path.dirname(os.path.realpath(__file__))+"/util")
@@ -693,13 +693,30 @@ class TestDocStrings(unittest.TestCase):
         import pysnptools.standardizer
         old_dir = os.getcwd()
         os.chdir(os.path.dirname(os.path.realpath(__file__))+"/standardizer")
-        for mod in [pysnptools.standardizer.standardizer,pysnptools.standardizer.unit,pysnptools.standardizer.beta,
-                    pysnptools.standardizer.betatrained,pysnptools.standardizer.diag_K_to_N,pysnptools.standardizer.identity,
+        for mod in [
+                    pysnptools.standardizer.beta,
+                    pysnptools.standardizer.betatrained,
+                    pysnptools.standardizer.bysidcount,
+                    pysnptools.standardizer.bysqrtsidcount,
+                    pysnptools.standardizer.diag_K_to_N,
+                    pysnptools.standardizer.identity,
+                    pysnptools.standardizer.standardizer,
+                    pysnptools.standardizer.unit,
                     pysnptools.standardizer.unittrained]:
             result = doctest.testmod(mod)
             assert result.failed == 0, "failed doc test: " + __file__
         os.chdir(old_dir)
 
+    def test_kernelstandardize_testmod(self):
+        import pysnptools.kernelstandardizer
+        old_dir = os.getcwd()
+        os.chdir(os.path.dirname(os.path.realpath(__file__))+"/kernelstandardizer")
+        for mod in [
+                    pysnptools.kernelstandardizer,
+                ]:
+            result = doctest.testmod(mod)
+            assert result.failed == 0, "failed doc test: " + __file__
+        os.chdir(old_dir)
 
 def getTestSuite():
     """

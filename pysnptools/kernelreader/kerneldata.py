@@ -5,6 +5,8 @@ import pandas as pd
 import logging
 from kernelreader import KernelReader
 from pysnptools.pstreader import PstData
+from pysnptools.kernelstandardizer import Identity as KS_Identity
+from pysnptools.kernelstandardizer import DiagKtoN
 
 class KernelData(KernelReader,PstData):
     """A :class:`.KernelReader` for holding kernel values in-memory, along with related iid information.
@@ -19,7 +21,7 @@ class KernelData(KernelReader,PstData):
                      * **iid0** (an array of strings) -- The :attr:`KernelReader.iid0` information
                      * **iid1** (an array of strings) -- The :attr:`KernelReader.iid1` information
                      * **val** (a 2-D array of floats) -- The SNP values
-                     * **parent_string** (optional, string) -- Information to be display about the origin of this data
+                     * **name** (optional, string) -- Information to be display about the origin of this data
 
         If *iid* is provided, don't provide *iid0* and *iid1*. Likewise, if *iid0* and *iid1* are provided, don't provide *iid*.
 
@@ -33,7 +35,7 @@ class KernelData(KernelReader,PstData):
     **Equality:**
 
         Two KernelData objects are equal if their three arrays (:attr:`.iid0`, :attr:`.iid1`, and :attr:`.val`) are 'array_equal'.
-        (Their 'parent_string' does not need to be the same).
+        (Their 'string' does not need to be the same).
 
         :Example:
 
@@ -52,9 +54,12 @@ class KernelData(KernelReader,PstData):
 
     **Methods beyond** :class:`.KernelReader`
     """
-    def __init__(self, iid=None, iid0=None, iid1=None, val=None, parent_string=""): #!!!autodoc doesn't generate good doc for this constructor
+    def __init__(self, iid=None, iid0=None, iid1=None, val=None, name=None, parent_string=None): #!!!autodoc doesn't generate good doc for this constructor
         #!!why does SnpData __init__ have a copy_inputs, but KernelData doesn't?
         assert (iid is None) != (iid0 is None and iid1 is None), "Either 'iid' or both 'iid0' 'iid1' must be provided."
+        assert name is None or parent_string is None, "Can't set both 'name' and the deprecated 'parent_string'"
+        if parent_string is not None:
+            warnings.warn("'parent_string' is deprecated. Use 'name'", DeprecationWarning)
 
         if iid is not None:
             self._row = PstData._fixup_input(iid,empty_creator=lambda ignore:np.empty([0,2],dtype=str))
@@ -67,7 +72,7 @@ class KernelData(KernelReader,PstData):
         self.val = PstData._fixup_input_val(val,row_count=len(self._row),col_count=len(self._col),empty_creator=lambda row_count,col_count:np.empty([row_count,col_count],dtype=np.float64))
 
         self._assert_iid0_iid1()
-        self._parent_string = parent_string
+        self._name = name or parent_string or ""
         self._std_string_list = []
 
     val = None
@@ -80,7 +85,7 @@ class KernelData(KernelReader,PstData):
     """
 
     #!! SnpData.standardize() changes the str to help show that the data has been standardized. Should this to that too?
-    def standardize(self):
+    def standardize(self, standardizer=DiagKtoN(), return_trained=False, force_python_only=False):
         """Does in-place standardization of the in-memory
         kernel data. The method multiples the values with a scalar factor such that the diagonal sums to iid_count. Although it works in place, for convenience
         it also returns the KernelData.
@@ -101,10 +106,7 @@ class KernelData(KernelReader,PstData):
         >>> print np.diag(kerneldata2.val).sum()
         500.0
         """
-        factor = float(self.iid_count) / np.diag(self.val).sum()
-        if abs(factor-1.0)>1e-15:
-            self.val *= factor
-        return self
+        return standardizer.standardize(self, return_trained=return_trained, force_python_only=force_python_only)
 
 
 if __name__ == "__main__":

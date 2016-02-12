@@ -434,7 +434,7 @@ class PstReader(object):
         """
         val = self._read(None, None, order, dtype, force_python_only, view_ok)
         from pstdata import PstData
-        ret = PstData(self.row, self.col, val, row_property=self.row_property, col_property=self.col_property, parent_string=str(self))
+        ret = PstData(self.row, self.col, val, row_property=self.row_property, col_property=self.col_property, name=str(self))
         return ret
 
     def row_to_index(self, list):
@@ -458,7 +458,8 @@ class PstReader(object):
             self._row_to_index = {}
             for index, item in enumerate(self.row):
                 key = PstReader._makekey(item)
-                if self._row_to_index.has_key(key) : raise Exception("Expect row to appear in data only once. ({0})".format(key))
+                if self._row_to_index.has_key(key):
+                   raise Exception("Expect row to appear in data only once. ({0})".format(key))
                 self._row_to_index[key] = index
         index = np.fromiter((self._row_to_index[PstReader._makekey(item1)] for item1 in list),np.int)
         return index

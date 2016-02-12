@@ -22,6 +22,20 @@ class Standardizer(object):
     >>> print kerneldata.val[0,0]
     9923.06992842
 
+
+    Can also return a constant SNP standardizer that can be applied to other :class:`.SnpData`.
+
+    >>> snp_whole = Bed('../../tests/datasets/all_chr.maf0.001.N300')
+    >>> train_idx, test_idx = range(10,snp_whole.iid_count), range(0,10) #test on the first 10, train on the rest
+    >>> snp_train, trained_standardizer = Unit().standardize(snp_whole[train_idx,:].read(),return_trained=True)
+    >>> print snp_train.val[0,0]
+    0.233549683248
+    >>> print trained_standardizer.stats[0,:] #The mean and stddev of the 1st SNP on the training data
+    [ 1.94827586  0.22146953]
+    >>> snp_test = snp_whole[test_idx,:].read().standardize(trained_standardizer)
+    >>> snp_test.val[0,0]
+    0.23354968324845735
+
     Standardize any Numpy array.
 
     >>> val = Bed('../../tests/datasets/all_chr.maf0.001.N300').read().val
@@ -34,33 +48,29 @@ class Standardizer(object):
     Details of Methods & Properties:
     '''
 
-    def standardize(self, snps, block_size=None, force_python_only=False):
+    def standardize(self, snps, block_size=None, return_trained=False, force_python_only=False):
         '''
-        Applies standardization, in place, to an NumPy array of SNP data. For convenience also returns the array.
+        Applies standardization, in place, to :class:`.SnpData` (or a NumPy array). For convenience also returns the :class:`.SnpData` (or a NumPy array).
 
-        :param snps: An array of snp data.
-        :type snps: NumPy array
+        :param snps: SNP values to standardize
+        :type snps: :class:`.SnpData` (or a NumPy array)
 
         :param block_size: *Not used*
         :type block_size: None
+
+        :param return_trained: If true, returns a second value containing a constant standardizer trained on this data.
+        :type return_trained: boolean
 
         :param force_python_only: optional -- If False (default), may use outside library code. If True, requests that the read
             be done without outside library code.
         :type force_python_only: bool
 
-        :rtype: NumPy array
-
+        :rtype: :class:`.SnpData` (or a NumPy array), (optional) constant :class:`.Standardizer`
 
         '''
         if block_size is not None:
             warnings.warn("block_size is deprecated (and not needed, since standardization is in-place", DeprecationWarning)
         raise NotImplementedError("subclass {0} needs to implement method '.standardize'".format(self.__class__.__name__))
-
-    def _train_standardizer(self,snpdata,apply_in_place,force_python_only=False):
-        if apply_in_place:
-            self.standardize(snpdata.val, force_python_only=force_python_only)
-        from pysnptools.standardizer._cannotbetrained import _CannotBeTrained
-        return _CannotBeTrained(self.__class__.__name__)
 
     @staticmethod
     #changes snps in place
@@ -74,7 +84,7 @@ class Standardizer(object):
             stats = np.empty([snps.shape[1],2],dtype=snps.dtype,order="F" if snps.flags["F_CONTIGUOUS"] else "C")
         elif not (
              stats.dtype == snps.dtype   #stats must have the same dtype as snps
-             and (stats.flags["OWNDATA"] or stats.base.nbytes == snps.nbytes) # stats must own its data
+             and (stats.flags["OWNDATA"]) # stats must own its data
              and (snps.flags["C_CONTIGUOUS"] and stats.flags["C_CONTIGUOUS"]) or (snps.flags["F_CONTIGUOUS"] and stats.flags["F_CONTIGUOUS"]) #stats must have the same order as snps
              ):
             stats = np.array(stats,dtype=snps.dtype,order="F" if snps.flags["F_CONTIGUOUS"] else "C")
@@ -140,6 +150,16 @@ class Standardizer(object):
             snps[imissX] = 0
     
 
+    @property
+    def is_constant(self):
+        '''
+        Tell if a standardizer's statistics are constant. For example, :class:`.Unit_Trained` contains a pre-specified mean and stddev for each SNP, so :attr:`Unit_Trained.is_constant` is True.
+        :class:`.Unit`, on the other hand, measures the mean and stddev for each SNP, so :attr:`Unit.is_constant` is False.
+
+        :rtype: bool
+        '''
+        return False        
+
     @staticmethod
     def _standardize_beta_python(snps, betaA, betaB, apply_in_place, use_stats, stats):
         '''
@@ -176,6 +196,22 @@ class Standardizer(object):
             snps[imissX] = 0.0
             if use_stats: #If we're applying to test data, set any variables with to 0 if they have no variation in the training data.
                 snps[:,snp_std==np.inf] = 0.0
+
+    def _merge_trained(self, trained_list):
+        raise Exception("Not defined")
+
+class _CannotBeTrained(Standardizer):
+
+    def __init__(self, name):
+        self.name=name
+
+    def __repr__(self): 
+        return "{0}({1})".format(self.__class__.__name__,self.name)
+
+    def standardize(self, snps, block_size=None, return_trained=False, force_python_only=False):
+        if block_size is not None:
+            warnings.warn("block_size is deprecated (and not needed, since standardization is in-place", DeprecationWarning)
+        raise Exception("Standardizer '{0}' cannot be trained",self)
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)

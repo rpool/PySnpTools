@@ -42,6 +42,17 @@ class TestLoader(unittest.TestCase):
     def setUpClass(self):
         self.currentFolder = os.path.dirname(os.path.realpath(__file__))
 
+    def test_merge_std(self):
+        #unit vs beta
+        for std in [stdizer.Beta(2,10),stdizer.Unit()]:
+            np.random.seed(0)
+            snp_count = 20
+            snpreader = SnpData(iid=[["0","0"],["1","1"],["2","2"]],sid=[str(i) for i in xrange(snp_count)],val=np.array(np.random.randint(3,size=[3,snp_count]),dtype=np.float64,order='F'))
+            kerneldata0,trained0,diag0 = SnpKernel(snpreader,std,block_size=1)._read_with_standardizing(to_kerneldata=True,return_trained=True)
+            kerneldata1,trained1,diag1 = SnpKernel(snpreader,std,block_size=None)._read_with_standardizing(to_kerneldata=True,return_trained=True)
+            np.testing.assert_array_almost_equal(kerneldata0.val,kerneldata1.val, decimal=10)
+            np.testing.assert_array_almost_equal(trained0.stats,trained1.stats, decimal=10)
+            assert abs(diag0.factor-diag1.factor) < 1e-7
     
     def test_cpp_std(self):
 
@@ -67,48 +78,36 @@ class TestLoader(unittest.TestCase):
                                     snpreader0.val[0,2]=np.nan
                                     snpreader1.val[0,2]=np.nan
 
-                                #apply in place or not
-                                for apply_in_place in [True,False]:
-                                    #gather stats vs not
-                                    cppa = snpreader0.read(order=order,dtype=dtype)
-                                    pya = snpreader0.read(order=order,dtype=dtype)
-                                    stdcppa = std._train_standardizer(cppa,apply_in_place=apply_in_place,force_python_only=False)
-                                    stdpya = std._train_standardizer(pya,apply_in_place=apply_in_place,force_python_only=True)
-                                    np.testing.assert_array_almost_equal(cppa.val, pya.val, decimal=10 if dtype==np.float64 else 5)
+                                #gather stats vs not
+                                cppa, stdcppa = snpreader0.read(order=order,dtype=dtype).standardize(std,return_trained=True,force_python_only=False)
+                                pya, stdpya = snpreader0.read(order=order,dtype=dtype).standardize(std,return_trained=True,force_python_only=True)
+                                np.testing.assert_array_almost_equal(cppa.val, pya.val, decimal=10 if dtype==np.float64 else 5)
 
-                                    if not apply_in_place:
-                                        np.testing.assert_array_almost_equal(cppa.val, snpreader0.val, decimal=10 if dtype==np.float64 else 5)
-                                    np.testing.assert_array_almost_equal(stdcppa.stats,stdpya.stats, decimal=10 if dtype==np.float64 else 5)
-                                    assert (np.inf in stdcppa.stats[:,1]) == has_SNC_in_train
-                                    assert (np.inf in stdpya.stats[:,1]) == has_SNC_in_train
+                                np.testing.assert_array_almost_equal(stdcppa.stats,stdpya.stats, decimal=10 if dtype==np.float64 else 5)
+                                assert (np.inf in stdcppa.stats[:,1]) == has_SNC_in_train
+                                assert (np.inf in stdpya.stats[:,1]) == has_SNC_in_train
 
-                                    if has_SNC_in_train and apply_in_place:
-                                        assert np.array_equal(cppa.val[:,1],np.zeros([cppa.val.shape[0]]))
-                                        assert np.array_equal(pya.val[:,1],np.zeros([pya.val.shape[0]]))
+                                if has_SNC_in_train:
+                                    assert np.array_equal(cppa.val[:,1],np.zeros([cppa.val.shape[0]]))
+                                    assert np.array_equal(pya.val[:,1],np.zeros([pya.val.shape[0]]))
 
-                                    if has_missing_data:
-                                        if apply_in_place:
-                                            assert 0 == cppa.val[0,2]
-                                            assert 0 == pya.val[0,2]
-                                        else:
-                                            assert np.isnan(cppa.val[0,2])
-                                            assert np.isnan(pya.val[0,2])
+                                if has_missing_data:
+                                    assert 0 == cppa.val[0,2]
+                                    assert 0 == pya.val[0,2]
                                         
-                                    #uses stats
-                                    cppb = snpreader1.read(order=order,dtype=dtype)
-                                    pyb = snpreader1.read(order=order,dtype=dtype)
-                                    stdcppa._train_standardizer(cppb,apply_in_place=True,force_python_only=False)
-                                    stdpya._train_standardizer(pyb,apply_in_place=True,force_python_only=True)
-                                    np.testing.assert_array_almost_equal(cppb.val, pyb.val, decimal=10 if dtype==np.float64 else 5)
-                                    np.testing.assert_array_almost_equal(stdcppa.stats,stdpya.stats, decimal=10 if dtype==np.float64 else 5) #Make sure we haven't messed up the train stats
+                                #uses stats
+                                cppb = snpreader1.read(order=order,dtype=dtype).standardize(stdcppa,force_python_only=False)
+                                pyb = snpreader1.read(order=order,dtype=dtype).standardize(stdpya,force_python_only=True)
+                                np.testing.assert_array_almost_equal(cppb.val, pyb.val, decimal=10 if dtype==np.float64 else 5)
+                                np.testing.assert_array_almost_equal(stdcppa.stats,stdpya.stats, decimal=10 if dtype==np.float64 else 5) #Make sure we haven't messed up the train stats
 
-                                    if has_SNC_in_train:
-                                        assert np.array_equal(cppb.val[:,1],np.zeros([cppb.val.shape[0]]))
-                                        assert np.array_equal(pyb.val[:,1],np.zeros([pyb.val.shape[0]]))
+                                if has_SNC_in_train:
+                                    assert np.array_equal(cppb.val[:,1],np.zeros([cppb.val.shape[0]]))
+                                    assert np.array_equal(pyb.val[:,1],np.zeros([pyb.val.shape[0]]))
 
-                                    if has_missing_data:
-                                        assert cppb.val[0,2]==0
-                                        assert pyb.val[0,2]==0
+                                if has_missing_data:
+                                    assert cppb.val[0,2]==0
+                                    assert pyb.val[0,2]==0
         logging.info("done with 'test_cpp_std'")
 
 
@@ -123,7 +122,7 @@ class TestLoader(unittest.TestCase):
         from pysnptools.util import intersect_apply
 
         snps_all = Bed(self.currentFolder + "/../examples/toydata")
-        k = SnpKernel(snps_all,Unit())
+        k = SnpKernel(snps_all,stdizer.Identity())
 
         pheno = Pheno(self.currentFolder + "/../examples/toydata.phe")
         pheno = pheno[1:,:] # To test intersection we remove a iid from pheno
@@ -133,60 +132,11 @@ class TestLoader(unittest.TestCase):
 
         #What happens with fancy selection?
         k2 = k[::2]
-        assert isinstance(k2,KernelSubset)
+        assert isinstance(k2,SnpKernel)
 
         logging.info("Done with test_intersection")
 
 
-
-
-
-
-    def test_demo_kernel(self):
-
-        from sklearn import cross_validation
-        from pysnptools.standardizer import Unit
-
-        snps_all = Bed(self.currentFolder + "/../examples/toydata")
-
-        k_fold = cross_validation.KFold(n=snps_all.iid_count, n_folds=10, shuffle=True, random_state=0)
-        for train_index, test_index in k_fold:
-            snps_train = snps_all[train_index,:]
-            snps_test = snps_all[test_index,:]
-
-            # returns a snps_train.iid_count x snps_train.iid_count KernelData
-            kernel_train = snps_train.read_kernel(standardizer=Unit(),block_size=1000)
-            #     '.val' is the ndarray. 'iid' is the list of iids.
-            #     We require that the 'standardizer' be given explicitly because both 'Unit()' and 'Identity()' is reasonable.
-            #     By giving a block_size, we tell it read only 10 SNPs at a time, standardizing on the fly.
-
-            # returns a snps_train.iid_count x snps_test.iid_count KernelData
-            kernel_test = snps_train.read_kernel(standardizer=Unit(),test=snps_test,block_size=1000)
-            #     By giving a 'reference' we tell it to standardize 'snps_test' according to 'snps_train'.
-            #     '.val' is the ndarray. 'iid0' is the list of test iids, 'iid1' is the list of train iids.
-            #     By giving a block_size, we tell it read everything from disk again, only 10 SNPs at a time, standardizing on the fly.
-
-
-
-
-
-        ## Returns a 40 x 40 kernel
-        #kernel_0_0 = bed0.read_kernel(standardizer=Unit()) 
-        ## '.val' is the ndarray. 'iid' is the list of iids.
-        ## We require that the 'standardizer' be given explicitly because both 'Unit()' and 'Identity()' is reasonable. ???????
-
-        ##This will return a 40 x 1 kernel.
-        #kernel_0_1 = bed1.read_kernel(reference=bed0,standardizer=Unit())
-        ##SHOULD IT BE?
-        #kernel_0_1 = bed0.read_kernel(snpreader1=bed1,standardizer=Unit())
-        ## OR  1 x 40
-        #kernel_1_0 = bed1.read_kernel(reference=bed0,standardizer=Unit())
-
-        ## The standardization of the snps will be based only on the reference.
-        ##      In other words, for each snp, the mean and std from the bed0
-        ##      will be applied to bed1. bed1's values won't be used to determine the mean or std.
-        ## '.val' is the ndarray. 'iid0' is the list of iids from bed0 and 'iid1' will be the iids from bed1.
-     
 
 
 
@@ -201,8 +151,7 @@ class TestLoader(unittest.TestCase):
                         for snpreader0 in [snpdataX,snpdataX[:,1:]]:
                             snpreader1 = snpreader0[1:,:]
 
-                            refdata0 = snpreader0.read()
-                            trained_standardizer = refdata0.train_standardizer(apply_in_place=True,standardizer=stdx,force_python_only=True)
+                            refdata0, trained_standardizer = snpreader0.read().standardize(stdx,return_trained=True,force_python_only=True)
                             refval0 = refdata0.val.dot(refdata0.val.T)
                             refdata1 = snpreader1.read().standardize(trained_standardizer,force_python_only=True)
                             refval1 = refdata0.val.dot(refdata1.val.T)
@@ -211,30 +160,6 @@ class TestLoader(unittest.TestCase):
                                     k = snpreader0.read_kernel(standardizer=stdx,block_size=1,order=order_goal,dtype=dtype_goal)
                                     PstReader._array_properties_are_ok(k.val,order_goal,dtype_goal)
                                     np.testing.assert_array_almost_equal(refval0,k.val, decimal=min(decimal_start,decimal_goal))
-                                    k1 = snpreader0.read_kernel(standardizer=stdx,test=snpreader1,block_size=1,order=order_goal,dtype=dtype_goal)
-                                    PstReader._array_properties_are_ok(k1.val,order_goal,dtype_goal)
-                                    np.testing.assert_array_almost_equal(refval1,k1.val, decimal=min(decimal_start,decimal_goal))
-
-
-    def test_respect_nonsquare(self):
-        np.random.seed(0)
-        snp_count = 20
-        snpdata0 = SnpData(iid=[["0","0"],["1","1"],["2","2"]],sid=[str(i) for i in xrange(snp_count)],val=np.array(np.random.randint(3,size=[3,snp_count]),dtype=np.float64))
-        snpdata1 = SnpData(iid=[["3","3"],["4","4"]],sid=[str(i) for i in xrange(snp_count)],val=np.array(np.random.randint(3,size=[2,snp_count]),dtype=np.float64))
-        #create kernel for snpdata0 x snpdata1
-        k01 = snpdata0.read_kernel(standardizer=stdizer.Unit(),test=snpdata1)
-        k01f = snpdata0.read_kernel(standardizer=stdizer.Unit(),test=snpdata1,order='F')
-        k0132 = snpdata0.read_kernel(standardizer=stdizer.Unit(),test=snpdata1,dtype=np.float32)
-        trained_standardizer=snpdata0.train_standardizer(apply_in_place=True,force_python_only=True)
-        snpdata1.standardize(trained_standardizer,force_python_only=True)
-        refval = snpdata0.val.dot(snpdata1.val.T)
-        np.testing.assert_array_almost_equal(refval,k01.val, decimal=10)
-        np.testing.assert_array_almost_equal(refval,k01f.val, decimal=10)
-        np.testing.assert_array_almost_equal(refval,k0132.val, decimal=5)
-        logging.info("done with 'test_respect_nonsquare'")
-
-
-
 
     def test_fail(self):
         did_fail = True
@@ -313,9 +238,29 @@ class TestLoader(unittest.TestCase):
         expected = np.identity(kid.iid_count)[::2,:][:,1:5]
         np.testing.assert_array_almost_equal(sub3.read().val,expected)
 
+        logging.info("done with test")
+
+    def test_underscore_read1(self):
+        logging.info("in test_underscore_read1")
+        snpreader = Bed(self.currentFolder + "/../examples/toydata")
+        assert snpreader.iid is snpreader.row
+        kid = Identity(snpreader.row)
+        sub3 = kid[::2,::2]
+        expected = np.identity(kid.iid_count)[::2,:][:,::2]
+        np.testing.assert_array_almost_equal(sub3.read().val,expected)
 
         logging.info("done with test")
 
+    def test_underscore_read2(self):
+        logging.info("in test_underscore_read2")
+        snpreader = Bed(self.currentFolder + "/../examples/toydata")
+        assert snpreader.iid is snpreader.row
+        kid = Identity(snpreader.row)
+        sub3 = kid[::2,::2]
+        expected = np.identity(kid.iid_count)[::2,:][:,::2]
+        np.testing.assert_array_almost_equal(sub3.read().val,expected)
+
+        logging.info("done with test")
 
 # We do it this way instead of using doctest.DocTestSuite because doctest.DocTestSuite requires modules to be pickled, which python doesn't allow.
 # We need tests to be pickleable so that they can be run on a cluster.

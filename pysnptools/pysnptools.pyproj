@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{60f1cb4a-9da3-47c2-9b89-60ac1ce93347}</ProjectGuid>
     <ProjectHome />
-    <StartupFile>kernelreader\test.py</StartupFile>
+    <StartupFile>test.py</StartupFile>
     <SearchPath>..</SearchPath>
     <WorkingDirectory>C:\Source\carlk\pysnptools\</WorkingDirectory>
     <OutputPath>.</OutputPath>
@@ -46,6 +46,7 @@
     <Compile Include="kernelreader\test.py" />
     <Compile Include="kernelreader\_subset.py" />
     <Compile Include="kernelreader\__init__.py" />
+    <Compile Include="kernelstandardizer\__init__.py" />
     <Compile Include="pstreader\_oneshot.py">
       <SubType>Code</SubType>
     </Compile>
@@ -59,6 +60,9 @@
     <Compile Include="pstreader\_subset.py" />
     <Compile Include="pstreader\__init__.py" />
     <Compile Include="snpreader\bed.py" />
+    <Compile Include="snpreader\mergerows.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="snpreader\snpnpz.py" />
     <Compile Include="snpreader\pheno.py" />
     <Compile Include="snpreader\dense.py" />
@@ -74,7 +78,6 @@
     <Compile Include="standardizer\bysqrtsidcount.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="standardizer\_cannotbetrained.py" />
     <Compile Include="standardizer\betatrained.py" />
     <Compile Include="standardizer\unittrained.py">
       <SubType>Code</SubType>
@@ -102,6 +105,7 @@
     <Folder Include="examples\" />
     <Folder Include="docsource\" />
     <Folder Include="kernelreader\" />
+    <Folder Include="kernelstandardizer\" />
     <Folder Include="pstreader\" />
     <Folder Include="setup\" />
     <Folder Include="util\" />

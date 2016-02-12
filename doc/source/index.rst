@@ -17,7 +17,9 @@ PySnpTools: A library for reading and manipulating genetic data.
 
 * :mod:`.pstreader`: Generalizes :mod:`.snpreader` and :mod:`.kernelreader` (provides the efficiency of numpy arrays with some of the flexibility of pandas)
 
-* :mod:`.standardizer`: Specify standardizers for :class:`.SnpReaders`.
+* :mod:`.standardizer`: Specify standardizers for :mod:`.snpreader`.
+
+* :mod:`.kernelstandardizer`: Specify standardizers for :mod:`.kernelreader`.
 
 :Tutorial:
 
@@ -268,9 +270,9 @@ PySnpTools: A library for reading and manipulating genetic data.
     :undoc-members:
 	:show-inheritance:
 	:special-members: __getitem__
-    :exclude-members: copyinputs,standardize
+    :exclude-members: copyinputs,standardize,is_constant
 
-:class:`standardizer.diag_K_to_N`
+:class:`standardizer.DiagKtoN`
 +++++++++++++++++++++++++++++++++++++
 .. autoclass:: pysnptools.standardizer.DiagKtoN
     :members:
@@ -286,17 +288,57 @@ PySnpTools: A library for reading and manipulating genetic data.
     :undoc-members:
 	:show-inheritance:
 	:special-members: __getitem__
-    :exclude-members: copyinputs,standardize
+    :exclude-members: copyinputs,standardize,is_constant
 
-:class:`standardizer.UnitTrained`
-+++++++++++++++++++++++++++++++++++++
-.. autoclass:: pysnptools.standardizer.UnitTrained
+:class:`standardizer.DiagKtoNTrained`
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+.. autoclass:: pysnptools.standardizer.DiagKtoNTrained
+    :members:
+    :undoc-members:
+	:show-inheritance:
+	:special-members: __getitem__
+    :exclude-members: copyinputs,standardize,is_constant
+
+
+******************************************************
+:mod:`kernelstandardizer` Module
+******************************************************
+
+:class:`kernelstandardizer.KernelStandardizer`
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+.. autoclass:: pysnptools.kernelstandardizer.KernelStandardizer
+    :members:
+    :undoc-members:
+	:show-inheritance:
+	:special-members: __getitem__
+    :exclude-members: copyinputs
+
+:class:`kernelstandardizer.DiagKtoN`
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+.. autoclass:: pysnptools.kernelstandardizer.DiagKtoN
     :members:
     :undoc-members:
 	:show-inheritance:
 	:special-members: __getitem__
     :exclude-members: copyinputs,standardize
 
+:class:`kernelstandardizer.DiagKtoNTrained`
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+.. autoclass:: pysnptools.kernelstandardizer.DiagKtoNTrained
+    :members:
+    :undoc-members:
+	:show-inheritance:
+	:special-members: __getitem__
+    :exclude-members: copyinputs,standardize,is_constant
+
+:class:`kernelstandardizer.Identity`
++++++++++++++++++++++++++++++++++++++
+.. autoclass:: pysnptools.kernelstandardizer.Identity
+    :members:
+    :undoc-members:
+	:show-inheritance:
+	:special-members: __getitem__
+    :exclude-members: copyinputs,standardize
 
 
 ***********************

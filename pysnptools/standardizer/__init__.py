@@ -8,6 +8,7 @@ from pysnptools.standardizer.identity import Identity
 from pysnptools.standardizer.diag_K_to_N import DiagKtoN
 from pysnptools.standardizer.betatrained import BetaTrained
 from pysnptools.standardizer.unittrained import UnitTrained
+from pysnptools.standardizer.diag_K_to_N import DiagKtoNTrained
 
 #Deprecated
 from pysnptools.standardizer.bysqrtsidcount import BySqrtSidCount

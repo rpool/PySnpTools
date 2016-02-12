@@ -2,6 +2,7 @@ import numpy as np
 import scipy as sp
 import logging
 from pysnptools.standardizer import Standardizer
+from pysnptools.standardizer.unittrained import UnitTrained
 import warnings
 
 class Unit(Standardizer):
@@ -19,21 +20,33 @@ class Unit(Standardizer):
     def __init__(self):
         pass
 
-    def __repr__(self): 
+    def __repr__(self):
         return "{0}()".format(self.__class__.__name__)
 
-    #changes snpdata.val in place
-    def _train_standardizer(self,snpdata,apply_in_place,force_python_only=False):
-        from pysnptools.standardizer import UnitTrained
-        stats=self._standardize_unit_and_beta(snpdata.val, is_beta=False, a=np.nan, b=np.nan, apply_in_place=apply_in_place,use_stats=False,stats=None, force_python_only=force_python_only)
-        return UnitTrained(stats)
-
-    def standardize(self, snps, block_size=None, force_python_only=False):
+    def standardize(self, snps, block_size=None, return_trained=False, force_python_only=False):
         if block_size is not None:
             warnings.warn("block_size is deprecated (and not needed, since standardization is in-place", DeprecationWarning)
-        self._standardize_unit_and_beta(snps, is_beta=False, a=np.nan, b=np.nan, apply_in_place=True,use_stats=False,stats=None,force_python_only=force_python_only,)
-        return snps
 
+        if hasattr(snps,"val"):
+            val = snps.val
+        else:
+            warnings.warn("standardizing an nparray instead of a SnpData is deprecated", DeprecationWarning)
+            val = snps
+
+        stats = self._standardize_unit_and_beta(val, is_beta=False, a=np.nan, b=np.nan, apply_in_place=True,use_stats=False,stats=None,force_python_only=force_python_only,)
+
+        if return_trained:
+            assert hasattr(snps,"val"), "return_trained=True requires that snps be a SnpData"
+            return snps, UnitTrained(snps.sid, stats)
+        else:
+            return snps
+
+    def _merge_trained(self, trained_list):
+        sid = np.concatenate([trained.sid for trained in trained_list])
+        stats = np.concatenate([trained.stats for trained in trained_list])
+        return UnitTrained(sid, stats)
+
+        
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 

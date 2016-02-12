@@ -43,17 +43,17 @@ class Identity(KernelReader):
         if len(iid)>0:
             self._row0 = iid
         else:
-            self._row0 = _empty
+            self._row0 = self._empty
 
         if len(test)>0:
             self._row1 = test
         else:
-            self._row1 = _empty
+            self._row1 = self._empty
 
     _empty = np.empty([0,2],dtype=str)
 
     def __repr__(self): 
-        return "{0}()".format(self.__class__.__name__)
+        return "{0}({1}x{2})".format(self.__class__.__name__, self.row_count, self.col_count)
 
 
     @property
@@ -65,15 +65,9 @@ class Identity(KernelReader):
         return self._row1
 
     def _read(self, row_index_or_none, col_index_or_none, order, dtype, force_python_only, view_ok):
-        if row_index_or_none is None and col_index_or_none is None and self._row0 is self._row1:
+        if row_index_or_none is None and col_index_or_none is None and self._row0 is self._row1: #read all of a square ID
             return np.identity(self.row_count,dtype=dtype)
-        elif (row_index_or_none is col_index_or_none or np.array_equal(row_index_or_none, col_index_or_none)) and self._row0 is self._row1:
-            return np.identity(len(row_index_or_none),dtype=dtype)
-        elif self._row0 is self._row1:
-            #!!! This is less efficient than it could be because it create a big identity matrix and then slices it.
-            val, shares_memory = self._apply_sparray_or_slice_to_val(np.identity(self.row_count,dtype=dtype), row_index_or_none, col_index_or_none, order, dtype, force_python_only)
-            return val
-        else:
+        else: #Non-square
             #!!! This is also less efficient than it could be because it create a big identity matrix and then slices it.
 
             #In about O(col_count + row_count) fill in zeros
@@ -83,6 +77,21 @@ class Identity(KernelReader):
             val, shares_memory = self._apply_sparray_or_slice_to_val(big, row_index_or_none, col_index_or_none, order, dtype, force_python_only)
             return val
 
+    def __getitem__(self, iid_indexer_and_snp_indexer):
+        if isinstance(iid_indexer_and_snp_indexer,tuple):
+            row_index_or_none, col_index_or_none = iid_indexer_and_snp_indexer
+        else:
+            row_index_or_none = iid_indexer_and_snp_indexer
+            col_index_or_none = row_index_or_none
+
+        #If iid0 will be iid1 then make 'is' equal
+        iid=self.iid0[row_index_or_none]
+        test=self.iid1[col_index_or_none]
+        if len(iid) == len(test) and np.array_equal(iid,test):
+            result = Identity(iid)
+        else: 
+            result = Identity(iid=iid,test=test)
+        return result
 
 
 if __name__ == "__main__":

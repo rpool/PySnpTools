@@ -79,13 +79,17 @@ def intersect_apply(data_list, sort_by_dataset=True, intersect_before_standardiz
 
     #LATER this doesn't cover non-square kernel readers. What should it do when there are two different iid lists?
     from pysnptools.kernelreader import SnpKernel
+    from pysnptools.kernelreader import Identity as IdentityKernel
     for data in data_list:
         if data is None:
             iid = None
             reindex = lambda data, iididx : None
         elif intersect_before_standardize and isinstance(data,SnpKernel):
             iid = data.iid1 if is_test else data.iid0
-            reindex = lambda data, iididx,is_test=is_test : _reindex_snpkernel(data, iididx,is_test)
+            reindex = lambda data, iididx,is_test=is_test : _reindex_snpkernel(data, iididx, is_test)
+        elif intersect_before_standardize and isinstance(data,IdentityKernel):
+            iid = data.iid1 if is_test else data.iid0
+            reindex = lambda data, iididx,is_test=is_test : _reindex_identitykernel(data, iididx, is_test)
         else:
             try: #pheno dictionary
                 iid = data['iid'] 
@@ -114,10 +118,10 @@ def intersect_apply(data_list, sort_by_dataset=True, intersect_before_standardiz
     if len(iid_list) == 0: raise Exception("Expect a least one input item")
 
     if _all_same(iid_list):
-        logging.info("iids match up across {0} data sets".format(len(iid_list)))
+        logging.debug("iids match up across {0} data sets".format(len(iid_list)))
         return data_list
     else:
-        logging.info("iids do not match up, so intersecting the data over individuals")            
+        logging.debug("iids do not match up, so intersecting the data over individuals")            
         indarr = intersect_ids(iid_list)
         assert indarr.shape[0] > 0, "no individuals remain after intersection, check that ids match in files"
 
@@ -131,6 +135,7 @@ def intersect_apply(data_list, sort_by_dataset=True, intersect_before_standardiz
                     indarr=indarr[sortind]
                     break
 
+        #!!! for the case in which some of the data items don't need to change, can we avoid calling reindex? Alternatively, should the _read code notice that all the iids are the same and in the same order                    
         data_out_list = []
         for i in xrange(indarr.shape[1]):
             data = data_list[i]
@@ -149,14 +154,24 @@ def _reindex_phen_dict(phen_dict, iididx):
     phen_dict['iid'] = phen_dict['iid'][iididx]
     return phen_dict
 
-def _reindex_snpkernel(snpkernel, iididx,is_test=False):
-    assert snpkernel.test is snpkernel.snpreader, "Current code can only intersect square snpkernel"
+def _reindex_snpkernel(snpkernel, iididx, is_test=False):
     from pysnptools.kernelreader import SnpKernel
     if not is_test:
         new_reader = snpkernel.snpreader[iididx,:]
+        reference = new_reader
+        result = SnpKernel(new_reader,snpkernel.standardizer,block_size=snpkernel.block_size)
     else:
-        new_reader = snpkernel.snpreader[:,iididx]
-    result = SnpKernel(new_reader,snpkernel.standardizer,test=None,block_size=snpkernel.block_size)
+        new_reader = snpkernel.test[iididx,:]
+        result = SnpKernel(snpkernel.snpreader,snpkernel.standardizer,block_size=snpkernel.block_size)
+    return result
+
+def _reindex_identitykernel(identitykernel, iididx, is_test=False):
+    from pysnptools.kernelreader import Identity as IdentityKernel
+    if not is_test:
+        iid = identitykernel.iid[iididx]
+        result = IdentityKernel(iid)
+    else:
+        result = IdentityKernel(identitykernel.iid0,test=identitykernel.iid1[iididx])
     return result
 
 def _all_same(iids_list):

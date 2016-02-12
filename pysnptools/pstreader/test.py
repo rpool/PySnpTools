@@ -112,7 +112,7 @@ class TestLoader(unittest.TestCase):
                           val = np.random.normal(.5,2,size=(3,2)),
                           row_property=row_property,
                           col_property=col_property,
-                          parent_string="test_read")
+                          name="test_read")
 
         assert pstdata.row_to_index([np.array([3.0,4])])[0] == 1
         assert pstdata.col_to_index([np.array(["A","a"])])[0] == 0
@@ -160,7 +160,7 @@ class TestLoader(unittest.TestCase):
                           val = np.random.normal(.5,2,size=(3,2)),
                           row_property=row_property,
                           col_property=col_property,
-                          parent_string="test_read")
+                          name="test_read")
 
         assert pstdata.row_to_index([3])[0] == 1
         assert pstdata.col_to_index(["Aa"])[0] == 0
@@ -179,7 +179,7 @@ class TestLoader(unittest.TestCase):
                           val = np.random.normal(.5,2,size=(3,2)),
                           row_property=row_property,
                           col_property=col_property,
-                          parent_string="test_read")
+                          name="test_read")
 
         assert pstdata.row_to_index([3])[0] == 1
         assert pstdata.col_to_index(["Aa"])[0] == 0
@@ -197,7 +197,7 @@ class TestLoader(unittest.TestCase):
                           val = [[],[],[]],
                           row_property=row_property,
                           col_property=col_property,
-                          parent_string="test_read")
+                          name="test_read")
 
         assert pstdata.row_to_index([[3,4]])[0] == 1
         assert np.array_equal(pstdata[1:,:2].row_property,pstdata.row_property[1:])
@@ -211,7 +211,7 @@ class TestLoader(unittest.TestCase):
                           val = None,
                           row_property=None,
                           col_property=None,
-                          parent_string="test_read")
+                          name="test_read")
 
         assert pstdata.row_count == 0 and pstdata.col_count == 0 and pstdata.val.shape[0] == 0 and pstdata.val.shape[1]==0 and len(pstdata.row_property)==0 and len(pstdata.col_property)==0 
         logging.info("done with test")

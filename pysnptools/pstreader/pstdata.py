@@ -24,7 +24,7 @@ class PstData(PstReader):
                      * **val** (a 2-D array of floats) -- The values
                      * **row_property** (optional, an array of anything) -- Additional information associated with each row.
                      * **col_property** (optional, an array of strings) -- Additional information associated with each col.
-                     * **parent_string** (optional, string) -- Information to be display about the origin of this data
+                     * **name** (optional, string) -- Information to be display about the origin of this data
                      * **copyinputs_function** (optional, function) -- *Used internally by optional clustering code*
 
         :Example:
@@ -37,7 +37,7 @@ class PstData(PstReader):
     **Equality:**
 
         Two PstData objects are equal if their five arrays (:attr:`.row`, :attr:`.col`, :attr:`.val`, :attr:`PstReader.row_property`, and :attr:`.col_property`) are 'array_equal'.
-        (Their 'parent_string' does not need to be the same).
+        (Their 'name' does not need to be the same).
 
         :Example:
 
@@ -58,13 +58,17 @@ class PstData(PstReader):
 
 
     '''
-    def __init__(self, row, col, val, row_property=None, col_property=None, parent_string="",copyinputs_function=None):
+    def __init__(self, row, col, val, row_property=None, col_property=None, name=None, parent_string=None, copyinputs_function=None):
         self._row = PstData._fixup_input(row)
         self._col = PstData._fixup_input(col)
         self._row_property = PstData._fixup_input(row_property,count=len(self._row))
         self._col_property = PstData._fixup_input(col_property,count=len(self._col))
         self.val = PstData._fixup_input_val(val,row_count=len(self._row),col_count=len(self._col))
-        self._parent_string = parent_string
+
+        name = name or parent_string or ""
+        if parent_string is not None:
+            warnings.warn("'parent_string' is deprecated. Use 'name'", DeprecationWarning)
+        self._name = name
 
     val = None
     """The 2D NumPy array of floats that represents the values.
@@ -113,10 +117,10 @@ class PstData(PstReader):
 
 
     def __repr__(self):
-        if self._parent_string == "":
+        if self._name == "":
             return "{0}()".format(self.__class__.__name__)
         else:
-            return "{0}({1})".format(self.__class__.__name__,self._parent_string)
+            return "{0}({1})".format(self.__class__.__name__,self._name)
 
     def copyinputs(self, copier):
         pass

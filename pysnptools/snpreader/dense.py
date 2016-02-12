@@ -47,7 +47,7 @@ class Dense(_OneShot,SnpReader):
                      * **extract_iid_function** (*string*) -- A function that breaks the row id from the file into a family id and an case id. Defaults to
                        setting the family id to 0 and using the whole row id as the iid.
                      * **extract_sid_pos_function** (*string*) -- A function that breaks the column id from the file into (chromosome, sid, genetic distance, basepair distance).
-                       Defaults to setting the :attr:`.pos` information to 0 and using the whole column id as the sid.
+                       Defaults to setting the :attr:`.SnpReader.pos` information to 0 and using the whole column id as the sid.
 
         :Example:
 
@@ -91,7 +91,7 @@ class Dense(_OneShot,SnpReader):
         for col_index in xrange(len(col)):
             val[:,col_index] = val_list_list[col_index]
 
-        return PstData(iid,col,val,col_property=col_property,parent_string=self.filename)
+        return PstData(iid,col,val,col_property=col_property,name=self.filename)
 
     @staticmethod
     def write(filename, snpdata, join_iid_function=just_case,join_sid_pos_function=just_sid):
@@ -105,7 +105,7 @@ class Dense(_OneShot,SnpReader):
                                   Defaults ignoring the family id and using the case id as the column id.
         :type join_iid_function: a function
         :param join_sid_pos_function: function to turn a sid and pos data into a file id for rows.
-                                      Defaults ignoring the :attr:`.pos` information and using the sid id as the row id.
+                                      Defaults ignoring the :attr:`.SnpReader.pos` information and using the sid id as the row id.
         :type join_sid_pos_function: a function
 
         >>> from pysnptools.snpreader import Dense, Bed

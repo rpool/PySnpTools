@@ -451,7 +451,7 @@ class SnpReader(PstReader):
         """
         val = self._read(None, None, order, dtype, force_python_only, view_ok)
         from snpdata import SnpData
-        ret = SnpData(self.iid,self.sid,val,pos=self.pos,parent_string=str(self))
+        ret = SnpData(self.iid,self.sid,val,pos=self.pos,name=str(self))
         return ret
 
     def iid_to_index(self, list):
@@ -497,16 +497,12 @@ class SnpReader(PstReader):
         iid_indexer, snp_indexer = iid_indexer_and_snp_indexer
         return _Subset(self, iid_indexer, snp_indexer)
 
-    def read_kernel(self, standardizer=None, test=None, block_size=None, order='A', dtype=np.float64, force_python_only=False, view_ok=False):
+    def read_kernel(self, standardizer=None, block_size=None, order='A', dtype=np.float64, force_python_only=False, view_ok=False):
         """Returns a :class:`KernelData` such that the :meth:`KernelData.val` property will be a ndarray of the standardized SNP values multiplied with their transposed selves.
 
         :param standardizer: -- (required) Specify standardization to be applied before the matrix multiply. Any :class:`.Standardizer` may be used. Some choices include :class:`Standardizer.Identity` 
             (do nothing), :class:`.Unit` (make values for each SNP have mean zero and standard deviation 1.0) and :class:`Beta`.
         :type standardizer: :class:`.Standardizer`
-
-        :param test: optional (defaults to 'self') -- Instead of the usual square kernel, create a rectangular kernel from this set of SNPs to a second set of test SNPs. Any standardizer will be
-            trained on these SNPs and then applied to the test SNPs. The resulting :class:`KernelData` will have dimensions self.iid_count x test.iidcount.
-        :type test: :class:`.SnpReader`
 
         :param block_size: optional -- Default of None (meaning to load all). Suggested number of sids to read into memory at a time.
         :type block_size: int or None
@@ -525,14 +521,11 @@ class SnpReader(PstReader):
         >>> kerneldata1 = snp_on_disk.read_kernel(Unit())
         >>> print int(kerneldata1.iid_count), kerneldata1.val[0,0]
         300 901.421835903
-        >>> kerneldata2 = snp_on_disk[10:,:].read_kernel(Unit(),test=snp_on_disk[0:10,:]) #train on all-but-1st-10 & test on first 10
-        >>> print (int(kerneldata2.iid0_count), int(kerneldata2.iid1_count)), kerneldata2.val[0,0]
-        (290, 10) -17.1978350849
         """
         assert standardizer is not None, "'standardizer' must be provided"
 
         from pysnptools.kernelreader import SnpKernel
-        snpkernel = SnpKernel(self,standardizer=standardizer,test=test,block_size=block_size)
+        snpkernel = SnpKernel(self,standardizer=standardizer,block_size=block_size)
         kerneldata = snpkernel.read(order, dtype, force_python_only, view_ok)
         return kerneldata
 
@@ -572,60 +565,55 @@ class SnpReader(PstReader):
         return self._read_kernel(standardizer, block_size=block_size)
 
     @staticmethod
-    def _as_snpdata(snpreader,standardizer, force_python_only, dtype):
+    def _as_snpdata(snpreader, standardizer, force_python_only, dtype):
+        '''
+        Like 'read' except (1) won't read if already a snpdata and (2) returns the standardizer
+        '''
         from pysnptools.snpreader import SnpData
         if isinstance(snpreader,SnpData) and snpreader.val.dtype==dtype and isinstance(standardizer,stdizer.Identity):
             return snpreader, stdizer.Identity()
         else:
-            snpdata = snpreader.read(order='A',dtype=dtype)
-            trained_standardizer = snpdata.train_standardizer(apply_in_place=True,standardizer=standardizer,force_python_only=force_python_only)
-            return snpdata, trained_standardizer
+            return snpreader.read(order='A',dtype=dtype).standardize(standardizer,return_trained=True,force_python_only=force_python_only)
     
-    def _read_kernel(train, standardizer, test=None, block_size=None, order='A', dtype=np.float64, force_python_only=False, view_ok=False):
-        if test is None:
-            test = train
-
+    def _read_kernel(self, standardizer, block_size=None, order='A', dtype=np.float64, force_python_only=False, view_ok=False, return_trained=False):
         #Do all-at-once (not in blocks) if 1. No block size is given or 2. The #ofSNPs < Min(block_size,iid_count)
-        if block_size is None or (
-                        (train.sid_count <= block_size or train.sid_count <= train.iid_count)
-                    and (test is None or test.sid_count <= block_size or test.sid_count <= test.iid_count)):
-
-            train_data,trained_standardizer  = SnpReader._as_snpdata(train,standardizer=standardizer,dtype=dtype,force_python_only=force_python_only)
-            if test is train:
-                test_data = train_data
+        if block_size is None or (self.sid_count <= block_size or self.sid_count <= self.iid_count):
+            train_data,trained_standardizer  = SnpReader._as_snpdata(self,standardizer=standardizer,dtype=dtype,force_python_only=force_python_only)
+            kernel = train_data._read_kernel(stdizer.Identity(), order=order,dtype=dtype,force_python_only=force_python_only,view_ok=False)
+            if return_trained:
+                return kernel, trained_standardizer
             else:
-                test_data,_ = SnpReader._as_snpdata(test,standardizer=trained_standardizer,dtype=dtype,force_python_only=force_python_only)
+                return kernel
 
-            return train_data._read_kernel(stdizer.Identity(),test_data,block_size=None,order=order,dtype=dtype,force_python_only=force_python_only,view_ok=False)
         else: #Do in blocks
-            assert train is test or np.array_equal(train.sid,test.sid), "To create a kernel between two snpreader, they must have the same snps (in the same order)"
-
             #Set the default order to 'C' because with kernels any order is fine and the Python .dot method likes 'C' best.
             if order=='A':
                 order = 'C'
             t0 = time.time()
-            K = np.zeros([train.iid_count,test.iid_count],dtype=dtype,order=order)
+            K = np.zeros([self.iid_count,self.iid_count],dtype=dtype,order=order)
+            trained_standardizer_list = []
 
-            logging.info("reading {0} SNPs in blocks of {1} and adding up kernels (for {2}x{3} individuals)".format(train.sid_count, block_size, train.iid_count,test.iid_count))
+            logging.info("reading {0} SNPs in blocks of {1} and adding up kernels (for {2} individuals)".format(self.sid_count, block_size, self.iid_count))
 
             ct = 0
             ts = time.time()
 
-            for start in xrange(0, train.sid_count, block_size):
+            for start in xrange(0, self.sid_count, block_size):
                 ct += block_size
-                train_data,trained_standardizer = SnpReader._as_snpdata(train[:,start:start+block_size],standardizer=standardizer,dtype=dtype,force_python_only=force_python_only)
-                if train is test:
-                    test_data = train_data
-                else:
-                    test_data,_ = SnpReader._as_snpdata(test[:,start:start+block_size],standardizer=trained_standardizer,dtype=dtype,force_python_only=force_python_only)
-                K += train_data._read_kernel(stdizer.Identity(),test_data,block_size=None,order=order,dtype=dtype,force_python_only=force_python_only,view_ok=False)
+                train_data,trained_standardizer = SnpReader._as_snpdata(self[:,start:start+block_size],standardizer=standardizer,dtype=dtype,force_python_only=force_python_only)
+                trained_standardizer_list.append(trained_standardizer)
+                K += train_data._read_kernel(stdizer.Identity(),block_size=None,order=order,dtype=dtype,force_python_only=force_python_only,view_ok=False)
                 if ct % block_size==0:
-                    logging.info("read %s SNPs in %.2f seconds" % (ct, time.time()-ts))
+                    diff = time.time()-ts
+                    if diff > 1: logging.info("read %s SNPs in %.2f seconds" % (ct, diff))
 
             t1 = time.time()
             logging.info("%.2f seconds elapsed" % (t1-t0))
 
-            return K
+            if return_trained:
+                return K, standardizer._merge_trained(trained_standardizer_list) #turns this into a single standardizer
+            else:
+                return K
 
     def copyinputs(self, copier):
         raise NotImplementedError
