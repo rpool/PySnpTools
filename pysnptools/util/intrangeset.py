@@ -1675,7 +1675,7 @@ class IntRangeSet(object):
                 return
             else:
                 self._start_to_length[start] = length
-                index += 1	  # index should point to the following range for the remainder of this method
+                index += 1      # index should point to the following range for the remainder of this method
                 previous = start
                 stop = start + length
         elif index == 0:
