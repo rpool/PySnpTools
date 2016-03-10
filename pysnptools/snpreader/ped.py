@@ -79,7 +79,7 @@ class Ped(_OneShot,SnpReader):
 
         >>> from pysnptools.snpreader import Ped, Bed
         >>> import pysnptools.util as pstutil
-        >>> snpdata = Bed('../examples/toydata.bed')[:,:10].read()  # Read first 10 snps from Bed format
+        >>> snpdata = Bed('../examples/toydata.bed',count_A1=False)[:,:10].read()  # Read first 10 snps from Bed format
         >>> pstutil.create_directory_if_necessary("tempdir/toydata10.ped")
         >>> Ped.write("tempdir/toydata10.ped",snpdata)            # Write data in Ped format
         """

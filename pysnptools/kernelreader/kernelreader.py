@@ -26,12 +26,12 @@ class KernelReader(PstReader):
         >>> # Compute kernel from a SnpReader
         >>> from pysnptools.snpreader import Bed
         >>> from pysnptools.standardizer import Unit
-        >>> snp_on_disk = Bed('../../tests/datasets/all_chr.maf0.001.N300')
+        >>> snp_on_disk = Bed('../../tests/datasets/all_chr.maf0.001.N300',count_A1=False)
         >>> kerneldata1 = snp_on_disk.read_kernel(Unit()) #reads the SNP values and computes the kernel
         >>> type(kerneldata1.val) # The val property is an ndarray of kernel values
         <type 'numpy.ndarray'>
         >>> print kerneldata1 # prints the specification of the in-memory kernel information
-        KernelData(SnpKernel(Bed('../../tests/datasets/all_chr.maf0.001.N300'),standardizer=Unit()))
+        KernelData(SnpKernel(Bed('../../tests/datasets/all_chr.maf0.001.N300',count_A1=False),standardizer=Unit()))
         >>> kerneldata1.iid_count #prints the number of iids (number of individuals) in this in-memory data
         300
         >>> # Read kernel from a KernelReader
@@ -93,7 +93,7 @@ class KernelReader(PstReader):
         >>> from pysnptools.snpreader import Bed
         >>> from pysnptools.standardizer import Unit
         >>> import pysnptools.util as pstutil
-        >>> kerneldata = Bed('../examples/toydata.bed').read_kernel(Unit())     # Create a kernel from the data in the Bed file
+        >>> kerneldata = Bed('../examples/toydata.bed',count_A1=False).read_kernel(Unit())     # Create a kernel from the data in the Bed file
         >>> pstutil.create_directory_if_necessary("tempdir/toydata.kernel.npz")
         >>> KernelNpz.write("tempdir/toydata.kernel.npz",kerneldata)      # Write data in KernelNpz format
 

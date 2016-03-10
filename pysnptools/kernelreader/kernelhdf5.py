@@ -43,7 +43,7 @@ class KernelHdf5(PstHdf5,KernelReader):
         >>> from pysnptools.snpreader import Bed
         >>> from pysnptools.standardizer import Unit
         >>> import pysnptools.util as pstutil
-        >>> kerneldata = Bed('../examples/toydata.bed').read_kernel(Unit())     # Create a kernel from the data in the Bed file
+        >>> kerneldata = Bed('../examples/toydata.bed',count_A1=False).read_kernel(Unit())     # Create a kernel from the data in the Bed file
         >>> pstutil.create_directory_if_necessary("tempdir/toydata.kernel.hdf5")
         >>> KernelHdf5.write("tempdir/toydata.kernel.hdf5",kerneldata)          # Write data in KernelHdf5 format
         """
